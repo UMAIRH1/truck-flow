@@ -20,14 +20,12 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Redirect if already authenticated
   React.useEffect(() => {
     if (isAuthenticated) {
       router.push("/");
     }
   }, [isAuthenticated, router]);
 
-  // Redirect to splash if no role selected
   React.useEffect(() => {
     if (!selectedRole) {
       router.push("/auth/splash");
@@ -64,27 +62,20 @@ export default function SignInPage() {
   const roleTitle = selectedRole === "manager" ? "Manager" : "Driver";
 
   return (
-    <div className="min-h-screen bg-white flex flex-col px-4 py-4 max-w-md mx-auto space-y-4">
-      {/* Status Bar Space */}
-      <div className="h-12" />
-
-      {/* Content */}
-      <div className="flex-1 px-6 py-8">
-        <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">Login</h1>
-        <p className="text-center text-yellow-500 mb-8">Welcome back to the app</p>
+    <div className="min-h-screen bg-white lg:border my-4 rounded-2xl border-(--color-primary-yellow-dark) flex flex-col px-4 py-4 max-w-md mx-auto space-y-4">
+      <div className="flex-1 px-6 py-4">
+        <h1 className="text-2xl font-bold text-center text-(--color-light-black) mb-2">Login</h1>
+        <p className="text-center text-(--color-yellow-light) mb-8">Welcome back to the app</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email Field */}
           <div>
             <label className="block text-sm text-gray-600 mb-2">Email Address</label>
             <Input type="email" placeholder="hello@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 bg-gray-50 border-gray-200 rounded-lg" required />
           </div>
-
-          {/* Password Field */}
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="text-sm text-gray-600">Password</label>
-              <Link href="/auth/forgot-password" className="text-sm text-yellow-500 hover:underline">
+              <Link href="/auth/forgot-password" className="text-sm text-(--color-yellow-light) hover:underline">
                 Forgot Password?
               </Link>
             </div>
@@ -103,7 +94,6 @@ export default function SignInPage() {
             </div>
           </div>
 
-          {/* Keep me signed in */}
           <div className="flex items-center gap-2">
             <Checkbox
               id="keepSignedIn"
@@ -115,24 +105,17 @@ export default function SignInPage() {
               Keep me signed in
             </label>
           </div>
-
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-
-          {/* Sign In Button */}
-          <Button type="submit" disabled={isLoading} className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full">
+          <Button type="submit" disabled={isLoading} variant="yellow" className="w-full h-12">
             {isLoading ? "Signing in..." : "Sign In"}
           </Button>
         </form>
-
-        {/* Divider */}
         <div className="flex items-center my-6">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="px-4 text-sm text-gray-400">or sign in with</span>
-          <div className="flex-1 h-px bg-gray-200" />
+          <div className="flex-1 h-px bg-[#82A0BFCC]" />
+          <span className="px-4 text-sm text-(--color-gray-table)">or sign in with</span>
+          <div className="flex-1 h-px bg-[#82A0BFCC]" />
         </div>
-
-        {/* Google Sign In */}
-        <Button type="button" onClick={handleGoogleLogin} disabled={isLoading} variant="outline" className="w-full h-12 rounded-full border-gray-300">
+        <Button type="button" onClick={handleGoogleLogin} disabled={isLoading} variant="gray" className="w-full h-12 rounded-full border-gray-300">
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -141,10 +124,8 @@ export default function SignInPage() {
           </svg>
           Continue with Google
         </Button>
-
-        {/* Create Account Link */}
         <div className="mt-8 text-center">
-          <Link href="/auth/signup" className="text-yellow-500 hover:underline">
+          <Link href="/auth/signup" className="text-(--color-primary-yellow-dark) hover:underline">
             Create an account
           </Link>
         </div>
