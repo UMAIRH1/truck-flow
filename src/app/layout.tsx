@@ -36,12 +36,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.className} ${inter.variable} font-sans antialiased`}>
         <AuthProvider>
           <NotificationProvider>
-            <LoadProvider>
-              {children}
-            </LoadProvider>
+            <LoadProvider>{children}</LoadProvider>
           </NotificationProvider>
         </AuthProvider>
       </body>
