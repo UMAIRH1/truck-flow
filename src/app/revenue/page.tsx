@@ -1,47 +1,46 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Header, MobileLayout } from "@/components/layout";
 import { LineChart, FinanceCard } from "@/components/shared";
+import { DateField } from "@/components/ui/date-field";
 import { useLoads } from "@/contexts/LoadContext";
-import { Calendar, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export default function RevenuePage() {
   const { loads } = useLoads();
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-
-  // Calculate finances
   const completedLoads = loads.filter((l) => l.status === "completed");
-  const totalIncome = completedLoads.reduce((sum, load) => sum + load.clientPrice, 0);
-  const totalExpense = completedLoads.reduce((sum, load) => sum + (load.driverPrice || 0) + (load.fuel || 0) + (load.tolls || 0) + (load.otherExpenses || 0), 0);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const filteredCompletedLoads = selectedDate ? completedLoads.filter((l) => new Date(l.loadingDate).toDateString() === selectedDate.toDateString()) : completedLoads;
+  const totalIncome = filteredCompletedLoads.reduce((sum, load) => sum + load.clientPrice, 0);
+  const totalExpense = filteredCompletedLoads.reduce((sum, load) => sum + (load.driverPrice || 0) + (load.fuel || 0) + (load.tolls || 0) + (load.otherExpenses || 0), 0);
   const profit = totalIncome - totalExpense;
 
   return (
     <MobileLayout>
       <Header title="Revenue" showBack />
-
-      <div className="px-4 py-4 max-w-md mx-auto space-y-4">
-        {/* Chart */}
-        <LineChart trend="+5%" trendLabel="Last 3 Months" labels={["Oct", "Nov", "Dec"]} />
-
-        {/* Date Selector */}
-        <div className="flex items-center justify-center gap-3">
-          <button className="px-6 py-2 bg-gray-100 rounded-full text-sm font-medium">Today</button>
-          <button className="p-3 bg-gray-900 rounded-xl">
-            <Calendar className="h-5 w-5 text-white" />
-          </button>
-        </div>
-
-        {/* Finance Cards */}
-        <div className="space-y-3">
-          <Link href="/total-earning">
-            <FinanceCard label="Income" value={totalIncome} trend="Today" variant="default" showArrow />
-          </Link>
-
-          <FinanceCard label="Expense" value={totalExpense} trend="Today" variant="default" showArrow />
-
-          <FinanceCard label="Profit" value={profit} trend="Today" variant="profit" showArrow />
+      <div className="px-4 lg:px-6 py-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <div className="lg:col-span-2">
+            <LineChart trend="+5%" trendLabel="Last 3 Months" labels={["Oct", "Nov", "Dec"]} className="h-64 md:h-80 lg:h-96" />
+          </div>
+          <aside className="lg:col-span-1 flex flex-col gap-4 lg:sticky lg:top-24">
+            <div>
+              <DateField value={selectedDate} onChange={setSelectedDate} className="w-full" />
+            </div>
+            <div className="flex flex-col gap-3">
+              {[
+                { key: "income", label: "Income", value: totalIncome },
+                { key: "expense", label: "Expense", value: totalExpense },
+                { key: "profit", label: "Profit", value: profit },
+              ].map((c) => (
+                <Link href={`/total-earning?metric=${c.key}`} key={c.key}>
+                  <FinanceCard label={c.label} value={c.value} trend="Today" variant="default" showArrow className="w-full" />
+                </Link>
+              ))}
+            </div>
+            <div className="hidden lg:block text-sm text-gray-500 mt-2">Updated just now</div>
+          </aside>
         </div>
       </div>
     </MobileLayout>

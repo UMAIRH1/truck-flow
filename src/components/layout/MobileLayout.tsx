@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { ReactNode } from 'react';
-import { BottomNav } from './BottomNav';
-import { FloatingActionButton } from './FloatingActionButton';
+import React, { ReactNode } from "react";
+import { BottomNav } from "./BottomNav";
+import { FloatingActionButton } from "./FloatingActionButton";
 
 interface MobileLayoutProps {
   children: ReactNode;
@@ -12,7 +12,7 @@ interface MobileLayoutProps {
 
 export function MobileLayout({ children, showBottomNav = true, showFAB = true }: MobileLayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen pb-20">
       {children}
       {showFAB && <FloatingActionButton />}
       {showBottomNav && <BottomNav />}

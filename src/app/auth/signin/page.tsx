@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { validateSignInForm } from "../validations";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function SignInPage() {
@@ -19,6 +20,10 @@ export default function SignInPage() {
   const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({ email: "", password: "" });
+
+  const emailRef = useRef<HTMLInputElement | null>(null);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
 
   React.useEffect(() => {
     if (isAuthenticated) {
@@ -35,6 +40,19 @@ export default function SignInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setFieldErrors({ email: "", password: "" });
+
+    const { emailError, passwordError } = validateSignInForm(email, password);
+    if (emailError || passwordError) {
+      setFieldErrors({ email: emailError || "", password: passwordError || "" });
+      // focus first invalid field
+      setTimeout(() => {
+        if (emailError) emailRef.current?.focus();
+        else if (passwordError) passwordRef.current?.focus();
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -67,10 +85,19 @@ export default function SignInPage() {
         <h1 className="text-2xl font-bold text-center text-(--color-light-black) mb-2">Login</h1>
         <p className="text-center text-(--color-yellow-light) mb-8">Welcome back to the app</p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form noValidate onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm text-gray-600 mb-2">Email Address</label>
-            <Input type="email" placeholder="hello@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 bg-gray-50 border-gray-200 rounded-lg" required />
+            <Input
+              ref={emailRef}
+              type="email"
+              placeholder="hello@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="h-12 bg-gray-50 border-gray-200 rounded-lg"
+              required
+            />
+            {fieldErrors.email && <p className="text-red-500 text-sm mt-1">{fieldErrors.email}</p>}
           </div>
           <div>
             <div className="flex justify-between items-center mb-2">
@@ -81,6 +108,7 @@ export default function SignInPage() {
             </div>
             <div className="relative">
               <Input
+                ref={passwordRef}
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••••••••"
                 value={password}
@@ -92,6 +120,7 @@ export default function SignInPage() {
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
+            {fieldErrors.password && <p className="text-red-500 text-sm mt-1">{fieldErrors.password}</p>}
           </div>
 
           <div className="flex items-center gap-2">

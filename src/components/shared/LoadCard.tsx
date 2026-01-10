@@ -1,9 +1,11 @@
 "use client";
 
-import { Clock, Truck } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, BusFront, Clock, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Load } from "@/types";
 import Link from "next/link";
+import { ASSETS } from "@/lib/assets";
+import { Icon } from "../ui/icon";
 
 interface LoadCardProps {
   load: Load;
@@ -26,39 +28,39 @@ export function LoadCard({ load, showStatus = true, showDriver = true, onClick, 
   const formattedTime = load.loadingTime;
 
   const content = (
-    <div className={cn("bg-yellow-400 rounded-2xl p-4 shadow-sm", onClick && "cursor-pointer hover:bg-yellow-300 transition-colors", className)}>
-      <div className="flex items-start justify-between mb-3">
+    <div className={cn("bg-(--color-primary-yellow-dark) rounded-xl p-3 shadow-sm", onClick && "cursor-pointer hover:bg-yellow-300 transition-colors", className)}>
+      <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
-          <div className="bg-blue-600 p-1.5 rounded-lg">
-            <Truck className="h-4 w-4 text-white" />
+          <div className="bg-(--color-blue-border) p-1.5 rounded-md">
+            <BusFront className="h-4 w-4 text-white" />
           </div>
-          <span className="font-semibold text-sm">{load.clientName}</span>
+          <span className="font-bold text-(--color-stat-gray) text-base">{load.clientName}</span>
         </div>
-        <div className="flex items-center gap-2 text-xs text-gray-700">
+        <div className="flex items-center gap-2 text-xs text-(--color-dark-gray)">
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
             <span>Today / {formattedTime}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Truck className="h-3 w-3" />
+            <Icon src={ASSETS.images.icons.share} className="h-3 w-3" />
             <span>{load.loadWeight} KG</span>
           </div>
         </div>
       </div>
 
-      <div className="flex items-start justify-between">
+      <div className="flex items-end justify-end">
         <div className="space-y-1 flex-1">
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-gray-600">↖</span>
-            <span className="text-gray-700">From: {load.pickupLocation}</span>
+            <ArrowDownLeft className="h-3 w-3 text-(--color-primary-gray)" />
+            <span className="text-(--color-dark-gray)">From: {load.pickupLocation}</span>
           </div>
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-gray-600">↘</span>
-            <span className="text-gray-700">To: {load.dropoffLocation}</span>
+            <ArrowUpRight className="h-3 w-3 text-(--color-primary-gray)" />
+            <span className="text-(--color-dark-gray)">To: {load.dropoffLocation}</span>
           </div>
         </div>
         <div className="text-right">
-          <span className="font-bold text-base">Price ${load.clientPrice.toFixed(2)}</span>
+          <span className="font-medium text-base text-(--color-stat-gray)">Price ${load.clientPrice.toFixed(2)}</span>
         </div>
       </div>
     </div>
