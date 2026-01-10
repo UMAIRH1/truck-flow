@@ -27,7 +27,7 @@ export default function SplashPage() {
   return (
     <div className="min-h-screen bg-(--color-yellow) flex flex-col items-center justify-between py-16 px-6">
       <div className="flex-1 flex flex-col items-center justify-center">
-        <OptimizedImage src={ASSETS.images.icons.logo} alt="" />
+        <OptimizedImage src={ASSETS.images.icons.logo} alt="logo" />
       </div>
       <div className="w-full max-w-xs space-y-4">
         <p className="text-center text-black font-medium ">Are you using this platform as a</p>

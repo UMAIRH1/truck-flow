@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { Calendar, ChevronLeft, ChevronRight, TableOfContents } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface DateFilterProps {
+interface DateFieldProps {
   value?: Date;
   onChange: (date: Date | undefined) => void;
+  placeholder?: string;
   className?: string;
 }
 
@@ -17,8 +18,8 @@ function endOfMonth(date: Date) {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0);
 }
 
-export function DateFilter({ value, onChange, className }: DateFilterProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function DateField({ value, onChange, placeholder = "Today", className }: DateFieldProps) {
+  const [open, setOpen] = useState(false);
   const [viewDate, setViewDate] = useState<Date>(value || new Date());
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -27,19 +28,19 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
   }, [value]);
 
   useEffect(() => {
-    const handle = (e: MouseEvent) => {
+    const handler = (e: MouseEvent) => {
       if (!ref.current) return;
-      if (!ref.current.contains(e.target as Node)) setIsOpen(false);
+      if (!ref.current.contains(e.target as Node)) setOpen(false);
     };
-    document.addEventListener("mousedown", handle);
-    return () => document.removeEventListener("mousedown", handle);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const formattedDate = value ? value.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" }) : "";
+  const formatted = value ? value.toLocaleDateString("en-US", { month: "short", day: "numeric" }) : placeholder;
 
   const monthStart = startOfMonth(viewDate);
   const monthEnd = endOfMonth(viewDate);
-  const startWeekDay = monthStart.getDay(); // 0 (Sun) - 6 (Sat)
+  const startWeekDay = monthStart.getDay();
 
   const days: (Date | null)[] = [];
   for (let i = 0; i < startWeekDay; i++) days.push(null);
@@ -50,25 +51,25 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
 
   const handleSelect = (d: Date) => {
     onChange(d);
-    setIsOpen(false);
+    setOpen(false);
   };
 
   const weekdayShort = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
   return (
-    <div ref={ref} className={cn("relative", className)}>
-      <div className="flex items-center border border-(--color-primary-yellow-dark) rounded-lg gap-2">
-        <div onClick={() => setIsOpen((s) => !s)} className="flex-1 flex items-center gap-2 px-4 py-3 cursor-pointer">
-          <Calendar className="h-4 w-4 text-gray-400" />
-          <input type="text" placeholder="Filter by date" value={formattedDate} readOnly className="bg-transparent outline-none text-sm flex-1" />
+    <div ref={ref} className={cn("relative inline-block", className)}>
+      <div className="flex w-full gap-2  items-center justify-between">
+        <div className="flex w-full items-center text-(--color-blue-dark) justify-center rounded-sm border border-gray-200 px-4 py-3 gap-3 text-sm">
+          <TableOfContents className="h-5 w-5" />
+          <div className="min-w-[80px]">{formatted}</div>
         </div>
-        <button onClick={() => setIsOpen((s) => !s)} className="p-3 bg-(--color-primary-yellow-dark) rounded-r-lg hover:bg-gray-200 transition-colors">
-          <Calendar className="h-5 w-5 text-white" />
+        <button onClick={() => setOpen((s) => !s)} className="p-3 bg-black text-white rounded-sm">
+          <Calendar className="h-5 w-5" />
         </button>
       </div>
 
-      {isOpen && (
-        <div className="absolute top-full left-0 mt-2 p-4 bg-white rounded-xl shadow-lg border border-(--color-primary-yellow-dark) z-50 w-[320px]">
+      {open && (
+        <div className="absolute top-full right-0 mt-2 p-4 bg-white rounded-xl shadow-lg border z-50 w-[320px]">
           <div className="flex items-center justify-between mb-2">
             <button onClick={gotoPrev} className="p-2 rounded hover:bg-gray-100">
               <ChevronLeft className="w-4 h-4" />
@@ -88,7 +89,6 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
               </div>
             ))}
           </div>
-
           <div className="grid grid-cols-7 gap-1">
             {days.map((d, idx) => {
               if (!d) return <div key={"empty-" + idx} className="h-8" />;
@@ -101,8 +101,8 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
                   onClick={() => handleSelect(d)}
                   className={cn(
                     "h-8 flex items-center justify-center rounded",
-                    isSelected ? "bg-yellow-400 text-black font-normal" : "hover:bg-gray-100",
-                    isToday && !isSelected ? " text-white bg-(--color-yellow-light)" : ""
+                    isSelected ? "bg-yellow-400 text-black font-medium" : "hover:bg-gray-100",
+                    isToday && !isSelected ? "border border-gray-200" : ""
                   )}
                 >
                   {d.getDate()}
@@ -110,12 +110,11 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
               );
             })}
           </div>
-
           <div className="mt-3 flex items-center gap-2">
             <button
               onClick={() => {
                 onChange(undefined);
-                setIsOpen(false);
+                setOpen(false);
               }}
               className="text-sm text-gray-600 hover:underline"
             >
@@ -125,7 +124,7 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
             <button
               onClick={() => {
                 onChange(new Date());
-                setIsOpen(false);
+                setOpen(false);
               }}
               className="text-sm text-yellow-500 hover:underline"
             >

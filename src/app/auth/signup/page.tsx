@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { validateSignUpForm } from "../validations";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function SignUpPage() {
@@ -21,6 +22,11 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [justSignedUp, setJustSignedUp] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({ name: "", email: "", password: "" });
+
+  const nameRef = useRef<HTMLInputElement | null>(null);
+  const emailRef = useRef<HTMLInputElement | null>(null);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
 
   // Redirect if already authenticated (but avoid redirecting away while performing signup flow)
   React.useEffect(() => {
@@ -44,9 +50,22 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setFieldErrors({ name: "", email: "", password: "" });
 
     if (!agreeTerms) {
       setError("Please agree to the terms of service");
+      return;
+    }
+
+    const { nameError, emailError, passwordError } = validateSignUpForm(name, email, password);
+    if (nameError || emailError || passwordError) {
+      setFieldErrors({ name: nameError || "", email: emailError || "", password: passwordError || "" });
+      // focus first invalid field
+      setTimeout(() => {
+        if (nameError) nameRef.current?.focus();
+        else if (emailError) emailRef.current?.focus();
+        else if (passwordError) passwordRef.current?.focus();
+      });
       return;
     }
 
@@ -90,17 +109,27 @@ export default function SignUpPage() {
         <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">Create an account</h1>
         <p className="text-center text-yellow-500 mb-8">Welcome back to the app</p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form noValidate onSubmit={handleSubmit} className="space-y-5">
           {/* Name Field */}
           <div>
             <label className="block text-sm text-gray-600 mb-2">Name</label>
-            <Input type="text" placeholder="Ab Mahmud" value={name} onChange={(e) => setName(e.target.value)} className="h-12 bg-gray-50 border-gray-200 rounded-lg" required />
+            <Input ref={nameRef} type="text" placeholder="Ab Mahmud" value={name} onChange={(e) => setName(e.target.value)} className="h-12 bg-gray-50 border-gray-200 rounded-lg" required />
+            {fieldErrors.name && <p className="text-red-500 text-sm mt-1">{fieldErrors.name}</p>}
           </div>
 
           {/* Email Field */}
           <div>
             <label className="block text-sm text-gray-600 mb-2">Email Address</label>
-            <Input type="email" placeholder="hello@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 bg-gray-50 border-gray-200 rounded-lg" required />
+            <Input
+              ref={emailRef}
+              type="email"
+              placeholder="hello@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="h-12 bg-gray-50 border-gray-200 rounded-lg"
+              required
+            />
+            {fieldErrors.email && <p className="text-red-500 text-sm mt-1">{fieldErrors.email}</p>}
           </div>
 
           {/* Password Field */}
@@ -108,6 +137,7 @@ export default function SignUpPage() {
             <label className="block text-sm text-gray-600 mb-2">Password</label>
             <div className="relative">
               <Input
+                ref={passwordRef}
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••••••••"
                 value={password}
@@ -120,6 +150,7 @@ export default function SignUpPage() {
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
+            {fieldErrors.password && <p className="text-red-500 text-sm mt-1">{fieldErrors.password}</p>}
           </div>
 
           {/* Terms Agreement */}

@@ -29,16 +29,25 @@
   --color-primary-yellow-dark: #FFD800;
   --color-light-black: #2D2D2D;
   --color-gray-table: #001E39;
+  --color-light-black-border: #0D141C;
+  --color-extra-light-gray: #808486;
+  --color-dark-gray: #515759;
+  --color-primary-gray: #42494B;
+  --color-stat-gray: #2B3235;
+  --color-blue-border: #1577EA;
+  --color-border-primary-light:#E5E9EE;
+  --color-blue-dark: #001C38;
+  --color-primary-green: #088738;
+  --color-primary-gray-text: #4A739C;
 
 
   /* Additional Project Colors */
   --color-light-grayish-cyan: #dbfef7;
   --color-light-cyan: #19b8b0;
-  --color-extra-light-gray: #c4c4c4;
+  
   --color-light-pink: #cb077c;
-  --color-dark-gray: #6d6e71;
-  --color-primary-gray: #f0f0f0;
-  --color-light-black-border: #424242;
+  
+
   
   --color-button-table: #fafafa;
   --color-primary-pink: #ffc3f7;
@@ -48,16 +57,14 @@
   --color-greenish-light: #ecffe9;
   --color-greenish: #37d819;
   --color-table-header: #f8f8f8;
-  --color-primary-green: #00a63e;
-  --color-blue-border: #0068bd;
-  --color-stat-gray: #797d8c;
+ 
+  
   --color-stat-blue: #04103b;
   --color-gray: #7d7d7d;
   --color-primary-gold-bg: #fef9c2;
   --color-primary-green-gradient-start: #2ecc71;
   --color-primary-green-gradient-end: #42ff92;
   --color-gray-light: #989898;
-  --color-primary-gray-text: #818181;
   --color-brownish-red: #b82d00;
   --color-slider-track: #cdcdcd;
   --color-table-header-gray: #737373;
@@ -80,9 +87,7 @@
   --color-blue-light-bg: #dbeafe;
   --color-red-light: #fff1ef;
   --color-red-dark: #e7000b;
-  --color-blue-dark: #2b4ccf;
   --color-amber-500: #f59e0b;
-  --color-border-primary-light: #e9e9e9;
   --color-border-table-buttons: #f5f5f5;
   --color-border-gray-pagination: #f1f1f1;
   --color-border-primary-green: #19df54;

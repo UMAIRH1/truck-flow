@@ -1,8 +1,5 @@
 "use client";
-
-import React from "react";
 import { cn } from "@/lib/utils";
-
 interface Tab {
   id: string;
   label: string;
@@ -18,14 +15,14 @@ interface FilterTabsProps {
 
 export function FilterTabs({ tabs, activeTab, onTabChange, className }: FilterTabsProps) {
   return (
-    <div className={cn("flex gap-2 overflow-x-auto pb-2 scrollbar-hide", className)}>
+    <div className={cn("flex gap-2 shadow-2xl border border-gray-100 p-0.5 rounded-sm overflow-x-auto  scrollbar-hide", className)}>
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={cn(
-            "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-            activeTab === tab.id ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            "px-3 py-2 rounded-sm cursor-pointer text-xs font-medium whitespace-nowrap transition-colors",
+            activeTab === tab.id ? "bg-(--color-primary-yellow-dark) text-black" : "bg-white text-(--color-extra-light-gray) hover:bg-gray-200"
           )}
         >
           {tab.label}

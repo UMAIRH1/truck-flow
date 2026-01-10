@@ -40,8 +40,8 @@ function calculatePayoutDate(loadingDate: Date, terms: PaymentTerms): Date {
 const mockLoads: Load[] = [
   {
     id: 'L001',
-    pickupLocation: '11-12 Oxford St., United States',
-    dropoffLocation: '20 Los Angeles Sq., United States',
+    pickupLocation: '11-12 Oxford St.',
+    dropoffLocation: '20 Los Angeles Sq.',
     clientName: 'Watson',
     clientPrice: 10,
     driverPrice: 8,

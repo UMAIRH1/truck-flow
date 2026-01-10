@@ -1,7 +1,10 @@
+import { Share } from "next/font/google";
+
 export const ASSETS = {
   images: {
     icons: {
       logo: "/icons/Logo.svg",
+      share: "/icons/Share.svg",
     },
   },
 
