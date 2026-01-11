@@ -44,6 +44,10 @@
   --color-gray-light: #525252;
   --color-button-table: #0095FF;
   --color-gray: #EBEBEB;
+  --color-gray-text: #454545;
+  --color-greenish: #008E00;
+  --color-dangerous: #FF0000;
+  --color-arsenic-text: #CECECE;
 
 
   /* Additional Project Colors */
@@ -59,7 +63,6 @@
   --color-purple-light: #f2eeff;
   --color-purple: #744bf8;
   --color-greenish-light: #ecffe9;
-  --color-greenish: #37d819;
   --color-table-header: #f8f8f8;
  
   
@@ -70,7 +73,6 @@
   --color-slider-track: #cdcdcd;
   --color-table-header-gray: #737373;
   --color-table-row: #5e5e5e;
-  --color-gray-text: #8c8c8c;
   --color-table-buttons: #737375;
   --color-gray-extra-light: #b4b4b4;
   
@@ -80,7 +82,6 @@
   --color-green: #2bcf44;
   --color-green-status: #00bd00;
   --color-primary-gold: #945100;
-  --color-dangerous: #fedbdb;
   --color-dangerous-light: #b81919;
   --color-green-light-bg: #ecffe8;
   --color-verified-bg: #dbfce7;
@@ -93,7 +94,6 @@
   --color-border-gray-pagination: #f1f1f1;
   --color-border-primary-green: #19df54;
   --color-graphite-text: #939393;
-  --color-arsenic-text: #747474;
   --color-arsenic-light: #727272;
 
   /* Semantic Color Mappings */

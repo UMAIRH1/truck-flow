@@ -6,6 +6,7 @@ export const ASSETS = {
       share: "/icons/Share.svg",
       truck: '/icons/truck.svg', 
       camera: '/icons/camera.svg',
+      addCard: '/icons/add-card.svg',
     },
   },
 

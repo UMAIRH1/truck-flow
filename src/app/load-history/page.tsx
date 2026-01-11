@@ -41,8 +41,10 @@ export default function LoadHistoryPage() {
         </MobileLayout>
       </div>
       <div className="hidden md:block">
-        <Header title="Load History" showBack />
-        <div className="max-w-7xl mx-auto">{content}</div>
+        <MobileLayout>
+          <Header title="Load History" showBack />
+          <div className="max-w-7xl mx-auto">{content}</div>
+        </MobileLayout>
       </div>
     </>
   );

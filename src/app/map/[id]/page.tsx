@@ -29,7 +29,7 @@ export default function MapViewPage() {
 
   if (!load) {
     return (
-      <MobileLayout showFAB={false}>
+      <MobileLayout showFAB={true}>
         <Header title="Map View" showBack />
         <div className="px-4 py-8 text-center text-gray-500">Load not found</div>
       </MobileLayout>
@@ -37,7 +37,7 @@ export default function MapViewPage() {
   }
 
   return (
-    <MobileLayout showFAB={false} showBottomNav={false}>
+    <MobileLayout showFAB={true} showBottomNav={true}>
       <Header title="Map View" showBack />
 
       <div className="flex flex-col h-[calc(100vh-60px)]">
