@@ -1,80 +1,91 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Header, MobileLayout } from '@/components/layout';
-import { DriverLoadCard, FilterTabs } from '@/components/shared';
-import { useLoads } from '@/contexts/LoadContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import React, { useState } from "react";
+import { Header, MobileLayout } from "@/components/layout";
+import { DriverLoadCard, FilterTabs } from "@/components/shared";
+import { useLoads } from "@/contexts/LoadContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function MyLoadsPage() {
   const { loads, updateLoadStatus } = useLoads();
   const { user } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('pending');
+  const [activeTab, setActiveTab] = useState("pending");
 
   // Filter loads for this driver
-  const driverLoads = loads.filter(load => 
-    load.assignedDriver?.name === user?.name || 
-    load.assignedDriver?.id === user?.id ||
-    load.status === 'pending' // Show all pending loads for demo
+  const driverLoads = loads.filter(
+    (load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id || load.status === "pending" // Show all pending loads for demo
   );
 
   const tabs = [
-    { id: 'pending', label: 'Pending' },
-    { id: 'accepted', label: 'Accepted' },
-    { id: 'completed', label: 'Completed' },
+    { id: "pending", label: "Pending" },
+    { id: "accepted", label: "Accepted" },
+    { id: "completed", label: "Completed" },
   ];
 
-  const filteredLoads = driverLoads.filter(load => {
-    if (activeTab === 'pending') return load.status === 'pending';
-    if (activeTab === 'accepted') return load.status === 'accepted' || load.status === 'in-progress';
-    if (activeTab === 'completed') return load.status === 'completed';
+  const filteredLoads = driverLoads.filter((load) => {
+    if (activeTab === "pending") return load.status === "pending";
+    if (activeTab === "accepted") return load.status === "accepted" || load.status === "in-progress";
+    if (activeTab === "completed") return load.status === "completed";
     return true;
   });
 
   const handleAccept = (loadId: string) => {
-    updateLoadStatus(loadId, 'accepted');
+    updateLoadStatus(loadId, "accepted");
   };
 
   const handleDecline = (loadId: string) => {
-    updateLoadStatus(loadId, 'rejected');
+    updateLoadStatus(loadId, "rejected");
   };
 
   const handleMapView = (loadId: string) => {
     router.push(`/map/${loadId}`);
   };
 
-  return (
-    <MobileLayout>
-      <Header title="My Loads" showBack />
-      
-      <div className="px-4 py-4 max-w-md mx-auto space-y-4">
-        <FilterTabs
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+  const cards = filteredLoads.map((load) => (
+    <DriverLoadCard
+      key={load.id}
+      load={load}
+      showActions={activeTab === "pending"}
+      onAccept={() => handleAccept(load.id)}
+      onDecline={() => handleDecline(load.id)}
+      onMapView={() => handleMapView(load.id)}
+    />
+  ));
+  const noLoadsMessageMobile = <div className="text-center py-8 text-gray-500">No loads found</div>;
+  const noLoadsMessageDesktop = (
+    <div className="col-span-full text-center py-16 text-gray-500">
+      <div className="text-lg font-medium mb-2">No loads found</div>
+      <div className="text-sm">Check back later for new opportunities</div>
+    </div>
+  );
 
-        <div className="space-y-3">
-          {filteredLoads.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No loads found
+  return (
+    <>
+      <div className="block md:hidden">
+        <MobileLayout>
+          <Header title="My Loads" showBack />
+
+          <div className="px-4 py-4 max-w-md mx-auto space-y-4">
+            <FilterTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+            <div className="space-y-3 mt-6">{filteredLoads.length === 0 ? noLoadsMessageMobile : cards}</div>
+          </div>
+        </MobileLayout>
+      </div>
+      <div className="hidden md:block min-h-screen bg-gray-50">
+        <Header title="My Loads" showBack />
+        <div className="px-6 py-8 max-w-7xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold text-gray-900">My Loads</h1>
+            <div className="text-sm text-gray-600">
+              {filteredLoads.length} {activeTab} {filteredLoads.length === 1 ? "load" : "loads"}
             </div>
-          ) : (
-            filteredLoads.map((load) => (
-              <DriverLoadCard
-                key={load.id}
-                load={load}
-                showActions={activeTab === 'pending'}
-                onAccept={() => handleAccept(load.id)}
-                onDecline={() => handleDecline(load.id)}
-                onMapView={() => handleMapView(load.id)}
-              />
-            ))
-          )}
+          </div>
+          <FilterTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">{filteredLoads.length === 0 ? noLoadsMessageDesktop : cards}</div>
         </div>
       </div>
-    </MobileLayout>
+    </>
   );
 }
