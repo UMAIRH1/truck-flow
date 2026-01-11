@@ -2,8 +2,13 @@
 import { Line } from "react-chartjs-2";
 import "chart.js/auto";
 
+interface DataPoint {
+  month: string;
+  value: number;
+}
+
 interface LineChartProps {
-  data?: number[];
+  data?: number[] | DataPoint[];
   labels?: string[];
   trend?: string;
   trendLabel?: string;
@@ -11,20 +16,35 @@ interface LineChartProps {
   lineColor?: string;
 }
 
-export function LineChart({
-  data = [30, 45, 35, 50, 40, 55, 45, 60, 50, 65],
-  labels = ["Oct", "Nov", "Dec"],
-  trend = "+5%",
-  trendLabel = "Last 3 Months",
-  className,
-  lineColor = "#1e40af",
-}: LineChartProps) {
+export function LineChart({ data = [30, 45, 35], labels, trend = "+5%", trendLabel = "Last 3 Months", className, lineColor = "#1e40af" }: LineChartProps) {
+  // helper to capitalize month labels
+  const capitalize = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
+  let chartLabels: string[] = [];
+  let chartValues: number[] = [];
+
+  if (Array.isArray(data) && data.length > 0 && typeof (data as any)[0] === "object") {
+    const points = data as DataPoint[];
+    chartLabels = points.map((p) => capitalize(p.month));
+    chartValues = points.map((p) => p.value);
+  } else {
+    chartValues = data as number[];
+    const defaultLabels = ["Oct", "Nov", "Dec"];
+    if (labels && labels.length >= chartValues.length) {
+      chartLabels = labels.slice(0, chartValues.length);
+    } else if (labels && labels.length < chartValues.length) {
+      chartLabels = [...labels, ...Array.from({ length: chartValues.length - labels.length }, (_, i) => `M${labels.length + i + 1}`)];
+    } else {
+      chartLabels = defaultLabels.slice(0, Math.max(1, chartValues.length));
+    }
+  }
+
   const chartData = {
-    labels,
+    labels: chartLabels,
     datasets: [
       {
         label: trendLabel,
-        data,
+        data: chartValues,
         fill: true,
         backgroundColor: `${lineColor}33`,
         borderColor: lineColor,
@@ -58,12 +78,12 @@ export function LineChart({
   } as any;
 
   return (
-    <div>
+    <div className={className}>
       <div className="flex items-center justify-start gap-2 mb-4">
         <span className="text-base font-normal text-gray-600">{trendLabel}</span>
         <span className="text-base font-medium text-green-600">{trend}</span>
       </div>
-      <div className="w-full h-40 md:h-56 lg:h-72">
+      <div className="w-full h-full">
         <Line data={chartData} options={options} />
       </div>
     </div>

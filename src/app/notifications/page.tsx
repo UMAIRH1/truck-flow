@@ -1,14 +1,11 @@
 "use client";
 
-import React from "react";
 import { Header, MobileLayout } from "@/components/layout";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { Bell } from "lucide-react";
 
 export default function NotificationsPage() {
-  const { notifications, markAsRead, markAllAsRead } = useNotifications();
-
-  // Group notifications by date
+  const { notifications, markAsRead } = useNotifications();
   const groupedNotifications = notifications.reduce((groups, notification) => {
     const date = new Date(notification.timestamp);
     const today = new Date();
@@ -48,41 +45,90 @@ export default function NotificationsPage() {
   };
 
   return (
-    <MobileLayout>
-      <Header title="Notification" showBack />
+    <>
+      {/* Mobile view */}
+      <div className="block md:hidden">
+        <MobileLayout>
+          <Header title="Notification" showBack />
+          <div className="px-4 py-4 max-w-md mx-auto space-y-6">
+            {Object.entries(groupedNotifications).map(([dateKey, items]) => (
+              <div key={dateKey}>
+                <div className="flex">
+                  <h2 className="text-sm font-medium text-black mb-3">{dateKey}</h2>
+                  <hr className="flex-1 border-t border-[#A0A0A0] mt-3 ml-3" />
+                </div>
 
-      <div className="px-4 py-4 max-w-md mx-auto space-y-6">
-        {Object.entries(groupedNotifications).map(([dateKey, items]) => (
-          <div key={dateKey}>
-            <h2 className="text-sm font-semibold text-gray-500 mb-3">{dateKey}</h2>
-            <div className="space-y-3">
-              {items.map((notification) => (
-                <div
-                  key={notification.id}
-                  onClick={() => markAsRead(notification.id)}
-                  className={`bg-white rounded-xl p-4 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors ${!notification.read ? "border-l-4 border-l-yellow-400" : ""}`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-gray-100 rounded-full">
-                      <Bell className="h-4 w-4 text-gray-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-sm">{notification.title}</h3>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500">{formatTime(notification.timestamp)}</span>
-                          {!notification.read && <span className="w-2 h-2 bg-red-500 rounded-full" />}
+                <div className="space-y-3">
+                  {items.map((notification) => (
+                    <div
+                      key={notification.id}
+                      onClick={() => markAsRead(notification.id)}
+                      className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors "
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="p-3 border border-(--color-gray) rounded-full">
+                          <Bell className="h-5 w-5 text-(--color-button-table)" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-semibold text-sm">{notification.title}</h3>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-normal text-(--color-button-table)">{formatTime(notification.timestamp)}</span>
+                              {!notification.read && <span className="w-2 h-2 bg-[#FF0000] rounded-full" />}
+                            </div>
+                          </div>
+                          <p className="text-xs font-normal text-(--color-gray-light) mt-1">{notification.message}</p>
                         </div>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">{notification.message}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </MobileLayout>
+      </div>
+
+      {/* Desktop view */}
+      <div className="hidden md:block min-h-screen bg-gray-50">
+        <Header title="Notifications" />
+        <div className="max-w-7xl mx-auto py-12 px-8">
+          {Object.entries(groupedNotifications).map(([dateKey, items]) => (
+            <div key={dateKey} className="mb-8">
+              <div className="flex items-center">
+                <h2 className="text-sm font-medium text-black mr-4">{dateKey}</h2>
+                <hr className="flex-1 border-t border-[#A0A0A0]" />
+              </div>
+
+              <div className="mt-4 space-y-4">
+                {items.map((notification) => (
+                  <div
+                    key={notification.id}
+                    onClick={() => markAsRead(notification.id)}
+                    className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 border border-(--color-gray) rounded-full">
+                        <Bell className="h-5 w-5 text-(--color-button-table)" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold text-sm md:text-base">{notification.title}</h3>
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs md:text-sm font-normal text-(--color-button-table)">{formatTime(notification.timestamp)}</span>
+                            {!notification.read && <span className="w-2 h-2 bg-[#FF0000] rounded-full" />}
+                          </div>
+                        </div>
+                        <p className="text-sm text-(--color-gray-light) mt-2">{notification.message}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </MobileLayout>
+    </>
   );
 }
