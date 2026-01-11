@@ -108,98 +108,100 @@ export default function SettingsPage() {
           </div>
         </MobileLayout>
       </div>
-      <div className="hidden md:block min-h-screen bg-gray-50">
-        <Header title="Settings" />
-        <div className="max-w-7xl mx-auto  py-12 grid grid-cols-4 gap-8">
-          <aside className="col-span-4 space-y-6">
-            <div className="bg-white rounded-xl p-4 shadow">
-              <h2 className="text-base font-medium text-black mb-3">Account</h2>
-              <div className="space-y-2">
-                {accountItems.map((item, index) => (
-                  <div key={index}>
-                    {item.href ? (
-                      <Link href={item.href} className="block">
-                        <div className="flex items-center gap-4 py-2 bg-white rounded-xl hover:bg-gray-50">
-                          <div className="p-2 bg-(--color-button-table) rounded-md">
-                            <BusFront className="h-5 w-5 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-xs text-black">{item.label}</span>
-                              {item.badge && <span className="w-2 h-2 bg-red-500 rounded-full" />}
+      <div className="hidden md:block">
+        <MobileLayout showFAB={true} showBottomNav={true}>
+          <Header title="Settings" />
+          <div className="max-w-7xl mx-auto  py-12 grid grid-cols-4 gap-8">
+            <aside className="col-span-4 space-y-6">
+              <div className="bg-white rounded-xl p-4 shadow">
+                <h2 className="text-base font-medium text-black mb-3">Account</h2>
+                <div className="space-y-2">
+                  {accountItems.map((item, index) => (
+                    <div key={index}>
+                      {item.href ? (
+                        <Link href={item.href} className="block">
+                          <div className="flex items-center gap-4 py-2 bg-white rounded-xl hover:bg-gray-50">
+                            <div className="p-2 bg-(--color-button-table) rounded-md">
+                              <BusFront className="h-5 w-5 text-white" />
                             </div>
-                            <p className="text-xs font-normal text-(--color-gray-light)">{item.description}</p>
-                          </div>
-                        </div>
-                      </Link>
-                    ) : (
-                      <button onClick={() => item.onClick && item.onClick()} className="w-full text-left cursor-pointer">
-                        <div className="flex items-center gap-4 py-2 bg-white rounded-xl hover:bg-gray-50">
-                          <div className="p-2 bg-(--color-button-table) rounded-md">
-                            <BusFront className="h-5 w-5 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{item.label}</span>
-                              {item.badge && <span className="w-2 h-2 bg-red-500 rounded-full" />}
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-xs text-black">{item.label}</span>
+                                {item.badge && <span className="w-2 h-2 bg-red-500 rounded-full" />}
+                              </div>
+                              <p className="text-xs font-normal text-(--color-gray-light)">{item.description}</p>
                             </div>
-                            <p className="text-xs font-normal text-(--color-gray-light)">{item.description}</p>
                           </div>
-                        </div>
-                      </button>
-                    )}
-                  </div>
-                ))}
+                        </Link>
+                      ) : (
+                        <button onClick={() => item.onClick && item.onClick()} className="w-full text-left cursor-pointer">
+                          <div className="flex items-center gap-4 py-2 bg-white rounded-xl hover:bg-gray-50">
+                            <div className="p-2 bg-(--color-button-table) rounded-md">
+                              <BusFront className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{item.label}</span>
+                                {item.badge && <span className="w-2 h-2 bg-red-500 rounded-full" />}
+                              </div>
+                              <p className="text-xs font-normal text-(--color-gray-light)">{item.description}</p>
+                            </div>
+                          </div>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className="bg-white rounded-xl p-4 shadow">
-              <h2 className="text-base font-medium text-black mb-3">Actions</h2>
-              <div className="space-y-2">
-                {actionItems.map((item, index) => (
-                  <div key={index}>
-                    {item.href ? (
-                      <Link href={item.href} className="block">
-                        <div className="flex items-center gap-4 py-2 bg-white rounded-xl hover:bg-gray-50">
-                          <div className="p-2 bg-(--color-button-table) rounded-md">
-                            <BusFront className="h-5 w-5 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-xs text-black">{item.label}</span>
-                              {item.badge && <span className="w-2 h-2 bg-red-500 rounded-full" />}
+              <div className="bg-white rounded-xl p-4 shadow">
+                <h2 className="text-base font-medium text-black mb-3">Actions</h2>
+                <div className="space-y-2">
+                  {actionItems.map((item, index) => (
+                    <div key={index}>
+                      {item.href ? (
+                        <Link href={item.href} className="block">
+                          <div className="flex items-center gap-4 py-2 bg-white rounded-xl hover:bg-gray-50">
+                            <div className="p-2 bg-(--color-button-table) rounded-md">
+                              <BusFront className="h-5 w-5 text-white" />
                             </div>
-                            <p className="text-xs font-normal text-(--color-gray-light)">{item.description}</p>
-                          </div>
-                        </div>
-                      </Link>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          item.onClick && item.onClick();
-                        }}
-                        className="w-full text-left cursor-pointer"
-                      >
-                        <div className="flex items-center gap-4 py-2 bg-white rounded-xl hover:bg-gray-50">
-                          <div className="p-2 bg-(--color-button-table) rounded-md">
-                            <BusFront className="h-5 w-5 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-xs text-black">{item.label}</span>
-                              {item.badge && <span className="w-2 h-2 bg-red-500 rounded-full" />}
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-xs text-black">{item.label}</span>
+                                {item.badge && <span className="w-2 h-2 bg-red-500 rounded-full" />}
+                              </div>
+                              <p className="text-xs font-normal text-(--color-gray-light)">{item.description}</p>
                             </div>
-                            <p className="text-xs font-normal text-(--color-gray-light)">{item.description}</p>
                           </div>
-                        </div>
-                      </button>
-                    )}
-                  </div>
-                ))}
+                        </Link>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            item.onClick && item.onClick();
+                          }}
+                          className="w-full text-left cursor-pointer"
+                        >
+                          <div className="flex items-center gap-4 py-2 bg-white rounded-xl hover:bg-gray-50">
+                            <div className="p-2 bg-(--color-button-table) rounded-md">
+                              <BusFront className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-xs text-black">{item.label}</span>
+                                {item.badge && <span className="w-2 h-2 bg-red-500 rounded-full" />}
+                              </div>
+                              <p className="text-xs font-normal text-(--color-gray-light)">{item.description}</p>
+                            </div>
+                          </div>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          </aside>
-        </div>
+            </aside>
+          </div>
+        </MobileLayout>
       </div>
 
       {/* Modal (mobile bottom-sheet + desktop centered) */}

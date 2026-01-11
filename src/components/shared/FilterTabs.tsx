@@ -15,7 +15,7 @@ interface FilterTabsProps {
 
 export function FilterTabs({ tabs, activeTab, onTabChange, className }: FilterTabsProps) {
   return (
-    <div className={cn("flex gap-2 shadow-2xl border border-gray-100 p-0.5 rounded-sm overflow-x-auto  scrollbar-hide", className)}>
+    <div className={cn("flex gap-2 shadow-2xl mb-0 pb-2 border border-gray-100 p-0.5 rounded-sm overflow-x-auto  scrollbar-hide", className)}>
       {tabs.map((tab) => (
         <button
           key={tab.id}

@@ -57,11 +57,10 @@ export default function SecuritySettingsPage() {
   const canSave = validateCurrent(currentPassword) === "" && validateNew(newPassword) === "" && validateConfirm(confirmPassword, newPassword) === "";
 
   return (
-    <MobileLayout showFAB={false}>
+    <MobileLayout showFAB={true}>
       <Header title="Security" showBack />
-
-      <div className="px-4 py-6 max-w-7xl mx-auto space-y-8">
-        <section className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+      <div className=" max-w-7xl mx-auto sm:mt-7 max-sm:bg-(--color-yellow-light)">
+        <section className="bg-white px-4 py-6 max-sm:rounded-t-2xl sm:rounded md:shadow-md md:border border-gray-200">
           <h3 className="text-xl font-semibold mb-3">Change password</h3>
           <div className="space-y-4">
             <div>
