@@ -67,8 +67,16 @@ export function LoadCard({ load, showStatus = true, showDriver = true, onClick, 
   );
 
   if (onClick) {
-    return <div onClick={onClick}>{content}</div>;
+    return (
+      <div onClick={onClick} className="block">
+        {content}
+      </div>
+    );
   }
 
-  return <Link href={`/load/${load.id}`}>{content}</Link>;
+  return (
+    <Link href={`/load/${load.id}`} className="block">
+      {content}
+    </Link>
+  );
 }

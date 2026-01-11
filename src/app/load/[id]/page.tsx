@@ -1,10 +1,13 @@
 "use client";
 
-import React from "react";
 import { useParams } from "next/navigation";
 import { Header, MobileLayout } from "@/components/layout";
 import { useLoads } from "@/contexts/LoadContext";
-import { Truck, MapPin, Clock, Check } from "lucide-react";
+import { Clock, Check, BusFront, ArrowDownLeft, ArrowUpRight, X } from "lucide-react";
+import { OptimizedImage } from "@/components/ui/optimized-image";
+import { ASSETS } from "@/lib/assets";
+import { Badge } from "@/components/ui/badge";
+import { Icon } from "@/components/ui/icon";
 
 export default function LoadStatusPage() {
   const params = useParams();
@@ -14,20 +17,22 @@ export default function LoadStatusPage() {
 
   if (!load) {
     return (
-      <MobileLayout showFAB={false}>
-        <Header title="Load Status" showBack />
-        <div className="px-4 py-8 text-center text-gray-500">Load not found</div>
-      </MobileLayout>
+      <>
+        <div className="block md:hidden">
+          <MobileLayout showFAB={false}>
+            <Header title="Load Status" showBack />
+            <div className="px-4 py-8 text-center text-gray-500">Load not found</div>
+          </MobileLayout>
+        </div>
+        <div className="hidden md:block">
+          <Header title="Load Status" showBack />
+          <div className="px-4 py-8 text-center text-gray-500">Load not found</div>
+        </div>
+      </>
     );
   }
 
-  const timeline = load.timeline || [
-    { status: "In progress", date: new Date("2025-12-18T12:00:00"), description: "" },
-    { status: "Delivered", date: new Date("2025-12-20T12:00:00"), description: "" },
-    { status: "Waiting for documents", date: new Date("2025-12-20T09:00:00"), description: "" },
-    { status: "Unpaid", date: new Date("2025-12-20T10:00:00"), description: "" },
-    { status: "Paid & Load Completed", date: new Date("2025-12-21T09:00:00"), description: "" },
-  ];
+  const timeline = load.timeline || [];
 
   const formatDateTime = (date: Date) => {
     const d = new Date(date);
@@ -37,91 +42,92 @@ export default function LoadStatusPage() {
     };
   };
 
-  return (
-    <MobileLayout showFAB={false}>
-      <Header title="Load Status" showBack />
-
-      <div className="px-4 py-4 max-w-md mx-auto space-y-4">
-        {/* Load Card */}
-        <div className="bg-yellow-400 rounded-2xl p-4">
-          {/* Truck Image */}
-          <div className="bg-yellow-300 rounded-xl p-4 mb-4 flex items-center justify-center">
-            <div className="w-full h-20 flex items-center justify-center">
-              <Truck className="h-16 w-16" />
+  const content = (
+    <div className="px-4 py-4 space-y-4">
+      <div className="bg-(--color-primary-yellow-dark) rounded-2xl p-4">
+        <div className=" mb-4 flex items-center justify-center">
+          <OptimizedImage src={ASSETS.images.icons.truck} alt="Load Status" width={200} height={100} />
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="bg-(--color-blue-border) p-1.5 rounded-md">
+              <BusFront className="h-4 w-4 text-white" />
+            </div>
+            <span className="font-bold text-(--color-stat-gray) text-base">{load.clientName}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-(--color-dark-gray)">
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              <span>Today / {load.loadingTime}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Icon src={ASSETS.images.icons.share} className="h-3 w-3" />
+              <span>{load.loadWeight} KG</span>
             </div>
           </div>
+        </div>
 
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-600 p-1.5 rounded-lg">
-                <Truck className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-semibold">{load.clientName}</span>
+        <div className="flex items-center justify-between mt-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs">
+              <ArrowDownLeft className="h-3 w-3 text-(--color-primary-gray)" />
+              <span className="text-(--color-dark-gray)">From: {load.pickupLocation}</span>
             </div>
-            <div className="text-right text-xs text-gray-700">
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                <span>Today / {load.loadingTime}</span>
-              </div>
-              <div className="flex items-center gap-1 mt-1">
-                <Truck className="h-3 w-3" />
-                <span>{load.loadWeight} KG</span>
-              </div>
+            <div className="flex items-center gap-2 text-xs">
+              <ArrowUpRight className="h-3 w-3 text-(--color-primary-gray)" />
+              <span className="text-(--color-dark-gray)">To: {load.dropoffLocation}</span>
             </div>
           </div>
-
-          <div className="flex items-center justify-between mt-3">
-            <div className="space-y-1 text-xs">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">↖</span>
-                <span>From: {load.pickupLocation}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">↘</span>
-                <span>To: {load.dropoffLocation}</span>
-              </div>
-            </div>
-            <button className="px-4 py-2 bg-blue-500 text-white text-sm rounded-full font-medium">More Info</button>
-          </div>
-
-          <div className="text-right mt-2">
+          <div className="text-right flex flex-col justify-end items-start">
+            <Badge className="px-4 bg-[#0D80F2] text-white self-end text-sm rounded-md font-normal">More Info</Badge>
             <span className="font-bold">Price ${load.clientPrice.toFixed(2)}</span>
           </div>
         </div>
+      </div>
+      <div className="text-black">
+        <h3 className="font-medium text-xl">Driver | {load.assignedDriver?.name || "Unassigned"}</h3>
+        <p className="text-xs text-(--color-gray-light) font-normal mt-1">100 km | 2 hours | {load.loadWeight} kg</p>
+      </div>
+      <div>
+        <div className="space-y-">
+          {timeline.map((item, index) => {
+            const { date, time } = formatDateTime(item.date);
+            const isCompleted = item.completed;
 
-        {/* Driver Info */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <h3 className="font-semibold">Driver | {load.assignedDriver?.name || "Unassigned"}</h3>
-          <p className="text-sm text-gray-500 mt-1">100 km | 2 hours | {load.loadWeight} kg</p>
-        </div>
-
-        {/* Timeline */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <div className="space-y-4">
-            {timeline.map((item, index) => {
-              const { date, time } = formatDateTime(item.date);
-              const isCompleted = index < timeline.length;
-
-              return (
-                <div key={index} className="flex items-start gap-3">
-                  <div className="flex flex-col items-center">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isCompleted ? "bg-green-500" : "bg-gray-200"}`}>
-                      {isCompleted && <Check className="h-4 w-4 text-white" />}
-                    </div>
-                    {index < timeline.length - 1 && <div className="w-0.5 h-8 bg-gray-200 mt-1" />}
+            return (
+              <div key={index} className="flex items-start gap-3">
+                <div className="flex flex-col items-center">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isCompleted ? "bg-green-500" : "bg-(--color-primary-yellow-dark)"}`}>
+                    {isCompleted ? <Check className="h-4 w-4 text-white" /> : <X className="h-4 w-4 text-white" />}
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{item.status}</p>
-                    <p className="text-xs text-gray-500">
-                      {date} | {time}
-                    </p>
-                  </div>
+                  {index < timeline.length - 1 && <div className="w-0.5 h-8 bg-gray-200 mt-1" />}
                 </div>
-              );
-            })}
-          </div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm text-black">{item.status}</p>
+                  <p className="text-xs font-normal text-(--color-button-table)">
+                    {date} | {time}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
-    </MobileLayout>
+    </div>
+  );
+
+  return (
+    <>
+      <div className="block md:hidden">
+        <MobileLayout showFAB={false}>
+          <Header title="Load Status" showBack />
+          <div className="max-w-md mx-auto">{content}</div>
+        </MobileLayout>
+      </div>
+      <div className="hidden md:block">
+        <Header title="Load Status" showBack />
+        <div className="max-w-7xl mx-auto">{content}</div>
+      </div>
+    </>
   );
 }

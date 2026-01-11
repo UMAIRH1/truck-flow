@@ -39,6 +39,11 @@
   --color-blue-dark: #001C38;
   --color-primary-green: #088738;
   --color-primary-gray-text: #4A739C;
+  --color-cloud-bg: #8B8B8B;
+  --color-stat-blue: #0D80F2;
+  --color-gray-light: #525252;
+  --color-button-table: #0095FF;
+  --color-gray: #EBEBEB;
 
 
   /* Additional Project Colors */
@@ -49,7 +54,6 @@
   
 
   
-  --color-button-table: #fafafa;
   --color-primary-pink: #ffc3f7;
   --color-papaya-whip: #ffedd4;
   --color-purple-light: #f2eeff;
@@ -59,12 +63,9 @@
   --color-table-header: #f8f8f8;
  
   
-  --color-stat-blue: #04103b;
-  --color-gray: #7d7d7d;
   --color-primary-gold-bg: #fef9c2;
   --color-primary-green-gradient-start: #2ecc71;
   --color-primary-green-gradient-end: #42ff92;
-  --color-gray-light: #989898;
   --color-brownish-red: #b82d00;
   --color-slider-track: #cdcdcd;
   --color-table-header-gray: #737373;
@@ -91,7 +92,6 @@
   --color-border-table-buttons: #f5f5f5;
   --color-border-gray-pagination: #f1f1f1;
   --color-border-primary-green: #19df54;
-  --color-cloud-bg: #f2f2f2;
   --color-graphite-text: #939393;
   --color-arsenic-text: #747474;
   --color-arsenic-light: #727272;

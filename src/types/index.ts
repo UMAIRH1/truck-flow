@@ -1,5 +1,5 @@
 // User Types
-export type UserRole = 'manager' | 'driver';
+export type UserRole = "manager" | "driver";
 
 export interface User {
   id: string;
@@ -13,11 +13,11 @@ export interface User {
 }
 
 // Load Types
-export type LoadStatus = 'pending' | 'accepted' | 'rejected' | 'in-progress' | 'delivered' | 'completed' | 'dispute';
+export type LoadStatus = "pending" | "accepted" | "rejected" | "in-progress" | "delivered" | "completed" | "dispute";
 
 export type PaymentTerms = 30 | 45 | 60 | 90 | 120;
 
-export type ShippingType = 'FTL' | 'LTL' | 'Partial' | 'Expedited';
+export type ShippingType = "FTL" | "LTL" | "Partial" | "Expedited";
 
 export interface Load {
   id: string;
@@ -50,6 +50,7 @@ export interface LoadTimelineItem {
   status: string;
   date: Date;
   description?: string;
+  completed: boolean;
 }
 
 // Driver Types
@@ -73,17 +74,17 @@ export interface FinanceSummary {
 
 export interface CashflowItem {
   id: string;
-  type: 'client' | 'partner';
+  type: "client" | "partner";
   name: string;
   amount: number;
   since: Date;
   expected: Date;
-  status: 'outstanding' | 'overdue' | 'due-this-week';
+  status: "outstanding" | "overdue" | "due-this-week";
   daysOverdue?: number;
 }
 
 // Notification Types
-export type NotificationType = 'load_accepted' | 'load_uploaded' | 'status_updated' | 'payment_received';
+export type NotificationType = "load_accepted" | "load_uploaded" | "status_updated" | "payment_received";
 
 export interface Notification {
   id: string;
@@ -97,7 +98,7 @@ export interface Notification {
 // Payment Method Types
 export interface PaymentMethod {
   id: string;
-  type: 'bank' | 'card';
+  type: "bank" | "card";
   name: string;
   details: string;
 }

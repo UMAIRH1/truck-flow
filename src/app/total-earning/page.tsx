@@ -4,6 +4,7 @@ import { Header, MobileLayout } from "@/components/layout";
 import { LineChart, QuarterlyChart } from "@/components/shared";
 import { useLoads } from "@/contexts/LoadContext";
 import { useEffect, useState } from "react";
+import { aggregateMonthlyMetrics, computeTrend, aggregateQuarterlyMetrics, computeQuarterTrend, aggregateLastFourQuarters } from "@/lib/earnings";
 
 export default function TotalEarningPage() {
   const { loads } = useLoads();
@@ -25,13 +26,11 @@ export default function TotalEarningPage() {
 
   const metricTitle = metric === "expense" ? "Expense" : metric === "profit" ? "Profit" : "Income";
   const metricValue = metric === "expense" ? totalExpense : metric === "profit" ? profit : totalIncome;
-
-  const quarterlyData = [
-    { quarter: "Q1", value: 12000 },
-    { quarter: "Q2", value: 7000 },
-    { quarter: "Q3", value: 12000 },
-    { quarter: "Q4", value: 3000 },
-  ];
+  // use a rolling 4-quarter view so quarters spanning last year are included
+  const quarterlyData = aggregateLastFourQuarters(completedLoads, metric as "income" | "expense" | "profit");
+  const quarterlyTrend = computeQuarterTrend(quarterlyData);
+  const chartPoints = aggregateMonthlyMetrics(completedLoads, metric as "income" | "expense" | "profit", 3);
+  const trend = computeTrend(chartPoints);
 
   return (
     <MobileLayout showFAB={false}>
@@ -39,16 +38,14 @@ export default function TotalEarningPage() {
       <div className="px-4 lg:px-6 py-6 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           <div className="lg:col-span-2 space-y-6">
-            <LineChart trend="+5%" trendLabel="Last 3 Months" labels={["Oct", "Nov", "Dec"]} className="h-64 md:h-80 lg:h-96" />
+            <LineChart data={chartPoints} trend={trend} trendLabel="Last 3 Months" className="h-64 md:h-80 lg:h-96" />
             <div className="bg-white rounded-2xl p-4 shadow-sm">
-              <h3 className="text-sm text-gray-500">Total Completed Loads</h3>
-              <div className="flex items-baseline gap-2 mt-1">
+              <div className="flex flex-col justify-start text-(--color-light-black-border)">
+                <h3 className="text-base font-medium">Total Completed Loads</h3>
                 <span className="text-3xl font-bold">{completedLoads.length}</span>
-                <span className="text-sm text-green-500">This Year +12%</span>
               </div>
-
               <div className="mt-4">
-                <QuarterlyChart data={quarterlyData} />
+                <QuarterlyChart data={quarterlyData} trend={quarterlyTrend} trendLabel="This Year" />
               </div>
             </div>
           </div>

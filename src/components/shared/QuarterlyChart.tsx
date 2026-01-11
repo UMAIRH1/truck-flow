@@ -30,15 +30,20 @@ export function QuarterlyChart({
 
   return (
     <div className={cn("space-y-3", className)}>
+      <div className="flex items-center justify-start gap-2 mb-2">
+        <span className="text-base font-normal text-(--color-primary-gray-text) ">{trendLabel}</span>
+        <span className="text-sm font-medium text-(--color-primary-green)">{trend}</span>
+      </div>
+
       {data.map((item, index) => {
-        const percentage = (item.value / maxValue) * 100;
+        const percentage = maxValue === 0 ? 0 : (item.value / maxValue) * 100;
         return (
           <div key={index} className="flex items-center gap-3">
-            <span className="text-sm text-gray-600 w-8">{item.quarter}</span>
-            <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-yellow-400 rounded-full transition-all duration-500" style={{ width: `${percentage}%` }} />
+            <span className="text-sm font-bold text-(--color-primary-gray-text) w-8">{item.quarter}</span>
+            <div className="flex-1 h-8 overflow-hidden">
+              <div className="h-full bg-(--color-border-primary-light) border-r-2 border-(--color-cloud-bg) transition-all duration-500" style={{ width: `${percentage}%` }} />
             </div>
-            <span className="text-sm font-medium w-20 text-right">${item.value.toLocaleString()}</span>
+            <span className="text-sm font-medium text-(--color-primary-gray-text) w-20 text-right">${item.value.toLocaleString()}</span>
           </div>
         );
       })}

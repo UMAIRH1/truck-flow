@@ -97,27 +97,19 @@ export default function SignUpPage() {
     }
   };
 
-  const roleTitle = selectedRole === "manager" ? "Manager" : "Driver";
-
   return (
     <div className="min-h-screen bg-white flex flex-col  px-4 py-4 max-w-md mx-auto">
-      {/* Status Bar Space */}
       <div className="h-12" />
-
-      {/* Content */}
       <div className="flex-1 px-6 py-8">
         <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">Create an account</h1>
         <p className="text-center text-yellow-500 mb-8">Welcome back to the app</p>
 
         <form noValidate onSubmit={handleSubmit} className="space-y-5">
-          {/* Name Field */}
           <div>
             <label className="block text-sm text-gray-600 mb-2">Name</label>
             <Input ref={nameRef} type="text" placeholder="Ab Mahmud" value={name} onChange={(e) => setName(e.target.value)} className="h-12 bg-gray-50 border-gray-200 rounded-lg" required />
             {fieldErrors.name && <p className="text-red-500 text-sm mt-1">{fieldErrors.name}</p>}
           </div>
-
-          {/* Email Field */}
           <div>
             <label className="block text-sm text-gray-600 mb-2">Email Address</label>
             <Input
