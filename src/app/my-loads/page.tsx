@@ -64,9 +64,8 @@ export default function MyLoadsPage() {
   return (
     <>
       <div className="block md:hidden">
-        <MobileLayout>
+        <MobileLayout showBottomNav={true} showFAB={true}>
           <Header title="My Loads" showBack />
-
           <div className="px-4 py-4 max-w-md mx-auto space-y-4">
             <FilterTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
             <div className="space-y-3 mt-6">{filteredLoads.length === 0 ? noLoadsMessageMobile : cards}</div>
@@ -74,17 +73,19 @@ export default function MyLoadsPage() {
         </MobileLayout>
       </div>
       <div className="hidden md:block min-h-screen bg-gray-50">
-        <Header title="My Loads" showBack />
-        <div className="px-6 py-8 max-w-7xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900">My Loads</h1>
-            <div className="text-sm text-gray-600">
-              {filteredLoads.length} {activeTab} {filteredLoads.length === 1 ? "load" : "loads"}
+        <MobileLayout showBottomNav={true} showFAB={true}>
+          <Header title="My Loads" showBack />
+          <div className="px-6 py-8 max-w-7xl mx-auto space-y-6">
+            <div className="flex items-center justify-between">
+              <h1 className="text-3xl font-bold text-gray-900">My Loads</h1>
+              <div className="text-sm text-gray-600">
+                {filteredLoads.length} {activeTab} {filteredLoads.length === 1 ? "load" : "loads"}
+              </div>
             </div>
+            <FilterTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">{filteredLoads.length === 0 ? noLoadsMessageDesktop : cards}</div>
           </div>
-          <FilterTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">{filteredLoads.length === 0 ? noLoadsMessageDesktop : cards}</div>
-        </div>
+        </MobileLayout>
       </div>
     </>
   );
