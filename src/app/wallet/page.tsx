@@ -1,109 +1,164 @@
 "use client";
 
-import React, { useState } from "react";
 import { Header, MobileLayout } from "@/components/layout";
-import { LineChart, StatCard } from "@/components/shared";
+import { LineChart } from "@/components/shared";
+import { CreditCard, MoveRight, Upload, FileText, Trash, CloudUpload } from "lucide-react";
+import AccountDetails from "./_components/AccountDetails";
+import Modal from "@/app/settings/_components/modal";
+import { aggregateMonthlyMetrics, computeTrend } from "@/lib/earnings";
+import { useState, useRef } from "react";
 import { useLoads } from "@/contexts/LoadContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { DollarSign, Clock, Truck, CreditCard, ChevronRight, Upload, FileText } from "lucide-react";
-import Link from "next/link";
+import { toast } from "sonner";
 
 export default function WalletPage() {
+  const actionLinks = [
+    { action: "modal", icon: CreditCard, label: "Payment Methods" },
+    { action: "invoice", icon: Upload, label: "Upload Invoice" },
+    { action: "documents", icon: CloudUpload, label: "Upload Documents" },
+  ];
   const { loads } = useLoads();
-  const { user } = useAuth();
+  const completedLoads = loads.filter((l) => l.status === "completed");
+  const chartPoints = aggregateMonthlyMetrics(completedLoads, "income", 3);
+  const trend = computeTrend(chartPoints);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const invoiceInputRef = useRef<HTMLInputElement | null>(null);
+  const docsInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ id: number; name: string; size: number; kind: "invoice" | "documents"; uploadedAt: string }>>([]);
 
-  // Filter loads for this driver
-  const driverLoads = loads.filter((load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id);
+  const handleFiles = async (files: FileList | null, type: "invoice" | "documents") => {
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    if (file.type !== "application/pdf") {
+      toast("Only PDF files are supported");
+      return;
+    }
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("type", type);
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      if (res.ok) {
+        toast.success(`${file.name} uploaded`);
+      } else {
+        toast.error(`${file.name} uploaded (server returned ${res.status})`);
+      }
+      setUploadedFiles((prev) => [{ id: Date.now(), name: file.name, size: file.size, kind: type, uploadedAt: new Date().toISOString() }, ...prev]);
+    } catch (err) {
+      toast(`${file.name} selected (no upload endpoint)`);
+      setUploadedFiles((prev) => [{ id: Date.now(), name: file.name, size: file.size, kind: type, uploadedAt: new Date().toISOString() }, ...prev]);
+    } finally {
+      if (type === "invoice" && invoiceInputRef.current) invoiceInputRef.current.value = "";
+      if (type === "documents" && docsInputRef.current) docsInputRef.current.value = "";
+    }
+  };
 
-  const completedLoads = driverLoads.filter((l) => l.status === "completed");
-  const pendingLoads = driverLoads.filter((l) => l.status === "accepted" || l.status === "in-progress");
+  const content = (
+    <div className="px-4 md:px-6 py-4 md:py-8 max-w-md md:max-w-7xl mx-auto">
+      <div className="mb-4">
+        <LineChart data={chartPoints} trend={trend} trendLabel="Last 3 Months" className="h-64 md:h-80 lg:h-96" />
+      </div>
 
-  // Calculate stats
-  const totalEarning = completedLoads.reduce((sum, load) => sum + (load.driverPrice || 0), 0);
-  const pendingPayments = pendingLoads.reduce((sum, load) => sum + (load.driverPrice || 0), 0);
-  const paidLoads = completedLoads.length;
-  const cancelledAmount = 2000; // Mock data
+      <div>
+        <AccountDetails />
+      </div>
+      <div className="space-y-2 md:space-y-0 md:grid md:grid-cols-3 md:gap-4">
+        {actionLinks.map((link, index) => {
+          if (link.action === "modal") {
+            return (
+              <button key={index} type="button" className="block w-full text-left" onClick={() => setIsModalOpen(true)}>
+                <div className="flex items-center justify-between p-4 md:p-6 text-(--color-light-black-border) bg-(--color-yellow-light) rounded-xl shadow-sm transition-colors">
+                  <div className="flex items-center gap-3">
+                    <link.icon className="h-5 md:h-6 w-5 md:w-6 " />
+                    <span className="font-medium">{link.label}</span>
+                  </div>
+                  <MoveRight className="h-5 md:h-6 w-5 md:w-6 " />
+                </div>
+              </button>
+            );
+          }
+          if (link.action === "invoice") {
+            return (
+              <button key={index} type="button" className="block w-full text-left" onClick={() => invoiceInputRef.current && invoiceInputRef.current.click()}>
+                <div className="flex items-center justify-between p-4 md:p-6 text-(--color-light-black-border)  bg-(--color-yellow-light) rounded-xl shadow-sm transition-colors">
+                  <div className="flex items-center gap-3">
+                    <link.icon className="h-5 md:h-6 w-5 md:w-6 " />
+                    <span className="font-medium">{link.label}</span>
+                  </div>
+                  <MoveRight className="h-5 md:h-6 w-5 md:w-6" />
+                </div>
+              </button>
+            );
+          }
+          if (link.action === "documents") {
+            return (
+              <button key={index} type="button" className="block w-full text-left" onClick={() => docsInputRef.current && docsInputRef.current.click()}>
+                <div className="flex items-center justify-between text-(--color-light-black-border)  bg-(--color-yellow-light)  p-4 md:p-6rounded-xl shadow-sm transition-colors">
+                  <div className="flex items-center gap-3">
+                    <link.icon className="h-5 md:h-6 w-5 md:w-6 " />
+                    <span className="font-medium">{link.label}</span>
+                  </div>
+                  <MoveRight className="h-5 md:h-6 w-5 md:w-6 " />
+                </div>
+              </button>
+            );
+          }
+          return (
+            <div key={index} className="block">
+              <div className="flex items-center justify-between p-4 md:p-6 bg-white rounded-xl shadow-sm hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <link.icon className="h-5 md:h-6 w-5 md:w-6 text-gray-600" />
+                  <span className="font-medium">{link.label}</span>
+                </div>
+                <MoveRight className="h-5 md:h-6 w-5 md:w-6 text-gray-400" />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <input ref={invoiceInputRef} type="file" accept="application/pdf" className="hidden" onChange={(e) => handleFiles(e.target.files, "invoice")} />
+      <input ref={docsInputRef} type="file" accept="application/pdf" className="hidden" onChange={(e) => handleFiles(e.target.files, "documents")} />
+      {uploadedFiles.length > 0 && (
+        <div className="mt-4 space-y-3">
+          {uploadedFiles.map((f) => (
+            <div key={f.id} className="flex items-center justify-between gap-3 bg-white p-3 rounded-xl shadow-sm">
+              <div className="flex items-center gap-3">
+                <FileText className="h-6 w-6 text-gray-600" />
+                <div>
+                  <div className="font-medium">{f.name}</div>
+                  <div className="text-xs text-gray-500">
+                    {(f.size / 1024).toFixed(1)} KB • {f.kind}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-xs text-gray-400">{new Date(f.uploadedAt).toLocaleString()}</div>
+                <button onClick={() => setUploadedFiles((prev) => prev.filter((p) => p.id !== f.id))} className="text-gray-400 hover:text-red-600">
+                  <Trash className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Payment Methods" />
+    </div>
+  );
 
   return (
-    <MobileLayout>
-      <Header title="My Wallet" showBack />
-
-      <div className="px-4 py-4 max-w-md mx-auto space-y-4">
-        {/* Chart */}
-        <LineChart trend="+5%" trendLabel="Last 3 Months" labels={["Oct", "Nov", "Dec"]} />
-
-        {/* Account Details */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <h3 className="text-sm text-gray-500 mb-3">Account Details</h3>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-gray-50 rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <DollarSign className="h-4 w-4 text-gray-500" />
-                <span className="text-xs text-gray-500">Total Earning</span>
-              </div>
-              <p className="font-semibold">$ {(totalEarning || 12000).toLocaleString()}.00</p>
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Clock className="h-4 w-4 text-gray-500" />
-                <span className="text-xs text-gray-500">Pending Payments</span>
-              </div>
-              <p className="font-semibold">$ {(pendingPayments || 3000).toLocaleString()}.00</p>
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Truck className="h-4 w-4 text-gray-500" />
-                <span className="text-xs text-gray-500">Paid Loads</span>
-              </div>
-              <p className="font-semibold">$ {(paidLoads * 1000 || 9000).toLocaleString()}.00</p>
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <CreditCard className="h-4 w-4 text-gray-500" />
-                <span className="text-xs text-gray-500">Cancelled Amount</span>
-              </div>
-              <p className="font-semibold">$ {cancelledAmount.toLocaleString()}.00</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Links */}
-        <div className="space-y-2">
-          <Link href="/wallet/payment-methods">
-            <div className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm hover:bg-gray-50 transition-colors">
-              <div className="flex items-center gap-3">
-                <CreditCard className="h-5 w-5 text-gray-600" />
-                <span className="font-medium">Payment Methods</span>
-              </div>
-              <ChevronRight className="h-5 w-5 text-gray-400" />
-            </div>
-          </Link>
-
-          <Link href="/wallet/upload-invoice">
-            <div className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm hover:bg-gray-50 transition-colors">
-              <div className="flex items-center gap-3">
-                <Upload className="h-5 w-5 text-gray-600" />
-                <span className="font-medium">Upload Invoice</span>
-              </div>
-              <ChevronRight className="h-5 w-5 text-gray-400" />
-            </div>
-          </Link>
-
-          <Link href="/wallet/upload-documents">
-            <div className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm hover:bg-gray-50 transition-colors">
-              <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 text-gray-600" />
-                <span className="font-medium">Upload Documents</span>
-              </div>
-              <ChevronRight className="h-5 w-5 text-gray-400" />
-            </div>
-          </Link>
-        </div>
+    <>
+      <div className="block md:hidden">
+        <MobileLayout>
+          <Header title="My Wallet" showBack />
+          {content}
+        </MobileLayout>
       </div>
-    </MobileLayout>
+      <div className="hidden md:block min-h-screen bg-gray-50">
+        <MobileLayout>
+          <Header title="My Wallet" showBack />
+          {content}
+        </MobileLayout>
+      </div>
+    </>
   );
 }

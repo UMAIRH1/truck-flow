@@ -62,14 +62,14 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   return (
     <>
       {isLoadingNav && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40">
           <div className="inline-flex items-center justify-center bg-white p-4 rounded-full shadow">
             <LoaderCircle className="h-8 w-8 animate-spin text-black" aria-hidden />
           </div>
         </div>
       )}
 
-      <div className="md:hidden fixed inset-0 z-50 flex items-end justify-center">
+      <div className="md:hidden fixed inset-0 z-[99999] flex items-end justify-center">
         <div className="absolute inset-0 bg-black/80 bg-opacity-40" onClick={onClose} />
 
         <div className="relative w-full max-w-md bg-white rounded-t-2xl p-4 shadow-lg transform transition-transform duration-300">
@@ -81,7 +81,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           <div>{title === "Payment Methods" ? paymentContent : children}</div>
         </div>
       </div>
-      <div className="hidden md:flex fixed inset-0 z-50 items-center justify-center">
+      <div className="hidden md:flex fixed inset-0 z-[99999] items-center justify-center">
         <div className="absolute inset-0 bg-black/80 bg-opacity-40" onClick={onClose} />
         <div className="relative bg-white rounded-2xl p-6 shadow-lg w-3/5 max-w-2xl">
           <button aria-label="Close" onClick={onClose} className="absolute top-4 right-4 inline-flex items-center justify-center rounded-md p-2 hover:bg-gray-100">
