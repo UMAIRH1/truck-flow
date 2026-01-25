@@ -9,10 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { validateSignInForm } from "../validations";
 import { Eye, EyeOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function SignInPage() {
   const router = useRouter();
   const { login, loginWithGoogle, selectedRole, isAuthenticated } = useAuth();
+  const t = useTranslations("auth");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -82,12 +84,12 @@ export default function SignInPage() {
   return (
     <div className="min-h-screen bg-white lg:border my-4 rounded-2xl border-(--color-primary-yellow-dark) flex flex-col px-4 py-4 max-w-md mx-auto space-y-4">
       <div className="flex-1 px-6 py-4">
-        <h1 className="text-2xl font-bold text-center text-(--color-light-black) mb-2">Login</h1>
-        <p className="text-center text-(--color-yellow-light) mb-8">Welcome back to the app</p>
+        <h1 className="text-2xl font-bold text-center text-(--color-light-black) mb-2">{t("login")}</h1>
+        <p className="text-center text-(--color-yellow-light) mb-8">{t("welcomeBack")}</p>
 
         <form noValidate onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Email Address</label>
+            <label className="block text-sm text-gray-600 mb-2">{t("emailAddress")}</label>
             <Input
               ref={emailRef}
               type="email"
@@ -101,9 +103,9 @@ export default function SignInPage() {
           </div>
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="text-sm text-gray-600">Password</label>
+              <label className="text-sm text-gray-600">{t("password")}</label>
               <Link href="/auth/forgot-password" className="text-sm text-(--color-yellow-light) hover:underline">
-                Forgot Password?
+                {t("forgotPassword")}
               </Link>
             </div>
             <div className="relative">
@@ -131,17 +133,17 @@ export default function SignInPage() {
               className="data-[state=checked]:bg-yellow-400 data-[state=checked]:border-yellow-400"
             />
             <label htmlFor="keepSignedIn" className="text-sm text-gray-600 cursor-pointer">
-              Keep me signed in
+              {t("keepMeSignedIn")}
             </label>
           </div>
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           <Button type="submit" disabled={isLoading} variant="yellow" className="w-full h-12">
-            {isLoading ? "Signing in..." : "Sign In"}
+            {isLoading ? t("signingIn") : t("signIn")}
           </Button>
         </form>
         <div className="flex items-center my-6">
           <div className="flex-1 h-px bg-[#82A0BFCC]" />
-          <span className="px-4 text-sm text-(--color-gray-table)">or sign in with</span>
+          <span className="px-4 text-sm text-(--color-gray-table)">{t("orSignInWith")}</span>
           <div className="flex-1 h-px bg-[#82A0BFCC]" />
         </div>
         <Button type="button" onClick={handleGoogleLogin} disabled={isLoading} variant="gray" className="w-full h-12 rounded-full border-gray-300">
@@ -155,7 +157,7 @@ export default function SignInPage() {
         </Button>
         <div className="mt-8 text-center">
           <Link href="/auth/signup" className="text-(--color-primary-yellow-dark) hover:underline">
-            Create an account
+            {t("createAccount")}
           </Link>
         </div>
       </div>

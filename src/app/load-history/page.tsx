@@ -4,16 +4,18 @@ import React, { useState } from "react";
 import { Header, MobileLayout } from "@/components/layout";
 import { FilterTabs, DateFilter, LoadCard } from "@/components/shared";
 import { useLoads } from "@/contexts/LoadContext";
+import { useTranslations } from "next-intl";
 
 export default function LoadHistoryPage() {
   const { loads } = useLoads();
   const [activeTab, setActiveTab] = useState("completed");
   const [dateFilter, setDateFilter] = useState<Date | undefined>();
+  const t = useTranslations();
 
   const tabs = [
-    { id: "completed", label: "Completed" },
-    { id: "rejected", label: "Rejected" },
-    { id: "dispute", label: "Dispute" },
+    { id: "completed", label: t("tabs.completed") },
+    { id: "rejected", label: t("tabs.rejected") },
+    { id: "dispute", label: t("tabs.dispute") },
   ];
 
   const filteredLoads = loads.filter((load) => {
@@ -27,7 +29,7 @@ export default function LoadHistoryPage() {
       <DateFilter value={dateFilter} onChange={setDateFilter} />
       <FilterTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
       <div className="space-y-3">
-        {filteredLoads.length === 0 ? <div className="text-center py-8 text-gray-500">No loads found</div> : filteredLoads.map((load) => <LoadCard key={load.id} load={load} />)}
+        {filteredLoads.length === 0 ? <div className="text-center py-8 text-gray-500">{t("common.noLoadsFound")}</div> : filteredLoads.map((load) => <LoadCard key={load.id} load={load} />)}
       </div>
     </div>
   );
@@ -36,13 +38,13 @@ export default function LoadHistoryPage() {
     <>
       <div className="block md:hidden">
         <MobileLayout>
-          <Header title="Load History" showBack />
+          <Header title={t("header.loadHistory")} showBack />
           <div className="max-w-md mx-auto">{content}</div>
         </MobileLayout>
       </div>
       <div className="hidden md:block">
         <MobileLayout>
-          <Header title="Load History" showBack />
+          <Header title={t("header.loadHistory")} showBack />
           <div className="max-w-7xl mx-auto">{content}</div>
         </MobileLayout>
       </div>

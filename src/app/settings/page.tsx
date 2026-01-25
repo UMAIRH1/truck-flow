@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ChevronRight, BusFront } from "lucide-react";
 import Link from "next/link";
 import Modal from "@/app/settings/_components/modal";
+import { useTranslations } from "next-intl";
 
 interface SettingsItem {
   label: string;
@@ -18,32 +19,33 @@ interface SettingsItem {
 export default function SettingsPage() {
   const { logout } = useAuth();
   const [showPaymentMethods, setShowPaymentMethods] = useState(false);
+  const t = useTranslations("settings");
 
   const accountItems: SettingsItem[] = [
-    { label: "Edit Profile", description: "You can update your info except username", href: "/settings/profile" },
+    { label: t("editProfile"), description: t("editProfileDesc"), href: "/settings/profile" },
     {
-      label: "Security",
-      description: "Tap here to know about security",
+      label: t("security"),
+      description: t("securityDesc"),
       href: "/settings/security",
     },
-    { label: "Notifications", description: "Tap here to change notification setting", href: "/notifications", badge: true },
-    { label: "Privacy", description: "Tap here to know privacy setting", href: "/settings/privacy" },
+    { label: t("notifications"), description: t("notificationsDesc"), href: "/notifications", badge: true },
+    { label: t("privacy"), description: t("privacyDesc"), href: "/settings/privacy" },
   ];
 
   const actionItems: SettingsItem[] = [
     {
-      label: "Add Payment Methods",
-      description: "Add your bank accounts",
+      label: t("addPaymentMethods"),
+      description: t("addPaymentMethodsDesc"),
       onClick: () => setShowPaymentMethods(true),
     },
     {
-      label: "Help & Support",
-      description: "Ask for your help & support easily",
+      label: t("helpSupport"),
+      description: t("helpSupportDesc"),
       href: "/settings/support",
     },
     {
-      label: "Sign Out",
-      description: "Tap here to Sign out from this platform",
+      label: t("signOut"),
+      description: t("signOutDesc"),
       onClick: logout,
     },
   ];
@@ -85,11 +87,11 @@ export default function SettingsPage() {
     <>
       <div className="block md:hidden">
         <MobileLayout showFAB={!showPaymentMethods} showBottomNav={!showPaymentMethods}>
-          <Header title="Settings" showBack />
+          <Header title={t("settings")} showBack />
           <div className="max-w-md mx-auto space-y-6 bg-(--color-yellow-light)">
             <div className=" py-6 px-4 max-sm:rounded-t-2xl sm:rounded-none bg-(--color-white)">
               <div>
-                <h2 className="text-base font-medium text-black mb-3">Account</h2>
+                <h2 className="text-base font-medium text-black mb-3">{t("account")}</h2>
                 <div className="space-y-2">
                   {accountItems.map((item, index) => (
                     <SettingsItemComponent key={index} item={item} />
@@ -97,7 +99,7 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div>
-                <h2 className="text-base font-medium text-black mb-3">Actions</h2>
+                <h2 className="text-base font-medium text-black mb-3">{t("actions")}</h2>
                 <div className="space-y-2">
                   {actionItems.map((item, index) => (
                     <SettingsItemComponent key={index} item={item} />

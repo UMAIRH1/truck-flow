@@ -5,11 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import { Header, MobileLayout } from "@/components/layout";
 import { useLoads } from "@/contexts/LoadContext";
 import { MapPin, Navigation } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function MapViewPage() {
   const params = useParams();
   const router = useRouter();
   const { getLoadById, updateLoadStatus } = useLoads();
+  const t = useTranslations("map");
 
   const load = getLoadById(params.id as string);
 
@@ -30,24 +32,24 @@ export default function MapViewPage() {
   if (!load) {
     return (
       <MobileLayout showFAB={true}>
-        <Header title="Map View" showBack />
-        <div className="px-4 py-8 text-center text-gray-500">Load not found</div>
+        <Header title={t("title")} showBack />
+        <div className="px-4 py-8 text-center text-gray-500">{t("loadNotFound")}</div>
       </MobileLayout>
     );
   }
 
   return (
     <MobileLayout showFAB={true} showBottomNav={true}>
-      <Header title="Map View" showBack />
+      <Header title={t("title")} showBack />
 
       <div className="flex flex-col h-[calc(100vh-60px)]">
         {/* Action Buttons */}
         <div className="flex gap-2 p-4">
           <button onClick={handleAccept} className="flex-1 py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition-colors">
-            ✓ Accept
+            ✓ {t("accept")}
           </button>
           <button onClick={handleDecline} className="flex-1 py-3 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition-colors">
-            ✕ Decline
+            ✕ {t("decline")}
           </button>
         </div>
 
@@ -57,7 +59,7 @@ export default function MapViewPage() {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
               <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">Map View</p>
+              <p className="text-gray-500">{t("title")}</p>
               <p className="text-sm text-gray-400 mt-2">
                 {load.pickupLocation} → {load.dropoffLocation}
               </p>
@@ -84,12 +86,12 @@ export default function MapViewPage() {
         {/* Distance Info */}
         <div className="p-4 bg-white border-t flex items-center justify-center gap-8">
           <div className="text-center">
-            <p className="text-sm text-gray-500">Distance</p>
+            <p className="text-sm text-gray-500">{t("distance")}</p>
             <p className="font-semibold">100 KM</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-500">Approximate Time</p>
-            <p className="font-semibold">2 Hours</p>
+            <p className="text-sm text-gray-500">{t("approximateTime")}</p>
+            <p className="font-semibold">2 {t("hours")}</p>
           </div>
         </div>
       </div>

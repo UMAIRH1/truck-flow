@@ -6,9 +6,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { validateEmail } from "../validations";
+import { useTranslations } from "next-intl";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -43,12 +45,12 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-white lg:border my-4 rounded-2xl border-(--color-primary-yellow-dark) flex flex-col px-4 py-4 max-w-md mx-auto space-y-4">
       <div className="h-16" />
       <div className="flex-1 px-6 py-8">
-        <h1 className="text-2xl font-bold text-center text-(--color-light-black) mb-2">Forgot Password</h1>
-        <p className="text-center text-(--color-yellow-light) mb-8">Enter your account email to receive a reset link</p>
+        <h1 className="text-2xl font-bold text-center text-(--color-light-black) mb-2">{t("forgotPassword")}</h1>
+        <p className="text-center text-(--color-yellow-light) mb-8">{t("enterEmailForReset")}</p>
 
         <form noValidate onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Email Address</label>
+            <label className="block text-sm text-gray-600 mb-2">{t("emailAddress")}</label>
             <Input
               ref={emailRef}
               type="email"
@@ -64,13 +66,13 @@ export default function ForgotPasswordPage() {
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
           <Button type="submit" variant="yellow" disabled={isLoading} className="w-full h-12">
-            {isLoading ? "Sending..." : "Send reset link"}
+            {isLoading ? t("sending") : t("sendResetLink")}
           </Button>
         </form>
 
         <div className="mt-6 text-center">
           <Link href="/auth/signin" className="text-(--color-yellow-light) hover:underline">
-            Back to sign in
+            {t("backToSignIn")}
           </Link>
         </div>
       </div>

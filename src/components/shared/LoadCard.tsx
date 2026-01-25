@@ -6,6 +6,7 @@ import { Load } from "@/types";
 import Link from "next/link";
 import { ASSETS } from "@/lib/assets";
 import { Icon } from "../ui/icon";
+import { useTranslations } from "next-intl";
 
 interface LoadCardProps {
   load: Load;
@@ -17,6 +18,7 @@ interface LoadCardProps {
 }
 
 export function LoadCard({ load, showStatus = true, showDriver = true, onClick, className, variant = "default" }: LoadCardProps) {
+  const t = useTranslations("common");
   const formattedDate = new Date(load.loadingDate)
     .toLocaleDateString("en-US", {
       day: "2-digit",
@@ -39,7 +41,9 @@ export function LoadCard({ load, showStatus = true, showDriver = true, onClick, 
         <div className="flex items-center gap-2 text-xs text-(--color-dark-gray)">
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            <span>Today / {formattedTime}</span>
+            <span>
+              {t("today")} / {formattedTime}
+            </span>
           </div>
           <div className="flex items-center gap-1">
             <Icon src={ASSETS.images.icons.share} className="h-3 w-3" />
@@ -52,15 +56,21 @@ export function LoadCard({ load, showStatus = true, showDriver = true, onClick, 
         <div className="space-y-1 flex-1">
           <div className="flex items-center gap-2 text-xs">
             <ArrowDownLeft className="h-3 w-3 text-(--color-primary-gray)" />
-            <span className="text-(--color-dark-gray)">From: {load.pickupLocation}</span>
+            <span className="text-(--color-dark-gray)">
+              {t("from")}: {load.pickupLocation}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-xs">
             <ArrowUpRight className="h-3 w-3 text-(--color-primary-gray)" />
-            <span className="text-(--color-dark-gray)">To: {load.dropoffLocation}</span>
+            <span className="text-(--color-dark-gray)">
+              {t("to")}: {load.dropoffLocation}
+            </span>
           </div>
         </div>
         <div className="text-right">
-          <span className="font-medium text-base text-(--color-stat-gray)">Price ${load.clientPrice.toFixed(2)}</span>
+          <span className="font-medium text-base text-(--color-stat-gray)">
+            {t("price")} ${load.clientPrice.toFixed(2)}
+          </span>
         </div>
       </div>
     </div>

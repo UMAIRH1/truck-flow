@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { Driver } from "@/types";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
+import { useTranslations } from "next-intl";
 
 interface DriverDashboardStats {
   assignedLoads: number;
@@ -25,6 +26,7 @@ export function DriverDashboard() {
   const router = useRouter();
   const [dashboardStats, setDashboardStats] = useState<DriverDashboardStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const t = useTranslations();
 
   // Fetch dashboard stats from API
   useEffect(() => {
@@ -41,7 +43,7 @@ export function DriverDashboard() {
         const driverLoads = loads.filter((load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id);
         const completedLoads = driverLoads.filter((l) => l.status === "completed");
         const acceptedLoads = driverLoads.filter((l) => l.status === "accepted" || l.status === "in-progress");
-        
+
         setDashboardStats({
           assignedLoads: driverLoads.filter((l) => l.status === "pending").length,
           acceptedLoads: acceptedLoads.length,
@@ -59,15 +61,15 @@ export function DriverDashboard() {
       fetchDashboardStats();
     }
   }, [loads, isLoading, user]);
-  
+
   if (isLoading || isLoadingStats) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header title="Dashboard" />
+        <Header title={t("header.dashboard")} />
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading dashboard...</p>
+            <p className="text-gray-600">{t("dashboard.loadingDashboard")}</p>
           </div>
         </div>
       </div>
@@ -77,27 +79,24 @@ export function DriverDashboard() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header title="Dashboard" />
+        <Header title={t("header.dashboard")} />
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <p className="text-red-600 mb-4">{error}</p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="px-4 py-2 bg-yellow-400 rounded-lg hover:bg-yellow-500"
-            >
-              Retry
+            <button onClick={() => window.location.reload()} className="px-4 py-2 bg-yellow-400 rounded-lg hover:bg-yellow-500">
+              {t("common.retry")}
             </button>
           </div>
         </div>
       </div>
     );
   }
-  
+
   const driverLoads = loads.filter((load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id);
   const pendingLoads = loads.filter((l) => l.status === "pending" && !l.assignedDriver); // Available pending loads
   const completedLoads = driverLoads.filter((l) => l.status === "completed");
   const acceptedLoads = driverLoads.filter((l) => l.status === "accepted" || l.status === "in-progress");
-  
+
   // Use API stats if available, otherwise calculate from loads
   const stats = dashboardStats || {
     totalEarnings: completedLoads.reduce((sum, load) => sum + (load.driverPrice || 0), 0),
@@ -138,14 +137,14 @@ export function DriverDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title="Dashboard" />
+      <Header title={t("header.dashboard")} />
 
       <div className="px-6 py-8 max-w-7xl mx-auto space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
             <div className="grid grid-cols-2 mb-3 gap-6">
-              <StatCard icon={DollarSign} label="Total Earning" value={`$ ${stats.totalEarnings.toLocaleString()}.00`} />
-              <StatCard icon={Clock} label="Pending Payments" value={`$ ${stats.pendingEarnings.toLocaleString()}.00`} />
+              <StatCard icon={DollarSign} label={t("dashboard.totalEarning")} value={`$ ${stats.totalEarnings.toLocaleString()}.00`} />
+              <StatCard icon={Clock} label={t("dashboard.pendingPayments")} value={`$ ${stats.pendingEarnings.toLocaleString()}.00`} />
             </div>
             <Link href="/my-loads" className="block">
               <div className="bg-white rounded-xl p-6 flex items-center justify-between shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
@@ -154,8 +153,10 @@ export function DriverDashboard() {
                     <CreditCard className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <span className="font-semibold text-lg">New Load Requests</span>
-                    <p className="text-gray-600 text-sm">{pendingLoads.length} available</p>
+                    <span className="font-semibold text-lg">{t("dashboard.newLoadRequests")}</span>
+                    <p className="text-gray-600 text-sm">
+                      {pendingLoads.length} {t("dashboard.available")}
+                    </p>
                   </div>
                 </div>
                 <ArrowRight className="h-6 w-6 text-gray-400" />
@@ -163,7 +164,7 @@ export function DriverDashboard() {
             </Link>
           </div>
           <div className="lg:col-span-2 space-y-4">
-            <h3 className="text-xl font-semibold text-gray-900">Recent Load Requests</h3>
+            <h3 className="text-xl font-semibold text-gray-900">{t("dashboard.recentLoadRequests")}</h3>
             <div className="grid gap-4">
               {pendingLoads.slice(0, 3).map((load) => (
                 <DriverLoadCard key={load.id} load={load} showActions={true} onAccept={() => handleAccept(load.id)} onDecline={() => handleDecline(load.id)} onMapView={() => handleMapView(load.id)} />

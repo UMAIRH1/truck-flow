@@ -3,34 +3,40 @@
 import { Header, MobileLayout } from "@/components/layout";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { Bell } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function NotificationsPage() {
   const { notifications, markAsRead } = useNotifications();
-  const groupedNotifications = notifications.reduce((groups, notification) => {
-    const date = new Date(notification.timestamp);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+  const t = useTranslations();
 
-    let dateKey: string;
-    if (date.toDateString() === today.toDateString()) {
-      dateKey = "Today";
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      dateKey = "Yesterday";
-    } else {
-      dateKey = date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    }
+  const groupedNotifications = notifications.reduce(
+    (groups, notification) => {
+      const date = new Date(notification.timestamp);
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
 
-    if (!groups[dateKey]) {
-      groups[dateKey] = [];
-    }
-    groups[dateKey].push(notification);
-    return groups;
-  }, {} as Record<string, typeof notifications>);
+      let dateKey: string;
+      if (date.toDateString() === today.toDateString()) {
+        dateKey = t("common.today");
+      } else if (date.toDateString() === yesterday.toDateString()) {
+        dateKey = t("common.yesterday");
+      } else {
+        dateKey = date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+      }
+
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(notification);
+      return groups;
+    },
+    {} as Record<string, typeof notifications>,
+  );
 
   const formatTime = (date: Date) => {
     const now = new Date();
@@ -46,7 +52,7 @@ export default function NotificationsPage() {
 
   return (
     <MobileLayout showFAB={true} showBottomNav={true}>
-      <Header title="Notifications" showBack />
+      <Header title={t("notifications.title")} showBack />
       <div className="px-4 py-4 max-w-md mx-auto space-y-6 md:max-w-7xl md:px-8 md:py-12 md:bg-gray-50 md:min-h-screen">
         {Object.entries(groupedNotifications).map(([dateKey, items]) => (
           <div key={dateKey} className="md:mb-8">

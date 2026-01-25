@@ -6,10 +6,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ManagerDashboard } from "@/components/dashboard/ManagerDashboard";
 import { DriverDashboard } from "@/components/dashboard/DriverDashboard";
 import { MobileLayout } from "@/components/layout";
+import { useTranslations } from "next-intl";
 
 export default function Home() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const t = useTranslations();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -21,7 +23,7 @@ export default function Home() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-yellow-400 flex items-center justify-center">
-        <div className="text-black font-bold text-2xl">Loading...</div>
+        <div className="text-black font-bold text-2xl">{t("common.loading")}</div>
       </div>
     );
   }

@@ -8,6 +8,7 @@ import { OptimizedImage } from "@/components/ui/optimized-image";
 import { toast } from "sonner";
 import { ASSETS } from "@/lib/assets";
 import { validateBankAccount, BankAccountErrors } from "@/app/settings/_components/validations";
+import { useTranslations } from "next-intl";
 
 interface ContentProps {
   fullName: string;
@@ -21,9 +22,10 @@ interface ContentProps {
   errors: BankAccountErrors;
   setErrors: React.Dispatch<React.SetStateAction<BankAccountErrors>>;
   onSubmit: () => void;
+  t: ReturnType<typeof useTranslations<"bankAccount">>;
 }
 
-const Content = ({ fullName, setFullName, bank, setBank, account, setAccount, swift, setSwift, errors, setErrors, onSubmit }: ContentProps) => (
+const Content = ({ fullName, setFullName, bank, setBank, account, setAccount, swift, setSwift, errors, setErrors, onSubmit, t }: ContentProps) => (
   <div className="space-y-6 md:grid md:grid-cols-2 md:gap-8 md:items-start md:space-y-0 ">
     <div>
       <div className="rounded-xl overflow-hidden shadow-lg">
@@ -37,7 +39,7 @@ const Content = ({ fullName, setFullName, bank, setBank, account, setAccount, sw
       <div className="space-y-4 md:bg-white md:rounded-xl md:p-6 md:border md:border-gray-100 md:shadow-sm">
         <div className="space-y-4">
           <div>
-            <label className="block text-base font-bold text-black mb-1">Full Name</label>
+            <label className="block text-base font-bold text-black mb-1">{t("fullName")}</label>
 
             <Input
               value={fullName}
@@ -45,49 +47,49 @@ const Content = ({ fullName, setFullName, bank, setBank, account, setAccount, sw
                 setFullName(e.target.value);
                 if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: undefined }));
               }}
-              placeholder="Full Name"
+              placeholder={t("fullName")}
               className="w-full px-4 py-6! border border-gray-200! rounded-md!"
             />
             {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
           </div>
 
           <div>
-            <label className="block text-base font-bold text-black mb-1">Select Your Bank</label>
+            <label className="block text-base font-bold text-black mb-1">{t("selectBank")}</label>
             <Input
               value={bank}
               onChange={(e) => {
                 setBank(e.target.value);
                 if (errors.bank) setErrors((prev) => ({ ...prev, bank: undefined }));
               }}
-              placeholder="Bank name"
+              placeholder={t("bankName")}
               className="w-full px-4 py-6! border border-gray-200! rounded-md!"
             />
             {errors.bank && <p className="text-red-500 text-sm mt-1">{errors.bank}</p>}
           </div>
 
           <div>
-            <label className="block text-base font-bold text-black mb-1">Account Number</label>
+            <label className="block text-base font-bold text-black mb-1">{t("accountNumber")}</label>
             <Input
               value={account}
               onChange={(e) => {
                 setAccount(e.target.value);
                 if (errors.account) setErrors((prev) => ({ ...prev, account: undefined }));
               }}
-              placeholder="Account number"
+              placeholder={t("accountNumber")}
               className="w-full px-4 py-6! border border-gray-200! rounded-md!"
             />
             {errors.account && <p className="text-red-500 text-sm mt-1">{errors.account}</p>}
           </div>
 
           <div>
-            <label className="block text-base font-bold text-black mb-1">Swift Code</label>
+            <label className="block text-base font-bold text-black mb-1">{t("swiftCode")}</label>
             <Input
               value={swift}
               onChange={(e) => {
                 setSwift(e.target.value);
                 if (errors.swift) setErrors((prev) => ({ ...prev, swift: undefined }));
               }}
-              placeholder="Swift code"
+              placeholder={t("swiftCode")}
               className="w-full px-4 py-6! border border-gray-200! rounded-md!"
             />
             {errors.swift && <p className="text-red-500 text-sm mt-1">{errors.swift}</p>}
@@ -95,7 +97,7 @@ const Content = ({ fullName, setFullName, bank, setBank, account, setAccount, sw
 
           <div className="pt-4">
             <Button onClick={onSubmit} className="w-full rounded-md text-base font-medium bg-black h-11 text-white">
-              Link Bank Account
+              {t("linkBankAccount")}
             </Button>
           </div>
         </div>
@@ -105,6 +107,7 @@ const Content = ({ fullName, setFullName, bank, setBank, account, setAccount, sw
 );
 
 export default function AddBankAccountPage() {
+  const t = useTranslations("bankAccount");
   const [fullName, setFullName] = useState("");
   const [bank, setBank] = useState("");
   const [account, setAccount] = useState("");
@@ -115,7 +118,7 @@ export default function AddBankAccountPage() {
     const newErrors = validateBankAccount(fullName, bank, account, swift);
     setErrors(newErrors);
     if (Object.keys(newErrors).length === 0) {
-      toast.success("Bank account linked successfully!");
+      toast.success(t("bankLinkedSuccess"));
     }
   }
 
@@ -123,7 +126,7 @@ export default function AddBankAccountPage() {
     <>
       <div className="block md:hidden">
         <MobileLayout showBottomNav={true} showFAB={true}>
-          <Header title="Link Bank Account" showBack />
+          <Header title={t("title")} showBack />
           <div className=" max-w-md mx-auto  space-y-6 bg-(--color-yellow-light)">
             <div className="bg-white px-4 py-6 rounded-t-2xl">
               <Content
@@ -138,6 +141,7 @@ export default function AddBankAccountPage() {
                 errors={errors}
                 setErrors={setErrors}
                 onSubmit={handleLinkBank}
+                t={t}
               />
             </div>
           </div>
@@ -146,7 +150,7 @@ export default function AddBankAccountPage() {
 
       {/* Desktop */}
       <div className="hidden md:block min-h-screen bg-gray-50">
-        <Header title="Link Bank Account" showBack />
+        <Header title={t("title")} showBack />
         <div className="max-w-7xl mx-auto py-12 px-6 ">
           <Content
             fullName={fullName}
@@ -160,6 +164,7 @@ export default function AddBankAccountPage() {
             errors={errors}
             setErrors={setErrors}
             onSubmit={handleLinkBank}
+            t={t}
           />
         </div>
       </div>

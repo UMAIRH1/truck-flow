@@ -8,9 +8,11 @@ import CountrySelector from "./_components/countrySelector";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { ASSETS } from "@/lib/assets";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export default function EditProfilePage() {
   const { user } = useAuth();
+  const t = useTranslations("profile");
 
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -56,7 +58,7 @@ export default function EditProfilePage() {
 
   return (
     <MobileLayout showFAB={true} showBottomNav={true}>
-      <Header title="Edit Profile" showBack />
+      <Header title={t("name")} showBack />
       <div className=" max-w-7xl mx-auto bg-(--color-yellow-light)">
         <div className="py-6 px-4 lg:px-0 max-sm:rounded-t-2xl sm:rounded-none bg-(--color-white)">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start border border-gray-200 p-4 shadow-md rounded-xl ">
@@ -79,50 +81,50 @@ export default function EditProfilePage() {
             </div>
             <div className="md:col-span-2 space-y-4">
               <div>
-                <label className="block text-base font-bold text-black mb-1">Name</label>
+                <label className="block text-base font-bold text-black mb-1">{t("name")}</label>
                 <Input
                   type="text"
                   value={formData.name}
-                  placeholder="Enter your name"
+                  placeholder={t("enterYourName")}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 !py-6 border !border-gray-200 !rounded-md"
                 />
               </div>
 
               <div>
-                <label className="block text-base font-bold text-black mb-1">Email</label>
+                <label className="block text-base font-bold text-black mb-1">{t("email")}</label>
                 <Input
                   type="email"
                   value={formData.email}
-                  placeholder="Enter your email"
+                  placeholder={t("enterYourEmail")}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full px-4 !py-6 border !border-gray-200 !rounded-md"
                 />
               </div>
 
               <div>
-                <label className="block text-base font-bold text-black mb-1">Password</label>
+                <label className="block text-base font-bold text-black mb-1">{t("password")}</label>
                 <Input
                   type="password"
                   value={formData.password}
-                  placeholder="Enter your password"
+                  placeholder={t("password")}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full px-4 !py-6 border !border-gray-200 !rounded-md"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-base font-bold text-black mb-1">Phone Number</label>
+                  <label className="block text-base font-bold text-black mb-1">{t("phone")}</label>
                   <Input
                     type="tel"
                     value={formData.phone}
-                    placeholder="Enter your phone number"
+                    placeholder={t("enterYourPhone")}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="w-full px-4 !py-6 border !border-gray-200 !rounded-md"
                   />
                 </div>
                 <div>
-                  <label className="block text-base font-bold text-black mb-1">Country/Region</label>
+                  <label className="block text-base font-bold text-black mb-1">{t("country")}</label>
                   <div>
                     <CountrySelector value={formData.country} onChange={(val) => setFormData({ ...formData, country: val })} />
                   </div>
@@ -132,7 +134,7 @@ export default function EditProfilePage() {
           </div>
           <div className="mt-6 flex justify-center md:justify-end">
             <Button onClick={handleSave} className="w-full md:w-44 py-3 h-11 bg-black text-white text-base rounded-lg font-medium hover:bg-gray-800 transition-colors">
-              Save
+              {t("saveChanges")}
             </Button>
           </div>
         </div>

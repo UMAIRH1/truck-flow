@@ -7,10 +7,13 @@ import { useLoads } from "@/contexts/LoadContext";
 import { PaymentTerms, ShippingType } from "@/types";
 import { MapPin, Package, User, DollarSign, Calendar, Clock, Fuel, AlertCircle, Camera, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function AddLoadPage() {
   const router = useRouter();
   const { addLoad, drivers } = useLoads();
+  const t = useTranslations("addLoad");
+  const tHeader = useTranslations("header");
 
   const [formData, setFormData] = useState({
     pickupLocation: "",
@@ -88,7 +91,7 @@ export default function AddLoadPage() {
 
   return (
     <MobileLayout showFAB={false}>
-      <Header title="Add Load" showBack />
+      <Header title={tHeader("addLoad")} showBack />
 
       <form onSubmit={handleSubmit} className="px-4 py-4 max-w-md mx-auto space-y-4">
         {/* Location Inputs */}
@@ -97,7 +100,7 @@ export default function AddLoadPage() {
             <div className="absolute left-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-gray-400 rounded-full" />
             <input
               type="text"
-              placeholder="From"
+              placeholder={t("from")}
               value={formData.pickupLocation}
               onChange={(e) => setFormData({ ...formData, pickupLocation: e.target.value })}
               className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400"
@@ -109,7 +112,7 @@ export default function AddLoadPage() {
             <div className="absolute left-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-yellow-400 rounded-full" />
             <input
               type="text"
-              placeholder="To"
+              placeholder={t("to")}
               value={formData.dropoffLocation}
               onChange={(e) => setFormData({ ...formData, dropoffLocation: e.target.value })}
               className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400"
@@ -126,10 +129,10 @@ export default function AddLoadPage() {
             onChange={(e) => setFormData({ ...formData, shippingType: e.target.value as ShippingType })}
             className="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-yellow-400"
           >
-            <option value="FTL">FTL - Full Truck Load</option>
-            <option value="LTL">LTL - Less Than Truck Load</option>
-            <option value="Partial">Partial Load</option>
-            <option value="Expedited">Expedited</option>
+            <option value="FTL">{t("ftl")}</option>
+            <option value="LTL">{t("ltl")}</option>
+            <option value="Partial">{t("partial")}</option>
+            <option value="Expedited">{t("expedited")}</option>
           </select>
           <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
         </div>
@@ -142,7 +145,7 @@ export default function AddLoadPage() {
             onChange={(e) => setFormData({ ...formData, loadWeight: e.target.value })}
             className="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-yellow-400"
           >
-            <option value="">Load Weight</option>
+            <option value="">{t("loadWeight")}</option>
             <option value="100">100 KG</option>
             <option value="200">200 KG</option>
             <option value="300">300 KG</option>
@@ -161,10 +164,10 @@ export default function AddLoadPage() {
             onChange={(e) => setFormData({ ...formData, pallets: e.target.value })}
             className="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-yellow-400"
           >
-            <option value="">Pallets</option>
+            <option value="">{t("pallets")}</option>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
               <option key={n} value={n}>
-                {n} Pallet{n > 1 ? "s" : ""}
+                {n} {n > 1 ? t("pallets") : t("pallet")}
               </option>
             ))}
           </select>
@@ -176,7 +179,7 @@ export default function AddLoadPage() {
           <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Client's Name"
+            placeholder={t("clientName")}
             value={formData.clientName}
             onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
             className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400"
@@ -189,7 +192,7 @@ export default function AddLoadPage() {
           <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
             type="number"
-            placeholder="Client's Price"
+            placeholder={t("clientPrice")}
             value={formData.clientPrice}
             onChange={(e) => setFormData({ ...formData, clientPrice: e.target.value })}
             className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400"
@@ -205,10 +208,10 @@ export default function AddLoadPage() {
             onChange={(e) => setFormData({ ...formData, assignedDriverId: e.target.value })}
             className="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-yellow-400"
           >
-            <option value="">Assign Driver</option>
+            <option value="">{t("assignDriver")}</option>
             {drivers.map((driver) => (
               <option key={driver.id} value={driver.id}>
-                {driver.name} {driver.isAvailable ? "" : "(Unavailable)"}
+                {driver.name} {driver.isAvailable ? "" : t("unavailable")}
               </option>
             ))}
           </select>
@@ -220,7 +223,7 @@ export default function AddLoadPage() {
           <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
             type="number"
-            placeholder="Price to Driver"
+            placeholder={t("priceToDriver")}
             value={formData.driverPrice}
             onChange={(e) => setFormData({ ...formData, driverPrice: e.target.value })}
             className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400"
@@ -235,11 +238,11 @@ export default function AddLoadPage() {
             onChange={(e) => setFormData({ ...formData, paymentTerms: parseInt(e.target.value) as PaymentTerms })}
             className="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-yellow-400"
           >
-            <option value={30}>30 Days Payment Term</option>
-            <option value={45}>45 Days Payment Term</option>
-            <option value={60}>60 Days Payment Term</option>
-            <option value={90}>90 Days Payment Term</option>
-            <option value={120}>120 Days Payment Term</option>
+            <option value={30}>30 {t("daysPaymentTerm")}</option>
+            <option value={45}>45 {t("daysPaymentTerm")}</option>
+            <option value={60}>60 {t("daysPaymentTerm")}</option>
+            <option value={90}>90 {t("daysPaymentTerm")}</option>
+            <option value={120}>120 {t("daysPaymentTerm")}</option>
           </select>
           <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
         </div>
@@ -284,24 +287,24 @@ export default function AddLoadPage() {
         <div className="flex gap-2">
           <div className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl">
             <Fuel className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-600">Fuel</span>
+            <span className="text-sm text-gray-600">{t("fuel")}</span>
             <ChevronDown className="h-4 w-4 text-gray-400" />
           </div>
           <div className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl">
             <AlertCircle className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-600">Tolls</span>
+            <span className="text-sm text-gray-600">{t("tolls")}</span>
             <ChevronDown className="h-4 w-4 text-gray-400" />
           </div>
           <div className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl">
             <AlertCircle className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-600">Other</span>
+            <span className="text-sm text-gray-600">{t("other")}</span>
             <ChevronDown className="h-4 w-4 text-gray-400" />
           </div>
         </div>
 
         {/* Notes */}
         <textarea
-          placeholder="Notes (Optional)"
+          placeholder={t("notes")}
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
           className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 min-h-[80px] resize-none"
@@ -312,32 +315,28 @@ export default function AddLoadPage() {
           <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:border-yellow-400 transition-colors">
             <Camera className="h-6 w-6 mb-1" />
             <span className="text-xs text-center">
-              Upload Photos
+              {t("uploadPhotos")}
               <br />
-              (Optional)
+              {t("optional")}
             </span>
           </div>
         </div>
 
         {/* Profit Calculation */}
         <button type="button" className="w-full py-3 bg-yellow-400 rounded-xl font-semibold text-center hover:bg-yellow-500 transition-colors">
-          Profit Calculation: ${calculateProfit().toFixed(2)}
+          {t("profitCalculation")}: ${calculateProfit().toFixed(2)}
         </button>
 
         {/* Error Message */}
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-            {error}
-          </div>
-        )}
+        {error && <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">{error}</div>}
 
         {/* Submit Button */}
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={isSubmitting}
           className="w-full py-4 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? "Creating Load..." : "Submit & Add"}
+          {isSubmitting ? t("creatingLoad") : t("submitAndAdd")}
         </button>
       </form>
     </MobileLayout>

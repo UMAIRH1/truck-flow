@@ -9,10 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { validateSignUpForm } from "../validations";
 import { Eye, EyeOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function SignUpPage() {
   const router = useRouter();
   const { signup, loginWithGoogle, selectedRole, isAuthenticated } = useAuth();
+  const t = useTranslations("auth");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -101,17 +103,17 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-white flex flex-col  px-4 py-4 max-w-md mx-auto">
       <div className="h-12" />
       <div className="flex-1 px-6 py-8">
-        <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">Create an account</h1>
-        <p className="text-center text-yellow-500 mb-8">Welcome back to the app</p>
+        <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">{t("createAccount")}</h1>
+        <p className="text-center text-yellow-500 mb-8">{t("welcomeBack")}</p>
 
         <form noValidate onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Name</label>
+            <label className="block text-sm text-gray-600 mb-2">{t("name")}</label>
             <Input ref={nameRef} type="text" placeholder="Ab Mahmud" value={name} onChange={(e) => setName(e.target.value)} className="h-12 bg-gray-50 border-gray-200 rounded-lg" required />
             {fieldErrors.name && <p className="text-red-500 text-sm mt-1">{fieldErrors.name}</p>}
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Email Address</label>
+            <label className="block text-sm text-gray-600 mb-2">{t("emailAddress")}</label>
             <Input
               ref={emailRef}
               type="email"
@@ -126,7 +128,7 @@ export default function SignUpPage() {
 
           {/* Password Field */}
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Password</label>
+            <label className="block text-sm text-gray-600 mb-2">{t("password")}</label>
             <div className="relative">
               <Input
                 ref={passwordRef}
@@ -154,9 +156,9 @@ export default function SignUpPage() {
               className="mt-0.5 data-[state=checked]:bg-yellow-400 data-[state=checked]:border-yellow-400"
             />
             <label htmlFor="agreeTerms" className="text-sm text-gray-600 cursor-pointer">
-              By continuing, you agree to our{" "}
+              {t("agreeToTerms")}{" "}
               <Link href="/terms" className="text-yellow-500 hover:underline">
-                terms of service
+                {t("termsOfService")}
               </Link>
             </label>
           </div>
@@ -165,14 +167,14 @@ export default function SignUpPage() {
 
           {/* Sign Up Button */}
           <Button type="submit" disabled={isLoading} className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full">
-            {isLoading ? "Creating account..." : "Sign Up"}
+            {isLoading ? t("signingUp") : t("signUp")}
           </Button>
         </form>
 
         {/* Divider */}
         <div className="flex items-center my-6">
           <div className="flex-1 h-px bg-gray-200" />
-          <span className="px-4 text-sm text-gray-400">or sign up with</span>
+          <span className="px-4 text-sm text-gray-400">{t("orSignInWith")}</span>
           <div className="flex-1 h-px bg-gray-200" />
         </div>
 
@@ -190,7 +192,7 @@ export default function SignUpPage() {
         {/* Sign In Link */}
         <div className="mt-8 text-center">
           <Link href="/auth/signin" className="text-yellow-500 hover:underline">
-            Already have an account? Sign in here
+            {t("alreadyHaveAccount")} {t("signIn")}
           </Link>
         </div>
       </div>

@@ -6,22 +6,24 @@ import { DriverLoadCard, FilterTabs } from "@/components/shared";
 import { useLoads } from "@/contexts/LoadContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function MyLoadsPage() {
   const { loads, updateLoadStatus } = useLoads();
   const { user } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("pending");
+  const t = useTranslations();
 
   // Filter loads for this driver
   const driverLoads = loads.filter(
-    (load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id || load.status === "pending" // Show all pending loads for demo
+    (load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id || load.status === "pending", // Show all pending loads for demo
   );
 
   const tabs = [
-    { id: "pending", label: "Pending" },
-    { id: "accepted", label: "Accepted" },
-    { id: "completed", label: "Completed" },
+    { id: "pending", label: t("tabs.pending") },
+    { id: "accepted", label: t("tabs.accepted") },
+    { id: "completed", label: t("tabs.completed") },
   ];
 
   const filteredLoads = driverLoads.filter((load) => {
@@ -53,11 +55,11 @@ export default function MyLoadsPage() {
       onMapView={() => handleMapView(load.id)}
     />
   ));
-  const noLoadsMessageMobile = <div className="text-center py-8 text-gray-500">No loads found</div>;
+  const noLoadsMessageMobile = <div className="text-center py-8 text-gray-500">{t("common.noLoadsFound")}</div>;
   const noLoadsMessageDesktop = (
     <div className="col-span-full text-center py-16 text-gray-500">
-      <div className="text-lg font-medium mb-2">No loads found</div>
-      <div className="text-sm">Check back later for new opportunities</div>
+      <div className="text-lg font-medium mb-2">{t("common.noLoadsFound")}</div>
+      <div className="text-sm">{t("driver.checkBackLater")}</div>
     </div>
   );
 
@@ -65,7 +67,7 @@ export default function MyLoadsPage() {
     <>
       <div className="block md:hidden">
         <MobileLayout showBottomNav={true} showFAB={true}>
-          <Header title="My Loads" showBack />
+          <Header title={t("header.myLoads")} showBack />
           <div className="px-4 py-4 max-w-md mx-auto space-y-4">
             <FilterTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
             <div className="space-y-3 mt-6">{filteredLoads.length === 0 ? noLoadsMessageMobile : cards}</div>
@@ -74,12 +76,12 @@ export default function MyLoadsPage() {
       </div>
       <div className="hidden md:block min-h-screen bg-gray-50">
         <MobileLayout showBottomNav={true} showFAB={true}>
-          <Header title="My Loads" showBack />
+          <Header title={t("header.myLoads")} showBack />
           <div className="px-6 py-8 max-w-7xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
-              <h1 className="text-3xl font-bold text-gray-900">My Loads</h1>
+              <h1 className="text-3xl font-bold text-gray-900">{t("header.myLoads")}</h1>
               <div className="text-sm text-gray-600">
-                {filteredLoads.length} {activeTab} {filteredLoads.length === 1 ? "load" : "loads"}
+                {filteredLoads.length} {activeTab} {filteredLoads.length === 1 ? t("common.load") : t("common.loads")}
               </div>
             </div>
             <FilterTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />

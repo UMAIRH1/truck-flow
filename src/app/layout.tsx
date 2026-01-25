@@ -4,6 +4,8 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LoadProvider } from "@/contexts/LoadContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { TranslationProvider } from "@/providers/TranslationProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -35,13 +37,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} ${inter.variable} font-sans antialiased`}>
-        <AuthProvider>
-          <NotificationProvider>
-            <LoadProvider>{children}</LoadProvider>
-          </NotificationProvider>
-        </AuthProvider>
+        <TranslationProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <NotificationProvider>
+                <LoadProvider>{children}</LoadProvider>
+              </NotificationProvider>
+            </AuthProvider>
+          </LanguageProvider>
+        </TranslationProvider>
       </body>
     </html>
   );

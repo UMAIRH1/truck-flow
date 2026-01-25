@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Home, DollarSign, History, Settings, Wallet, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslations } from "next-intl";
 
 interface NavItem {
   href: string;
@@ -16,19 +17,20 @@ interface NavItem {
 export function BottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const t = useTranslations("nav");
 
   const managerNavItems: NavItem[] = [
-    { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
-    { href: "/revenue", label: "Revenue", icon: <DollarSign className="h-5 w-5" /> },
-    { href: "/load-history", label: "Load History", icon: <History className="h-5 w-5" /> },
-    { href: "/settings", label: "Settings", icon: <Settings className="h-5 w-5" /> },
+    { href: "/", label: t("home"), icon: <Home className="h-5 w-5" /> },
+    { href: "/revenue", label: t("revenue"), icon: <DollarSign className="h-5 w-5" /> },
+    { href: "/load-history", label: t("loadHistory"), icon: <History className="h-5 w-5" /> },
+    { href: "/settings", label: t("settings"), icon: <Settings className="h-5 w-5" /> },
   ];
 
   const driverNavItems: NavItem[] = [
-    { href: "/", label: "Home", icon: <Home className="h-5 w-5" /> },
-    { href: "/wallet", label: "My Wallet", icon: <Wallet className="h-5 w-5" /> },
-    { href: "/my-loads", label: "My Loads", icon: <Truck className="h-5 w-5" /> },
-    { href: "/settings", label: "Settings", icon: <Settings className="h-5 w-5" /> },
+    { href: "/", label: t("home"), icon: <Home className="h-5 w-5" /> },
+    { href: "/wallet", label: t("myWallet"), icon: <Wallet className="h-5 w-5" /> },
+    { href: "/my-loads", label: t("myLoads"), icon: <Truck className="h-5 w-5" /> },
+    { href: "/settings", label: t("settings"), icon: <Settings className="h-5 w-5" /> },
   ];
 
   const navItems = user?.role === "driver" ? driverNavItems : managerNavItems;

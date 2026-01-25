@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { validateEmail } from "../validations";
 import { Mail, Repeat, Check, Copy } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function SendEmailPage() {
+  const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [fieldError, setFieldError] = useState("");
 
@@ -59,10 +61,10 @@ export default function SendEmailPage() {
     try {
       // TODO: call resend API
       await new Promise((res) => setTimeout(res, 800));
-      setMessage("Reset email resent. Check your inbox.");
+      setMessage(t("emailResent"));
       setCooldown(30);
     } catch {
-      setFieldError("Failed to resend email. Try again later.");
+      setFieldError(t("resendFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -71,9 +73,9 @@ export default function SendEmailPage() {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(email);
-      setMessage("Email copied to clipboard");
+      setMessage(t("emailCopied"));
     } catch {
-      setFieldError("Unable to copy email");
+      setFieldError(t("unableToCopy"));
     }
   };
 
@@ -85,12 +87,12 @@ export default function SendEmailPage() {
           <div className="rounded-full bg-yellow-100 p-4 border border-yellow-200">
             <Mail className="w-8 h-8 text-yellow-600" />
           </div>
-          <h1 className="text-2xl font-bold text-center text-(--color-light-black) mb-2">Check your email</h1>
-          <p className="text-center text-(--color-yellow-light) mb-8">We've sent a password reset link — just a few more steps to get back in.</p>
+          <h1 className="text-2xl font-bold text-center text-(--color-light-black) mb-2">{t("checkYourEmail")}</h1>
+          <p className="text-center text-(--color-yellow-light) mb-8">{t("resetLinkSent")}</p>
         </div>
 
         <div className="mt-8 space-y-4">
-          <label className="block text-sm text-gray-600 mb-2">Email we sent to</label>
+          <label className="block text-sm text-gray-600 mb-2">{t("emailSentTo")}</label>
           <div className="flex gap-2 items-center">
             <Input ref={emailRef} value={maskedEmail || email || ""} onChange={() => {}} readOnly className="h-12 bg-gray-50 border-gray-200 rounded-lg" />
             <Button type="button" title="Copy email" onClick={handleCopy} className="p-3 rounded-lg bg-gray-100 hover:bg-gray-200">
@@ -102,19 +104,21 @@ export default function SendEmailPage() {
           <div className="flex gap-2 mt-2">
             <Button type="button" onClick={handleResend} disabled={cooldown > 0 || isLoading} variant="yellow" className="flex-1 h-12 inline-flex items-center justify-center gap-2">
               {cooldown > 0 ? (
-                <span className="text-sm">Resend ({cooldown}s)</span>
+                <span className="text-sm">
+                  {t("resend")} ({cooldown}s)
+                </span>
               ) : isLoading ? (
-                "Resending..."
+                t("resending")
               ) : (
                 <>
-                  <Repeat className="w-4 h-4" /> Resend
+                  <Repeat className="w-4 h-4" /> {t("resend")}
                 </>
               )}
             </Button>
           </div>
           <div className="mt-4 text-center">
             <Link href="/auth/forgot-password" className="text-sm text-gray-600 hover:underline">
-              Change email
+              {t("changeEmail")}
             </Link>
           </div>
           <div aria-live="polite" className="mt-4 text-center">
@@ -128,7 +132,7 @@ export default function SendEmailPage() {
           <div className="mt-6 text-center">
             <Link href="/auth/signin">
               <Button variant="yellow" className="w-full h-12">
-                Back to sign in
+                {t("backToSignIn")}
               </Button>
             </Link>
           </div>

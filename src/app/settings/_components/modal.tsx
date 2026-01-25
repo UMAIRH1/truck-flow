@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreditCard, Landmark, X, LoaderCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "next-intl";
 
 interface ModalProps {
   isOpen: boolean;
@@ -14,10 +15,11 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
-  if (!isOpen) return null;
-
   const router = useRouter();
+  const t = useTranslations("settings");
   const [isLoadingNav, setIsLoadingNav] = useState(false);
+
+  if (!isOpen) return null;
 
   const handleNavigate = async (path: string) => {
     setIsLoadingNav(true);
@@ -35,27 +37,27 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         <div className="flex items-center gap-3">
           <Landmark className="h-5 w-5 text-(--color-gray-text)" />
           <div>
-            <p className="font-bold text-[13px] text-(--color-light-black-border)">Bank Account</p>
-            <p className="text-xs font-normal opacity-80 text-(--color-gray-text)">Link your bank</p>
+            <p className="font-bold text-[13px] text-(--color-light-black-border)">{t("bankAccount")}</p>
+            <p className="text-xs font-normal opacity-80 text-(--color-gray-text)">{t("linkYourBank")}</p>
           </div>
         </div>
         <button onClick={() => handleNavigate("/settings/add-bank-account")} className="w-28">
-          <Badge className="px-4 py-1.5  w-full bg-(--color-blue-border) rounded-md">Add Account</Badge>
+          <Badge className="px-4 py-1.5  w-full bg-(--color-blue-border) rounded-md">{t("addAccount")}</Badge>
         </button>
       </div>
       <div className="flex items-center justify-between p-3 bg-(--color-yellow-light) rounded-lg">
         <div className="flex items-center gap-3">
           <CreditCard className="h-5 w-5 text-(--color-gray-text)" />
           <div>
-            <p className="font-bold text-[13px] text-(--color-light-black-border)">Credit/ Debit Card</p>
-            <p className="text-xs  font-normal text-(--color-gray-text)">Add your card details</p>
+            <p className="font-bold text-[13px] text-(--color-light-black-border)">{t("creditDebitCard")}</p>
+            <p className="text-xs  font-normal text-(--color-gray-text)">{t("addCardDetails")}</p>
           </div>
         </div>
         <button onClick={() => handleNavigate("/settings/add-card-details")} className="w-28">
-          <Badge className="px-4 py-1.5 w-full bg-(--color-blue-border) rounded-md">Add Card</Badge>
+          <Badge className="px-4 py-1.5 w-full bg-(--color-blue-border) rounded-md">{t("addCard")}</Badge>
         </button>
       </div>
-      <p className="text-center text-base font-normal text-(--color-extra-light-gray) mt-4">Your transactions are secure</p>
+      <p className="text-center text-base font-normal text-(--color-extra-light-gray) mt-4">{t("transactionsSecure")}</p>
     </div>
   );
 
@@ -78,7 +80,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           </button>
           <div className="w-12 h-1.5 bg-white rounded-full mx-auto mb-3" />
           {title && <h2 className="text-lg text-(--color-light-black) font-bold mb-4 text-center">{title}</h2>}
-          <div>{title === "Payment Methods" ? paymentContent : children}</div>
+          <div>{title === t("paymentMethods") ? paymentContent : children}</div>
         </div>
       </div>
       <div className="hidden md:flex fixed inset-0 z-[99999] items-center justify-center">
@@ -88,7 +90,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             <X className="h-5 w-5 text-gray-600" />
           </button>
           {title && <h2 className="text-2xl font-bold mb-4 text-(--color-light-black)">{title}</h2>}
-          <div>{title === "Payment Methods" ? paymentContent : children}</div>
+          <div>{title === t("paymentMethods") ? paymentContent : children}</div>
         </div>
       </div>
     </>
