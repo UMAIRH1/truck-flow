@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Truck } from "lucide-react";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { ASSETS } from "@/lib/assets";
+import { useTranslations } from "next-intl";
 
 export default function SplashPage() {
   const router = useRouter();
   const { setSelectedRole, isAuthenticated } = useAuth();
+  const t = useTranslations("splash");
 
   // Redirect if already authenticated
   React.useEffect(() => {
@@ -30,14 +32,14 @@ export default function SplashPage() {
         <OptimizedImage src={ASSETS.images.icons.logo} alt="logo" />
       </div>
       <div className="w-full max-w-xs space-y-4">
-        <p className="text-center text-black font-medium ">Are you using this platform as a</p>
+        <p className="text-center text-black font-medium ">{t("roleQuestion")}</p>
 
         <Button variant="role" onClick={() => handleRoleSelect("manager")} className="w-full h-12 ">
-          Transport Manager
+          {t("transportManager")}
         </Button>
 
         <Button variant="role" onClick={() => handleRoleSelect("driver")} className="w-full h-12">
-          Partner or Driver
+          {t("partnerOrDriver")}
         </Button>
       </div>
     </div>

@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { PartyPopper } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function SuccessPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const t = useTranslations("success");
 
   // Redirect to home after 5 seconds if authenticated
   React.useEffect(() => {
@@ -41,18 +43,18 @@ export default function SuccessPage() {
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-center text-gray-900 mb-6">Congratulations!</h1>
+        <h1 className="text-2xl font-bold text-center text-gray-900 mb-6">{t("congratulations")}</h1>
 
         {/* Message */}
         <div className="text-center text-gray-600 space-y-4 max-w-xs">
-          <p>We&apos;ve sent you a verification email, please check your inbox and follow the instructions to verify your account.</p>
-          <p>Thank you for signing up with us!</p>
+          <p>{t("verificationEmailSent")}</p>
+          <p>{t("thankYouSignUp")}</p>
         </div>
 
         {/* Sign In Link */}
         <div className="mt-12">
           <Link href="/" className="text-yellow-500 hover:underline font-medium">
-            Sign in here
+            {t("signInHere")}
           </Link>
         </div>
       </div>

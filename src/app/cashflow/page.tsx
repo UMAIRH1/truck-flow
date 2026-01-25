@@ -5,14 +5,16 @@ import { Header, MobileLayout } from "@/components/layout";
 import { FilterTabs, CashflowCard } from "@/components/shared";
 import { mockCashflowData } from "@/components/data/data";
 import { DollarSign } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function CashflowPage() {
   const [activeTab, setActiveTab] = useState("outstanding");
+  const t = useTranslations();
 
   const tabs = [
-    { id: "outstanding", label: "Outstanding" },
-    { id: "overdue", label: "Overdue" },
-    { id: "due-this-week", label: "Due this week" },
+    { id: "outstanding", label: t("tabs.outstanding") },
+    { id: "overdue", label: t("tabs.overdue") },
+    { id: "due-this-week", label: t("tabs.dueThisWeek") },
   ];
   const clientsTotal = mockCashflowData.filter((c) => c.type === "client").reduce((sum, c) => sum + c.amount, 0);
   const partnersTotal = mockCashflowData.filter((c) => c.type === "partner").reduce((sum, c) => sum + c.amount, 0);
@@ -26,21 +28,21 @@ export default function CashflowPage() {
 
   return (
     <MobileLayout showFAB={true} showBottomNav={true}>
-      <Header title="Cashflow" showBack />
+      <Header title={t("header.cashflow")} showBack />
       <div className="max-sm:bg-(--color-yellow-light)">
         <div className="px-4 py-4 max-w-md mx-auto space-y-4 md:max-w-7xl md:px-8 md:py-12 rounded-t-2xl bg-white md:min-h-screen">
           <div className="flex gap-3 md:grid md:grid-cols-2 md:gap-6">
             <div className="flex justify-start items-center gap-2 bg-(--color-greenish) text-white rounded-lg px-2 py-4 md:p-6">
               <DollarSign />
               <div>
-                <p className="text-[13px] font-bold">Clients (Cash In)</p>
+                <p className="text-[13px] font-bold">{t("cashflow.clientsCashIn")}</p>
                 <p className="text-xs font-normal mt-1">{clientsTotal.toLocaleString()}.00</p>
               </div>
             </div>
             <div className="flex justify-start items-center gap-2 bg-(--color-dangerous) text-white rounded-lg px-2 py-4 md:p-6">
               <DollarSign />
               <div>
-                <p className="text-[13px] font-bold">Partners (Cash Out)</p>
+                <p className="text-[13px] font-bold">{t("cashflow.partnersCashOut")}</p>
                 <p className="text-xs font-normal mt-1">{partnersTotal.toLocaleString()}.00</p>
               </div>
             </div>

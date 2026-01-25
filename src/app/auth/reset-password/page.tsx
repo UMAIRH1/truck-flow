@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { validatePassword } from "../validations";
+import { useTranslations } from "next-intl";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const t = useTranslations("auth");
+  const tValidation = useTranslations("validation");
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,7 +38,7 @@ export default function ResetPasswordPage() {
     setError("");
 
     if (!token) {
-      setError("Invalid or missing reset token. Try again from the Forgot Password page.");
+      setError(t("invalidResetToken"));
       return;
     }
 
@@ -47,7 +50,7 @@ export default function ResetPasswordPage() {
     }
 
     if (password !== confirmPassword) {
-      setFieldErrors({ password: "", confirm: "Passwords do not match" });
+      setFieldErrors({ password: "", confirm: tValidation("passwordsDoNotMatch") });
       setTimeout(() => confirmRef.current?.focus());
       return;
     }
@@ -67,12 +70,12 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-white lg:border my-4 rounded-2xl border-(--color-primary-yellow-dark) flex flex-col px-4 py-4 max-w-md mx-auto space-y-4">
       <div className="h-12" />
       <div className="flex-1 px-6 py-8">
-        <h1 className="text-2xl font-bold text-center text-(--color-light-black) mb-2">Reset Password</h1>
-        <p className="text-center text-(--color-yellow-light) mb-8">Create a new password for your account</p>
+        <h1 className="text-2xl font-bold text-center text-(--color-light-black) mb-2">{t("resetPassword")}</h1>
+        <p className="text-center text-(--color-yellow-light) mb-8">{t("createNewPassword")}</p>
 
         <form noValidate onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm text-gray-600 mb-2">New Password</label>
+            <label className="block text-sm text-gray-600 mb-2">{t("newPassword")}</label>
             <div className="relative">
               <Input
                 ref={passwordRef}
@@ -92,7 +95,7 @@ export default function ResetPasswordPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Confirm Password</label>
+            <label className="block text-sm text-gray-600 mb-2">{t("confirmPassword")}</label>
             <div className="relative">
               <Input
                 ref={confirmRef}
@@ -114,13 +117,13 @@ export default function ResetPasswordPage() {
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
           <Button type="submit" disabled={isLoading} variant="yellow" className="w-full h-12">
-            {isLoading ? "Resetting..." : "Reset password"}
+            {isLoading ? t("resetting") : t("resetPassword")}
           </Button>
         </form>
 
         <div className="mt-6 text-center">
           <Link href="/auth/signin" className="text-(--color-yellow-light) hover:underline">
-            Back to sign in
+            {t("backToSignIn")}
           </Link>
         </div>
       </div>

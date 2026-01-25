@@ -7,6 +7,7 @@ import { aggregateMonthlyMetrics, computeTrend } from "@/lib/earnings";
 import { DateField } from "@/components/ui/date-field";
 import { useLoads } from "@/contexts/LoadContext";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function RevenuePage() {
   const { loads } = useLoads();
@@ -16,13 +17,14 @@ export default function RevenuePage() {
   const totalIncome = filteredCompletedLoads.reduce((sum, load) => sum + load.clientPrice, 0);
   const totalExpense = filteredCompletedLoads.reduce((sum, load) => sum + (load.driverPrice || 0) + (load.fuel || 0) + (load.tolls || 0) + (load.otherExpenses || 0), 0);
   const profit = totalIncome - totalExpense;
+  const t = useTranslations();
 
   const chartPoints = aggregateMonthlyMetrics(completedLoads, "income", 3, selectedDate);
   const trend = computeTrend(chartPoints);
 
   return (
-    <MobileLayout >
-      <Header title="Revenue" showBack />
+    <MobileLayout>
+      <Header title={t("header.revenue")} showBack />
       <div className="px-4 lg:px-6 py-6 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           <div className="lg:col-span-2">
@@ -34,16 +36,16 @@ export default function RevenuePage() {
             </div>
             <div className="flex flex-col gap-3">
               {[
-                { key: "income", label: "Income", value: totalIncome },
-                { key: "expense", label: "Expense", value: totalExpense },
-                { key: "profit", label: "Profit", value: profit },
+                { key: "income", label: t("revenue.income"), value: totalIncome },
+                { key: "expense", label: t("revenue.expense"), value: totalExpense },
+                { key: "profit", label: t("revenue.profit"), value: profit },
               ].map((c) => (
                 <Link href={`/total-earning?metric=${c.key}`} key={c.key}>
-                  <FinanceCard label={c.label} value={c.value} trend="Today" variant="default" showArrow className="w-full" />
+                  <FinanceCard label={c.label} value={c.value} trend={t("common.today")} variant="default" showArrow className="w-full" />
                 </Link>
               ))}
             </div>
-            <div className="hidden lg:block text-sm text-gray-500 mt-2">Updated just now</div>
+            <div className="hidden lg:block text-sm text-gray-500 mt-2">{t("common.updatedJustNow")}</div>
           </aside>
         </div>
       </div>

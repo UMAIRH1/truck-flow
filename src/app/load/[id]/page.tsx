@@ -8,10 +8,13 @@ import { OptimizedImage } from "@/components/ui/optimized-image";
 import { ASSETS } from "@/lib/assets";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
+import { useTranslations } from "next-intl";
 
 export default function LoadStatusPage() {
   const params = useParams();
   const { getLoadById } = useLoads();
+  const t = useTranslations("loadStatus");
+  const tCommon = useTranslations("common");
 
   const load = getLoadById(params.id as string);
 
@@ -20,13 +23,13 @@ export default function LoadStatusPage() {
       <>
         <div className="block md:hidden">
           <MobileLayout showFAB={false}>
-            <Header title="Load Status" showBack />
-            <div className="px-4 py-8 text-center text-gray-500">Load not found</div>
+            <Header title={t("title")} showBack />
+            <div className="px-4 py-8 text-center text-gray-500">{t("loadNotFound")}</div>
           </MobileLayout>
         </div>
         <div className="hidden md:block">
-          <Header title="Load Status" showBack />
-          <div className="px-4 py-8 text-center text-gray-500">Load not found</div>
+          <Header title={t("title")} showBack />
+          <div className="px-4 py-8 text-center text-gray-500">{t("loadNotFound")}</div>
         </div>
       </>
     );
@@ -58,7 +61,9 @@ export default function LoadStatusPage() {
           <div className="flex items-center gap-2 text-xs text-(--color-dark-gray)">
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              <span>Today / {load.loadingTime}</span>
+              <span>
+                {tCommon("today")} / {load.loadingTime}
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <Icon src={ASSETS.images.icons.share} className="h-3 w-3" />
@@ -71,21 +76,29 @@ export default function LoadStatusPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-xs">
               <ArrowDownLeft className="h-3 w-3 text-(--color-primary-gray)" />
-              <span className="text-(--color-dark-gray)">From: {load.pickupLocation}</span>
+              <span className="text-(--color-dark-gray)">
+                {tCommon("from")}: {load.pickupLocation}
+              </span>
             </div>
             <div className="flex items-center gap-2 text-xs">
               <ArrowUpRight className="h-3 w-3 text-(--color-primary-gray)" />
-              <span className="text-(--color-dark-gray)">To: {load.dropoffLocation}</span>
+              <span className="text-(--color-dark-gray)">
+                {tCommon("to")}: {load.dropoffLocation}
+              </span>
             </div>
           </div>
           <div className="text-right flex flex-col justify-end items-start">
-            <Badge className="px-4 bg-[#0D80F2] text-white self-end text-sm rounded-md font-normal">More Info</Badge>
-            <span className="font-bold">Price ${load.clientPrice.toFixed(2)}</span>
+            <Badge className="px-4 bg-[#0D80F2] text-white self-end text-sm rounded-md font-normal">{t("moreInfo")}</Badge>
+            <span className="font-bold">
+              {tCommon("price")} ${load.clientPrice.toFixed(2)}
+            </span>
           </div>
         </div>
       </div>
       <div className="text-black">
-        <h3 className="font-medium text-xl">Driver | {load.assignedDriver?.name || "Unassigned"}</h3>
+        <h3 className="font-medium text-xl">
+          {t("driver")} | {load.assignedDriver?.name || t("unassigned")}
+        </h3>
         <p className="text-xs text-(--color-gray-light) font-normal mt-1">100 km | 2 hours | {load.loadWeight} kg</p>
       </div>
       <div>
@@ -120,12 +133,12 @@ export default function LoadStatusPage() {
     <>
       <div className="block md:hidden">
         <MobileLayout showFAB={false}>
-          <Header title="Load Status" showBack />
+          <Header title={t("title")} showBack />
           <div className="max-w-md mx-auto">{content}</div>
         </MobileLayout>
       </div>
       <div className="hidden md:block">
-        <Header title="Load Status" showBack />
+        <Header title={t("title")} showBack />
         <div className="max-w-7xl mx-auto">{content}</div>
       </div>
     </>

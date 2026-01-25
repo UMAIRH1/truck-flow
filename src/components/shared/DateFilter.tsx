@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface DateFilterProps {
   value?: Date;
@@ -21,6 +22,7 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [viewDate, setViewDate] = useState<Date>(value || new Date());
   const ref = useRef<HTMLDivElement | null>(null);
+  const t = useTranslations("common");
 
   useEffect(() => {
     if (value) setViewDate(value);
@@ -60,7 +62,7 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
       <div className="flex items-center border border-(--color-primary-yellow-dark) rounded-lg gap-2">
         <div onClick={() => setIsOpen((s) => !s)} className="flex-1 flex items-center gap-2 px-4 py-3 cursor-pointer">
           <Calendar className="h-4 w-4 text-gray-400" />
-          <input type="text" placeholder="Filter by date" value={formattedDate} readOnly className="bg-transparent outline-none text-sm flex-1" />
+          <input type="text" placeholder={t("filterByDate")} value={formattedDate} readOnly className="bg-transparent outline-none text-sm flex-1" />
         </div>
         <button onClick={() => setIsOpen((s) => !s)} className="p-3 bg-(--color-primary-yellow-dark) rounded-r-lg hover:bg-gray-200 transition-colors">
           <Calendar className="h-5 w-5 text-white" />
@@ -102,7 +104,7 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
                   className={cn(
                     "h-8 flex items-center justify-center rounded",
                     isSelected ? "bg-yellow-400 text-black font-normal" : "hover:bg-gray-100",
-                    isToday && !isSelected ? " text-white bg-(--color-yellow-light)" : ""
+                    isToday && !isSelected ? " text-white bg-(--color-yellow-light)" : "",
                   )}
                 >
                   {d.getDate()}
@@ -119,7 +121,7 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
               }}
               className="text-sm text-gray-600 hover:underline"
             >
-              Clear
+              {t("clear")}
             </button>
             <div className="flex-1" />
             <button
@@ -129,7 +131,7 @@ export function DateFilter({ value, onChange, className }: DateFilterProps) {
               }}
               className="text-sm text-yellow-500 hover:underline"
             >
-              Today
+              {t("today")}
             </button>
           </div>
         </div>

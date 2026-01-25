@@ -9,12 +9,14 @@ import { aggregateMonthlyMetrics, computeTrend } from "@/lib/earnings";
 import { useState, useRef } from "react";
 import { useLoads } from "@/contexts/LoadContext";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export default function WalletPage() {
+  const t = useTranslations("wallet");
   const actionLinks = [
-    { action: "modal", icon: CreditCard, label: "Payment Methods" },
-    { action: "invoice", icon: Upload, label: "Upload Invoice" },
-    { action: "documents", icon: CloudUpload, label: "Upload Documents" },
+    { action: "modal", icon: CreditCard, label: t("paymentMethods") },
+    { action: "invoice", icon: Upload, label: t("uploadInvoice") },
+    { action: "documents", icon: CloudUpload, label: t("uploadDocuments") },
   ];
   const { loads } = useLoads();
   const completedLoads = loads.filter((l) => l.status === "completed");
@@ -55,7 +57,7 @@ export default function WalletPage() {
   const content = (
     <div className="px-4 md:px-6 py-4 md:py-8 max-w-md md:max-w-7xl mx-auto">
       <div className="mb-4">
-        <LineChart data={chartPoints} trend={trend} trendLabel="Last 3 Months" className="h-64 md:h-80 lg:h-96" />
+        <LineChart data={chartPoints} trend={trend} trendLabel={t("last3Months")} className="h-64 md:h-80 lg:h-96" />
       </div>
 
       <div>
@@ -141,7 +143,7 @@ export default function WalletPage() {
         </div>
       )}
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Payment Methods" />
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={t("paymentMethods")} />
     </div>
   );
 
@@ -149,13 +151,13 @@ export default function WalletPage() {
     <>
       <div className="block md:hidden">
         <MobileLayout>
-          <Header title="My Wallet" showBack />
+          <Header title={t("myWallet")} showBack />
           {content}
         </MobileLayout>
       </div>
       <div className="hidden md:block min-h-screen bg-gray-50">
         <MobileLayout>
-          <Header title="My Wallet" showBack />
+          <Header title={t("myWallet")} showBack />
           {content}
         </MobileLayout>
       </div>

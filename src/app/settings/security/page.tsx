@@ -5,8 +5,13 @@ import { Header, MobileLayout } from "@/components/layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function SecuritySettingsPage() {
+  const t = useTranslations("security");
+  const tHeader = useTranslations("header");
+  const tValidation = useTranslations("validation");
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -18,21 +23,21 @@ export default function SecuritySettingsPage() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const validateCurrent = (val: string) => {
-    if (!val || !val.trim()) return "Current password is required";
+    if (!val || !val.trim()) return tValidation("currentPasswordRequired");
     return "";
   };
 
   const validateNew = (val: string) => {
-    if (!val || val.length < 8) return "Password must be at least 8 characters";
-    if (!/[A-Z]/.test(val)) return "Include at least one uppercase letter";
-    if (!/[a-z]/.test(val)) return "Include at least one lowercase letter";
-    if (!/[0-9]/.test(val)) return "Include at least one number";
+    if (!val || val.length < 8) return tValidation("passwordMinLength");
+    if (!/[A-Z]/.test(val)) return tValidation("passwordUppercase");
+    if (!/[a-z]/.test(val)) return tValidation("passwordLowercase");
+    if (!/[0-9]/.test(val)) return tValidation("passwordNumber");
     return "";
   };
 
   const validateConfirm = (val: string, newVal = newPassword) => {
-    if (!val) return "Please confirm your new password";
-    if (val !== newVal) return "Passwords do not match";
+    if (!val) return tValidation("confirmPasswordRequired");
+    if (val !== newVal) return tValidation("passwordsDoNotMatch");
     return "";
   };
 
@@ -51,20 +56,20 @@ export default function SecuritySettingsPage() {
     setNewPassword("");
     setConfirmPassword("");
     setErrors({});
-    alert("Password updated (demo)");
+    alert(t("passwordUpdated"));
   }
 
   const canSave = validateCurrent(currentPassword) === "" && validateNew(newPassword) === "" && validateConfirm(confirmPassword, newPassword) === "";
 
   return (
     <MobileLayout showFAB={true}>
-      <Header title="Security" showBack />
+      <Header title={tHeader("security")} showBack />
       <div className=" max-w-7xl mx-auto sm:mt-7 max-sm:bg-(--color-yellow-light)">
         <section className="bg-white px-4 py-6 max-sm:rounded-t-2xl sm:rounded md:shadow-md md:border border-gray-200">
-          <h3 className="text-xl font-semibold mb-3">Change password</h3>
+          <h3 className="text-xl font-semibold mb-3">{t("changePassword")}</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-black mb-1">Current password</label>
+              <label className="block text-sm font-medium text-black mb-1">{t("currentPassword")}</label>
               <div className="relative">
                 <Input
                   value={currentPassword}
@@ -74,14 +79,14 @@ export default function SecuritySettingsPage() {
                   }}
                   onBlur={() => setErrors((p) => ({ ...p, current: validateCurrent(currentPassword) || undefined }))}
                   type={showCurrent ? "text" : "password"}
-                  placeholder="Enter current password"
+                  placeholder={t("enterCurrentPassword")}
                   className="w-full px-4 pr-10 !py-6 border !border-gray-200 !rounded-md"
                 />
                 <button
                   type="button"
                   onClick={() => setShowCurrent((s) => !s)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-600 hover:text-gray-900"
-                  aria-label={showCurrent ? "Hide current password" : "Show current password"}
+                  aria-label={showCurrent ? t("hidePassword") : t("showPassword")}
                 >
                   {showCurrent ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                 </button>
@@ -89,7 +94,7 @@ export default function SecuritySettingsPage() {
               {errors.current && <p className="text-xs text-red-500 mt-1">{errors.current}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-black mb-1">New password</label>
+              <label className="block text-sm font-medium text-black mb-1">{t("newPassword")}</label>
               <div className="relative">
                 <Input
                   value={newPassword}
@@ -100,23 +105,23 @@ export default function SecuritySettingsPage() {
                   }}
                   onBlur={() => setErrors((p) => ({ ...p, new: validateNew(newPassword) || undefined }))}
                   type={showNew ? "text" : "password"}
-                  placeholder="Enter new password"
+                  placeholder={t("enterNewPassword")}
                   className="w-full px-4 pr-10 !py-6 border !border-gray-200 !rounded-md"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNew((s) => !s)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-600 hover:text-gray-900"
-                  aria-label={showNew ? "Hide new password" : "Show new password"}
+                  aria-label={showNew ? t("hidePassword") : t("showPassword")}
                 >
                   {showNew ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Password must be at least 8 characters and include an uppercase letter and a number.</p>
+              <p className="text-xs text-gray-500 mt-1">{t("passwordRequirements")}</p>
               {errors.new && <p className="text-xs text-red-500 mt-1">{errors.new}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-black mb-1">Confirm password</label>
+              <label className="block text-sm font-medium text-black mb-1">{t("confirmPassword")}</label>
               <div className="relative">
                 <Input
                   value={confirmPassword}
@@ -127,14 +132,14 @@ export default function SecuritySettingsPage() {
                   }}
                   onBlur={() => setErrors((p) => ({ ...p, confirm: validateConfirm(confirmPassword, newPassword) || undefined }))}
                   type={showConfirm ? "text" : "password"}
-                  placeholder="Confirm new password"
+                  placeholder={t("confirmNewPassword")}
                   className="w-full px-4 pr-10 !py-6 border !border-gray-200 !rounded-md"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirm((s) => !s)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-600 hover:text-gray-900"
-                  aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
+                  aria-label={showConfirm ? t("hidePassword") : t("showPassword")}
                 >
                   {showConfirm ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                 </button>
@@ -147,7 +152,7 @@ export default function SecuritySettingsPage() {
                 disabled={!canSave}
                 className={`w-full md:w-44 h-11 py-2 px-4 rounded-lg text-base font-medium transition-colors ${canSave ? "bg-black text-white" : "bg-black text-gray-400 cursor-not-allowed"}`}
               >
-                Save
+                {t("save")}
               </Button>
             </div>
           </div>
