@@ -33,38 +33,48 @@ export default function AddLoadPage() {
   });
 
   const [images, setImages] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    setIsSubmitting(true);
 
-    const selectedDriver = drivers.find((d) => d.id === formData.assignedDriverId);
-    const loadingDate = new Date(formData.loadingDate);
-    const expectedPayoutDate = new Date(loadingDate);
-    expectedPayoutDate.setDate(expectedPayoutDate.getDate() + formData.paymentTerms);
+    try {
+      const selectedDriver = drivers.find((d) => d.id === formData.assignedDriverId);
+      const loadingDate = new Date(formData.loadingDate);
+      const expectedPayoutDate = new Date(loadingDate);
+      expectedPayoutDate.setDate(expectedPayoutDate.getDate() + formData.paymentTerms);
 
-    addLoad({
-      pickupLocation: formData.pickupLocation,
-      dropoffLocation: formData.dropoffLocation,
-      clientName: formData.clientName,
-      clientPrice: parseFloat(formData.clientPrice) || 0,
-      driverPrice: parseFloat(formData.driverPrice) || 0,
-      paymentTerms: formData.paymentTerms,
-      expectedPayoutDate,
-      loadingDate,
-      loadingTime: formData.loadingTime,
-      shippingType: formData.shippingType,
-      loadWeight: parseFloat(formData.loadWeight) || 0,
-      pallets: parseFloat(formData.pallets) || undefined,
-      assignedDriver: selectedDriver,
-      status: "pending",
-      notes: formData.notes,
-      fuel: parseFloat(formData.fuel) || 0,
-      tolls: parseFloat(formData.tolls) || 0,
-      otherExpenses: parseFloat(formData.otherExpenses) || 0,
-      podImages: images,
-    });
+      await addLoad({
+        pickupLocation: formData.pickupLocation,
+        dropoffLocation: formData.dropoffLocation,
+        clientName: formData.clientName,
+        clientPrice: parseFloat(formData.clientPrice) || 0,
+        driverPrice: parseFloat(formData.driverPrice) || 0,
+        paymentTerms: formData.paymentTerms,
+        expectedPayoutDate,
+        loadingDate,
+        loadingTime: formData.loadingTime,
+        shippingType: formData.shippingType,
+        loadWeight: parseFloat(formData.loadWeight) || 0,
+        pallets: parseFloat(formData.pallets) || undefined,
+        assignedDriver: selectedDriver,
+        status: "pending",
+        notes: formData.notes,
+        fuel: parseFloat(formData.fuel) || 0,
+        tolls: parseFloat(formData.tolls) || 0,
+        otherExpenses: parseFloat(formData.otherExpenses) || 0,
+        podImages: images,
+      });
 
-    router.push("/");
+      router.push("/");
+    } catch (err: any) {
+      setError(err.message || "Failed to create load. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const calculateProfit = () => {
@@ -314,9 +324,20 @@ export default function AddLoadPage() {
           Profit Calculation: ${calculateProfit().toFixed(2)}
         </button>
 
+        {/* Error Message */}
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Submit Button */}
-        <button type="submit" className="w-full py-4 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
-          Submit & Add
+        <button 
+          type="submit" 
+          disabled={isSubmitting}
+          className="w-full py-4 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? "Creating Load..." : "Submit & Add"}
         </button>
       </form>
     </MobileLayout>

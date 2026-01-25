@@ -1,18 +1,106 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout";
 import { StatCard, LoadCard, FilterTabs } from "@/components/shared";
 import { useLoads } from "@/contexts/LoadContext";
 import { DollarSign, Clock, CreditCard, Truck, ArrowRight, ChartColumn } from "lucide-react";
 import Link from "next/link";
+import api from "@/lib/api";
+
+interface DashboardStats {
+  totalLoads: number;
+  acceptedLoads: number;
+  completedLoads: number;
+  pendingLoads: number;
+  declinedLoads: number;
+  totalIncome: number;
+  pendingPayments: number;
+}
 
 export function ManagerDashboard() {
-  const { loads, getLoadsByStatus } = useLoads();
+  const { loads, getLoadsByStatus, isLoading, error } = useLoads();
   const [activeTab, setActiveTab] = useState<string>("accepted");
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  // Fetch dashboard stats from API
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        setIsLoadingStats(true);
+        const response = await api.getManagerDashboard();
+        if (response.success && response.dashboard) {
+          setDashboardStats(response.dashboard);
+        }
+      } catch (error: any) {
+        console.error("Failed to fetch dashboard stats:", error);
+        // Fallback to calculated stats from loads
+        const completedLoads = getLoadsByStatus("completed");
+        const acceptedLoads = getLoadsByStatus("accepted");
+        const pendingLoads = getLoadsByStatus("pending");
+        
+        setDashboardStats({
+          totalLoads: loads.length,
+          acceptedLoads: acceptedLoads.length,
+          completedLoads: completedLoads.length,
+          pendingLoads: pendingLoads.length,
+          declinedLoads: 0,
+          totalIncome: completedLoads.reduce((sum, load) => sum + load.clientPrice, 0),
+          pendingPayments: acceptedLoads.reduce((sum, load) => sum + load.clientPrice, 0),
+        });
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+
+    if (!isLoading && loads.length >= 0) {
+      fetchDashboardStats();
+    }
+  }, [loads, isLoading, getLoadsByStatus]);
+  
+  if (isLoading || isLoadingStats) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header title="Dashboard" />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header title="Dashboard" />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-yellow-400 rounded-lg hover:bg-yellow-500"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   const completedLoads = getLoadsByStatus("completed");
-  const totalEarning = completedLoads.reduce((sum, load) => sum + load.clientPrice, 0);
-  const pendingPayments = loads.filter((l) => l.status === "completed" && new Date(l.expectedPayoutDate) > new Date()).reduce((sum, load) => sum + load.clientPrice, 0);
+  
+  // Use API stats if available, otherwise calculate from loads
+  const stats = dashboardStats || {
+    totalLoads: loads.length,
+    totalIncome: completedLoads.reduce((sum, load) => sum + load.clientPrice, 0),
+    pendingPayments: loads.filter((l) => l.status === "completed" && new Date(l.expectedPayoutDate) > new Date()).reduce((sum, load) => sum + load.clientPrice, 0),
+  };
+
   const upcomingPayments = loads.filter((l) => l.status === "accepted" || l.status === "in-progress").reduce((sum, load) => sum + load.clientPrice, 0);
   const activeLoadCount = loads.filter((l) => l.status === "accepted" || l.status === "in-progress" || l.status === "pending").length;
 
@@ -36,9 +124,9 @@ export function ManagerDashboard() {
           <div className="space-y-4 lg:col-span-1">
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
               <Link href="/total-earning">
-                <StatCard icon={DollarSign} label="Total Earning" value={`$ ${totalEarning.toLocaleString()}.00`} className="hover:shadow-md transition-shadow" />
+                <StatCard icon={DollarSign} label="Total Earning" value={`$ ${stats.totalIncome.toLocaleString()}.00`} className="hover:shadow-md transition-shadow" />
               </Link>
-              <StatCard icon={CreditCard} label="Unpaid Amount" value={`$ ${pendingPayments.toLocaleString()}.00`} />
+              <StatCard icon={CreditCard} label="Unpaid Amount" value={`$ ${stats.pendingPayments.toLocaleString()}.00`} />
               <StatCard icon={Clock} label="Upcoming Payments" value={`$ ${upcomingPayments.toLocaleString()}.00`} />
               <Link href="/active-loads">
                 <StatCard icon={Truck} label="Active Loads" value={activeLoadCount} className="hover:shadow-md transition-shadow" />

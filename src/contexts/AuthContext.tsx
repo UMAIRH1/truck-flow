@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User, UserRole } from "@/types";
+import api from "@/lib/api";
 
 interface AuthContextType {
   user: User | null;
@@ -10,39 +11,17 @@ interface AuthContextType {
   selectedRole: UserRole | null;
   isLoading: boolean;
   isLoggingOut: boolean;
+  error: string | null;
   setSelectedRole: (role: UserRole) => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   logout: () => void;
   switchRole: (role: UserRole) => void;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Mock users for demo
-const mockUsers: Record<UserRole, User> = {
-  manager: {
-    id: "manager-1",
-    name: "Abdullah Al Mahmud",
-    email: "abmahmud11@gmail.com",
-    phone: "+880 1738 509 654",
-    avatar: "/avatars/manager.jpg",
-    role: "manager",
-    country: "Greece",
-    createdAt: new Date("2024-01-01"),
-  },
-  driver: {
-    id: "driver-1",
-    name: "Watson",
-    email: "watson@example.com",
-    phone: "+1 234 567 890",
-    avatar: "/avatars/driver.jpg",
-    role: "driver",
-    country: "United States",
-    createdAt: new Date("2024-06-01"),
-  },
-};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -50,74 +29,129 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const isAuthenticated = user !== null;
 
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
   // Check for existing session on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem("truckflow_user");
-    const storedRole = localStorage.getItem("truckflow_role");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    if (storedRole) {
-      setSelectedRole(storedRole as UserRole);
-    }
-    setIsLoading(false);
+    const checkAuth = async () => {
+      const token = localStorage.getItem("truckflow_token");
+      if (token) {
+        try {
+          const response = await api.getCurrentUser();
+          if (response.success && response.user) {
+            const userData: User = {
+              id: response.user.id,
+              name: response.user.name,
+              email: response.user.email,
+              phone: response.user.phone,
+              role: response.user.role,
+              createdAt: new Date(response.user.createdAt),
+            };
+            setUser(userData);
+            setSelectedRole(response.user.role);
+          }
+        } catch (error) {
+          console.error("Auth check failed:", error);
+          localStorage.removeItem("truckflow_token");
+          localStorage.removeItem("truckflow_refresh_token");
+        }
+      }
+      setIsLoading(false);
+    };
+    checkAuth();
   }, []);
 
   const login = useCallback(
     async (email: string, password: string) => {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const role = selectedRole || "manager";
-      const loggedInUser = { ...mockUsers[role], email };
-      setUser(loggedInUser);
-      localStorage.setItem("truckflow_user", JSON.stringify(loggedInUser));
-      localStorage.setItem("truckflow_role", role);
+      try {
+        setError(null);
+        const response = await api.login(email, password);
+        
+        if (response.success && response.token && response.user) {
+          // Store tokens
+          localStorage.setItem("truckflow_token", response.token);
+          if (response.refreshToken) {
+            localStorage.setItem("truckflow_refresh_token", response.refreshToken);
+          }
+          
+          // Set user data
+          const userData: User = {
+            id: response.user.id,
+            name: response.user.name,
+            email: response.user.email,
+            phone: response.user.phone,
+            role: response.user.role,
+            createdAt: new Date(response.user.createdAt),
+          };
+          setUser(userData);
+          setSelectedRole(response.user.role);
+          localStorage.setItem("truckflow_user", JSON.stringify(userData));
+          localStorage.setItem("truckflow_role", response.user.role);
+        } else {
+          throw new Error("Invalid response from server");
+        }
+      } catch (error: any) {
+        console.error("Login failed:", error);
+        setError(error.message || "Login failed");
+        throw error;
+      }
     },
-    [selectedRole]
+    []
   );
 
   const signup = useCallback(
     async (name: string, email: string, password: string) => {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const role = selectedRole || "manager";
-      const newUser: User = {
-        id: `${role}-${Date.now()}`,
-        name,
-        email,
-        phone: "",
-        role,
-        createdAt: new Date(),
-      };
-      setUser(newUser);
-      localStorage.setItem("truckflow_user", JSON.stringify(newUser));
-      localStorage.setItem("truckflow_role", role);
+      try {
+        setError(null);
+        // Note: Backend doesn't have a signup endpoint for managers
+        // This would need to be implemented if needed
+        throw new Error("Signup not implemented. Please contact administrator.");
+      } catch (error: any) {
+        console.error("Signup failed:", error);
+        setError(error.message || "Signup failed");
+        throw error;
+      }
     },
-    [selectedRole]
+    []
   );
 
   const loginWithGoogle = useCallback(async () => {
-    // Simulate Google OAuth
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const role = selectedRole || "manager";
-    const googleUser = { ...mockUsers[role], email: "google@example.com" };
-    setUser(googleUser);
-    localStorage.setItem("truckflow_user", JSON.stringify(googleUser));
-    localStorage.setItem("truckflow_role", role);
-  }, [selectedRole]);
+    try {
+      setError(null);
+      // Note: Google OAuth not implemented in backend
+      throw new Error("Google login not implemented yet");
+    } catch (error: any) {
+      console.error("Google login failed:", error);
+      setError(error.message || "Google login failed");
+      throw error;
+    }
+  }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
     console.log("[Auth] logout called");
+    
+    try {
+      await api.logout();
+    } catch (error) {
+      console.error("Logout API call failed:", error);
+    }
+    
     setUser(null);
     setSelectedRole(null);
+    localStorage.removeItem("truckflow_token");
+    localStorage.removeItem("truckflow_refresh_token");
     localStorage.removeItem("truckflow_user");
     localStorage.removeItem("truckflow_role");
     console.log("[Auth] cleared localStorage");
+    
     // Redirect to sign-in page after logout
     try {
       router.push("/auth/signin");
@@ -127,11 +161,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [router, isLoggingOut]);
 
   const switchRole = useCallback((role: UserRole) => {
-    const switchedUser = mockUsers[role];
-    setUser(switchedUser);
-    setSelectedRole(role);
-    localStorage.setItem("truckflow_user", JSON.stringify(switchedUser));
-    localStorage.setItem("truckflow_role", role);
+    // Role switching not supported with real API
+    // User role is determined by backend
+    console.warn("Role switching not supported with API authentication");
   }, []);
 
   const handleSetSelectedRole = useCallback((role: UserRole) => {
@@ -147,12 +179,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         selectedRole,
         isLoading,
         isLoggingOut,
+        error,
         setSelectedRole: handleSetSelectedRole,
         login,
         signup,
         loginWithGoogle,
         logout,
         switchRole,
+        clearError,
       }}
     >
       {children}
