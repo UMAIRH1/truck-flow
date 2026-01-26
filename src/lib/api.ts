@@ -180,7 +180,7 @@ class ApiClient {
     loadAmount: number;
     paymentTerms: number;
   }) {
-    return this.request('/loads', {
+    return this.request('/loads/', {
       method: 'POST',
       body: JSON.stringify(loadData),
     });
