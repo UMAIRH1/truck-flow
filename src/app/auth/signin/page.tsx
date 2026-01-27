@@ -141,6 +141,7 @@ export default function SignInPage() {
             {isLoading ? t("signingIn") : t("signIn")}
           </Button>
         </form>
+        {/* Temporarily commented out - Google login not configured
         <div className="flex items-center my-6">
           <div className="flex-1 h-px bg-[#82A0BFCC]" />
           <span className="px-4 text-sm text-(--color-gray-table)">{t("orSignInWith")}</span>
@@ -155,11 +156,14 @@ export default function SignInPage() {
           </svg>
           Continue with Google
         </Button>
+        */}
+        {/* Temporarily commented out - Signup not available
         <div className="mt-8 text-center">
           <Link href="/auth/signup" className="text-(--color-primary-yellow-dark) hover:underline">
             {t("createAccount")}
           </Link>
         </div>
+        */}
       </div>
     </div>
   );

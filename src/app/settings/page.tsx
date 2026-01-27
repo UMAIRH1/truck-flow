@@ -20,6 +20,7 @@ export default function SettingsPage() {
   const { logout } = useAuth();
   const [showPaymentMethods, setShowPaymentMethods] = useState(false);
   const t = useTranslations("settings");
+  const tHeader = useTranslations("header");
 
   const accountItems: SettingsItem[] = [
     { label: t("editProfile"), description: t("editProfileDesc"), href: "/settings/profile" },
@@ -87,7 +88,7 @@ export default function SettingsPage() {
     <>
       <div className="block md:hidden">
         <MobileLayout showFAB={!showPaymentMethods} showBottomNav={!showPaymentMethods}>
-          <Header title={t("settings")} showBack />
+          <Header title={tHeader("settings")} showBack />
           <div className="max-w-md mx-auto space-y-6 bg-(--color-yellow-light)">
             <div className=" py-6 px-4 max-sm:rounded-t-2xl sm:rounded-none bg-(--color-white)">
               <div>

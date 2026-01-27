@@ -30,14 +30,10 @@ const LoadContext = createContext<LoadContextType | undefined>(undefined);
 function transformLoadFromAPI(apiLoad: any): Load {
   return {
     id: apiLoad.loadNumber || apiLoad._id,
-    pickupLocation: apiLoad.origin 
-      ? `${apiLoad.origin.city}, ${apiLoad.origin.postalCode}`
-      : apiLoad.pickupLocation || "",
-    dropoffLocation: apiLoad.destination
-      ? `${apiLoad.destination.city}, ${apiLoad.destination.postalCode}`
-      : apiLoad.dropoffLocation || "",
+    pickupLocation: apiLoad.pickupLocation || "",
+    dropoffLocation: apiLoad.dropoffLocation || "",
     clientName: apiLoad.clientName || "Unknown Client",
-    clientPrice: apiLoad.loadAmount || apiLoad.clientPrice || 0,
+    clientPrice: apiLoad.clientPrice || 0,
     driverPrice: apiLoad.driverPrice || 0,
     fuel: apiLoad.fuel || 0,
     tolls: apiLoad.tolls || 0,
@@ -49,16 +45,16 @@ function transformLoadFromAPI(apiLoad: any): Load {
     shippingType: apiLoad.shippingType || "FTL",
     loadWeight: apiLoad.loadWeight || 0,
     pallets: apiLoad.pallets,
-    assignedDriver: apiLoad.driverId ? {
-      id: apiLoad.driverId._id || apiLoad.driverId.id || apiLoad.driverId,
-      name: apiLoad.driverId.name || "Unknown Driver",
-      phone: apiLoad.driverId.phone || "",
-      email: apiLoad.driverId.email || "",
+    assignedDriver: apiLoad.assignedDriver ? {
+      id: apiLoad.assignedDriver._id || apiLoad.assignedDriver.id || apiLoad.assignedDriver,
+      name: apiLoad.assignedDriver.name || "Unknown Driver",
+      phone: apiLoad.assignedDriver.phone || "",
+      email: apiLoad.assignedDriver.email || "",
       isAvailable: true,
     } : undefined,
     status: apiLoad.status || "pending",
     notes: apiLoad.notes,
-    podImages: apiLoad.pod?.imageUrl ? [apiLoad.pod.imageUrl] : apiLoad.podImages || [],
+    podImages: apiLoad.podImage ? [apiLoad.podImage] : apiLoad.podImages || [],
     createdAt: apiLoad.createdAt ? new Date(apiLoad.createdAt) : new Date(),
     updatedAt: apiLoad.updatedAt ? new Date(apiLoad.updatedAt) : new Date(),
     completedAt: apiLoad.completedAt ? new Date(apiLoad.completedAt) : undefined,
@@ -140,18 +136,24 @@ export function LoadProvider({ children }: { children: ReactNode }) {
   const addLoad = useCallback(
     async (loadData: Omit<Load, "id" | "createdAt" | "updatedAt">) => {
       try {
-        // Transform frontend format to backend format
+        // Send data directly matching UI fields
         const apiLoadData = {
-          origin: {
-            city: loadData.pickupLocation.split(",")[0]?.trim() || "",
-            postalCode: loadData.pickupLocation.split(",")[1]?.trim() || "",
-          },
-          destination: {
-            city: loadData.dropoffLocation.split(",")[0]?.trim() || "",
-            postalCode: loadData.dropoffLocation.split(",")[1]?.trim() || "",
-          },
-          loadAmount: loadData.clientPrice,
+          pickupLocation: loadData.pickupLocation,
+          dropoffLocation: loadData.dropoffLocation,
+          clientName: loadData.clientName,
+          clientPrice: loadData.clientPrice,
+          driverPrice: loadData.driverPrice || 0,
+          shippingType: loadData.shippingType,
+          loadWeight: loadData.loadWeight,
+          pallets: loadData.pallets,
+          loadingDate: loadData.loadingDate,
+          loadingTime: loadData.loadingTime,
           paymentTerms: loadData.paymentTerms,
+          fuel: loadData.fuel || 0,
+          tolls: loadData.tolls || 0,
+          otherExpenses: loadData.otherExpenses || 0,
+          notes: loadData.notes,
+          driverId: loadData.assignedDriver?.id || undefined,
         };
 
         const response = await api.createLoad(apiLoadData);

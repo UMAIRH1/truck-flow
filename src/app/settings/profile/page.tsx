@@ -9,6 +9,7 @@ import { OptimizedImage } from "@/components/ui/optimized-image";
 import { ASSETS } from "@/lib/assets";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import api from "@/lib/api";
 
 export default function EditProfilePage() {
   const { user } = useAuth();
@@ -23,38 +24,42 @@ export default function EditProfilePage() {
     avatar: user?.avatar || "",
   });
 
-  const handleSave = () => {
-    console.log("Saving profile:", formData);
+  const handleSave = async () => {
+    try {
+      const response = await api.updateProfile(formData);
+      if (response.success) {
+        console.log('Profile updated successfully:', response.user);
+        // Optionally update the auth context with new user data
+        // You could add a method to AuthContext to update user data
+      }
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+    }
   };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const createdUrlRef = useRef<string | null>(null);
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e?.target?.files?.[0];
     if (!file) return;
-    if (createdUrlRef.current) {
-      try {
-        URL.revokeObjectURL(createdUrlRef.current);
-      } catch (err) {}
+
+    // Validate file
+    const { validateImageFile, compressImage } = await import('@/lib/imageUtils');
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      alert(validation.error);
+      return;
     }
 
-    const url = URL.createObjectURL(file);
-    createdUrlRef.current = url;
-    setFormData((prev) => ({ ...prev, avatar: url }));
+    try {
+      // Compress and convert to base64
+      const base64 = await compressImage(file, 400, 400, 0.8);
+      setFormData((prev) => ({ ...prev, avatar: base64 }));
+    } catch (error) {
+      console.error('Error processing image:', error);
+      alert('Failed to process image');
+    }
   };
-
-  useEffect(() => {
-    return () => {
-      if (createdUrlRef.current) {
-        try {
-          URL.revokeObjectURL(createdUrlRef.current);
-        } catch (err) {
-          /* ignore */
-        }
-      }
-    };
-  }, []);
 
   return (
     <MobileLayout showFAB={true} showBottomNav={true}>

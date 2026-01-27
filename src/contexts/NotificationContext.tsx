@@ -1,75 +1,106 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { Notification, NotificationType } from '@/types';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import { Notification } from '@/types';
+import api from '@/lib/api';
+import socketService from '@/lib/socket';
+import { toast } from 'sonner';
 
 interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
+  isLoading: boolean;
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
-  clearNotifications: () => void;
+  deleteNotification: (id: string) => void;
+  refreshNotifications: () => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
-// Mock notifications
-const mockNotifications: Notification[] = [
-  {
-    id: 'n1',
-    type: 'load_accepted',
-    title: 'Load has been accepted',
-    message: 'Ema watson has accepted your load request with the price you sent.',
-    timestamp: new Date(Date.now() - 9 * 60 * 1000), // 9 min ago
-    read: false,
-  },
-  {
-    id: 'n2',
-    type: 'load_uploaded',
-    title: 'New load uploaded',
-    message: 'A new load has been recently uploaded by you with a 3 days delivery timeline.',
-    timestamp: new Date(Date.now() - 20 * 60 * 1000), // 20 min ago
-    read: false,
-  },
-  {
-    id: 'n3',
-    type: 'status_updated',
-    title: 'Load status has been updated',
-    message: 'Your partner - Watson just delivered the load. And it is now in next phase.',
-    timestamp: new Date(Date.now() - 35 * 60 * 1000), // 35 min ago
-    read: true,
-  },
-  {
-    id: 'n4',
-    type: 'load_uploaded',
-    title: 'New load uploaded',
-    message: 'A new load has been recently uploaded by you with a 7 days delivery timeline.',
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-    read: true,
-  },
-  {
-    id: 'n5',
-    type: 'load_uploaded',
-    title: 'New load uploaded',
-    message: 'A new load has been recently uploaded by you with a 7 days delivery timeline.',
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-    read: true,
-  },
-  {
-    id: 'n6',
-    type: 'load_accepted',
-    title: 'Load has been accepted',
-    message: 'Ema watson has accepted your load request with the price you sent.',
-    timestamp: new Date(Date.now() - 25 * 60 * 60 * 1000), // 1 day ago
-    read: true,
-  },
-];
-
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  // Fetch notifications from backend
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('truckflow_token') : null;
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await api.getNotifications(50);
+      if (response.success && response.data) {
+        const formattedNotifications = response.data.map((notif: any) => ({
+          id: notif._id,
+          type: notif.type,
+          title: notif.title,
+          message: notif.message,
+          timestamp: new Date(notif.createdAt),
+          read: notif.read,
+          loadId: notif.loadId,
+          loadNumber: notif.loadNumber,
+        }));
+        setNotifications(formattedNotifications);
+        setUnreadCount(formattedNotifications.filter((n: Notification) => !n.read).length);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Initialize WebSocket connection
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('truckflow_token') : null;
+    
+    if (token) {
+      // Fetch initial notifications
+      fetchNotifications();
+
+      // Connect to WebSocket
+      socketService.connect(token);
+
+      // Listen for new notifications
+      const handleNotification = (notification: any) => {
+        console.log('New notification received:', notification);
+        
+        const newNotification: Notification = {
+          id: notification.id,
+          type: notification.type,
+          title: notification.title,
+          message: notification.message,
+          timestamp: new Date(notification.createdAt),
+          read: notification.read,
+          loadId: notification.loadId,
+          loadNumber: notification.loadNumber,
+        };
+
+        setNotifications((prev) => [newNotification, ...prev]);
+        setUnreadCount((prev) => prev + 1);
+
+        // Show toast notification
+        toast.info(notification.title, {
+          description: notification.message,
+          duration: 5000,
+        });
+      };
+
+      socketService.on('notification', handleNotification);
+
+      // Cleanup
+      return () => {
+        socketService.off('notification', handleNotification);
+      };
+    } else {
+      setIsLoading(false);
+    }
+  }, [fetchNotifications]);
 
   const addNotification = useCallback(
     (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
@@ -80,33 +111,63 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         read: false,
       };
       setNotifications((prev) => [newNotification, ...prev]);
+      setUnreadCount((prev) => prev + 1);
     },
     []
   );
 
-  const markAsRead = useCallback((id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  const markAsRead = useCallback(async (id: string) => {
+    try {
+      await api.markNotificationAsRead(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
   }, []);
 
-  const markAllAsRead = useCallback(() => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const markAllAsRead = useCallback(async () => {
+    try {
+      await api.markAllNotificationsAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
   }, []);
 
-  const clearNotifications = useCallback(() => {
-    setNotifications([]);
+  const deleteNotification = useCallback(async (id: string) => {
+    try {
+      await api.deleteNotification(id);
+      setNotifications((prev) => {
+        const notification = prev.find((n) => n.id === id);
+        if (notification && !notification.read) {
+          setUnreadCount((count) => Math.max(0, count - 1));
+        }
+        return prev.filter((n) => n.id !== id);
+      });
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
   }, []);
+
+  const refreshNotifications = useCallback(async () => {
+    await fetchNotifications();
+  }, [fetchNotifications]);
 
   return (
     <NotificationContext.Provider
       value={{
         notifications,
         unreadCount,
+        isLoading,
         addNotification,
         markAsRead,
         markAllAsRead,
-        clearNotifications,
+        deleteNotification,
+        refreshNotifications,
       }}
     >
       {children}
@@ -121,3 +182,4 @@ export function useNotifications() {
   }
   return context;
 }
+
