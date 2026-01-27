@@ -132,7 +132,7 @@ export function ManagerDashboard() {
               </Link>
             </div>
             <Link href="/cashflow" className="block">
-              <div className="bg-(--color-yellow-light) rounded-lg p-6 flex items-center justify-between shadow-sm">
+              <div className="bg-(--color-yellow-light) rounded-lg p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-3">
                   <ChartColumn className="h-5 w-5 text-[#374957]" />
                   <span className="font-bold text-xs text-(--color-light-black-border)">{t("dashboard.cashflow")}</span>

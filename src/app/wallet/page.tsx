@@ -10,6 +10,7 @@ import { useState, useRef } from "react";
 import { useLoads } from "@/contexts/LoadContext";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import api from "@/lib/api";
 
 export default function WalletPage() {
   const t = useTranslations("wallet");
@@ -35,19 +36,23 @@ export default function WalletPage() {
       return;
     }
     try {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("type", type);
-      const res = await fetch("/api/upload", { method: "POST", body: form });
-      if (res.ok) {
-        toast.success(`${file.name} uploaded`);
-      } else {
-        toast.error(`${file.name} uploaded (server returned ${res.status})`);
+      const response = await api.uploadFile(file, type);
+      if (response.success) {
+        toast.success(`${file.name} uploaded successfully`);
+        setUploadedFiles((prev) => [
+          { 
+            id: Date.now(), 
+            name: response.file.originalName, 
+            size: response.file.size, 
+            kind: type, 
+            uploadedAt: response.file.uploadedAt 
+          }, 
+          ...prev
+        ]);
       }
-      setUploadedFiles((prev) => [{ id: Date.now(), name: file.name, size: file.size, kind: type, uploadedAt: new Date().toISOString() }, ...prev]);
     } catch (err) {
-      toast(`${file.name} selected (no upload endpoint)`);
-      setUploadedFiles((prev) => [{ id: Date.now(), name: file.name, size: file.size, kind: type, uploadedAt: new Date().toISOString() }, ...prev]);
+      toast.error(`Failed to upload ${file.name}`);
+      console.error('Upload error:', err);
     } finally {
       if (type === "invoice" && invoiceInputRef.current) invoiceInputRef.current.value = "";
       if (type === "documents" && docsInputRef.current) docsInputRef.current.value = "";

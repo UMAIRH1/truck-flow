@@ -375,6 +375,23 @@
     "gallery": "Gallery",
     "imagesUploaded": "images uploaded"
   },
+  "uploadPOD": {
+    "title": "Upload Proof of Delivery",
+    "loadNotFound": "Load not found",
+    "canOnlyUploadForAccepted": "You can only upload POD for accepted loads",
+    "pleaseSelectImage": "Please select at least one image",
+    "podUploadedSuccessfully": "POD uploaded successfully! Load marked as completed.",
+    "uploadFailed": "Failed to upload POD. Please try again.",
+    "loadDetails": "Load Details",
+    "instructions": "Instructions",
+    "takePhotosOfDelivery": "Take clear photos of the delivered goods",
+    "ensureImagesAreClear": "Ensure images are clear and readable",
+    "uploadWillMarkComplete": "Uploading will mark the load as completed",
+    "uploadProofOfDelivery": "Upload Proof of Delivery",
+    "uploading": "Uploading...",
+    "uploadAndComplete": "Upload & Complete Load",
+    "selectAtLeastOneImage": "Select at least one image to continue"
+  },
   "addDriver": {
     "title": "Add Driver",
     "driverInformation": "Driver Information",

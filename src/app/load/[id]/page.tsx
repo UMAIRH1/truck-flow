@@ -1,22 +1,29 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Header, MobileLayout } from "@/components/layout";
 import { useLoads } from "@/contexts/LoadContext";
-import { Clock, Check, BusFront, ArrowDownLeft, ArrowUpRight, X } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Clock, Check, BusFront, ArrowDownLeft, ArrowUpRight, X, DollarSign, Package, Calendar, Fuel, AlertCircle, User, Phone, Mail, MapPin, Upload } from "lucide-react";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { ASSETS } from "@/lib/assets";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
+import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { StatusBadge } from "@/components/shared";
 
 export default function LoadStatusPage() {
   const params = useParams();
+  const router = useRouter();
   const { getLoadById } = useLoads();
+  const { user } = useAuth();
   const t = useTranslations("loadStatus");
   const tCommon = useTranslations("common");
 
   const load = getLoadById(params.id as string);
+  const isManager = user?.role === "manager";
+  const isDriver = user?.role === "driver";
 
   if (!load) {
     return (
@@ -45,87 +52,283 @@ export default function LoadStatusPage() {
     };
   };
 
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
+  };
+
+  const profit = load.clientPrice - (load.driverPrice || 0) - (load.fuel || 0) - (load.tolls || 0) - (load.otherExpenses || 0);
+
   const content = (
-    <div className="px-4 py-4 space-y-4">
-      <div className="bg-(--color-primary-yellow-dark) rounded-2xl p-4">
-        <div className=" mb-4 flex items-center justify-center">
+    <div className="px-4 py-4 space-y-6 max-w-4xl mx-auto">
+      {/* Load Header Card */}
+      <div className="bg-(--color-primary-yellow-dark) rounded-2xl p-6 shadow-lg">
+        <div className="mb-4 flex items-center justify-center">
           <OptimizedImage src={ASSETS.images.icons.truck} alt="Load Status" width={200} height={100} />
         </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-(--color-blue-border) p-1.5 rounded-md">
-              <BusFront className="h-4 w-4 text-white" />
+        
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-(--color-blue-border) p-2 rounded-md">
+              <BusFront className="h-5 w-5 text-white" />
             </div>
-            <span className="font-bold text-(--color-stat-gray) text-base">{load.clientName}</span>
+            <div>
+              <span className="font-bold text-(--color-stat-gray) text-lg block">{load.clientName}</span>
+              <span className="text-xs text-(--color-dark-gray)">Load #{load.id.slice(-8).toUpperCase()}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-(--color-dark-gray)">
+          <StatusBadge status={load.status} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <ArrowDownLeft className="h-4 w-4 text-(--color-primary-gray)" />
+              <div>
+                <p className="text-xs text-(--color-dark-gray)">{tCommon("from")}</p>
+                <p className="font-medium text-(--color-stat-gray)">{load.pickupLocation}</p>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <ArrowUpRight className="h-4 w-4 text-(--color-primary-gray)" />
+              <div>
+                <p className="text-xs text-(--color-dark-gray)">{tCommon("to")}</p>
+                <p className="font-medium text-(--color-stat-gray)">{load.dropoffLocation}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-300">
+          <div className="flex items-center gap-4 text-xs text-(--color-dark-gray)">
             <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              <span>
-                {tCommon("today")} / {load.loadingTime}
-              </span>
+              <Calendar className="h-4 w-4" />
+              <span>{formatDate(load.loadingDate)}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Icon src={ASSETS.images.icons.share} className="h-3 w-3" />
+              <Clock className="h-4 w-4" />
+              <span>{load.loadingTime}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Package className="h-4 w-4" />
               <span>{load.loadWeight} KG</span>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="flex items-center justify-between mt-3">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs">
-              <ArrowDownLeft className="h-3 w-3 text-(--color-primary-gray)" />
-              <span className="text-(--color-dark-gray)">
-                {tCommon("from")}: {load.pickupLocation}
-              </span>
+      {/* Manager-specific Financial Details */}
+      {isManager && (
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="font-bold text-lg mb-4 text-black">Financial Details</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="h-4 w-4 text-green-600" />
+                <span className="text-xs text-gray-600">Client Price</span>
+              </div>
+              <p className="text-xl font-bold text-green-600">${load.clientPrice.toFixed(2)}</p>
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <ArrowUpRight className="h-3 w-3 text-(--color-primary-gray)" />
-              <span className="text-(--color-dark-gray)">
-                {tCommon("to")}: {load.dropoffLocation}
-              </span>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="h-4 w-4 text-blue-600" />
+                <span className="text-xs text-gray-600">Driver Price</span>
+              </div>
+              <p className="text-xl font-bold text-blue-600">${(load.driverPrice || 0).toFixed(2)}</p>
+            </div>
+            <div className="bg-orange-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="h-4 w-4 text-orange-600" />
+                <span className="text-xs text-gray-600">Total Expenses</span>
+              </div>
+              <p className="text-xl font-bold text-orange-600">${((load.fuel || 0) + (load.tolls || 0) + (load.otherExpenses || 0)).toFixed(2)}</p>
+            </div>
+            <div className={`${profit >= 0 ? 'bg-purple-50' : 'bg-red-50'} p-4 rounded-lg`}>
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className={`h-4 w-4 ${profit >= 0 ? 'text-purple-600' : 'text-red-600'}`} />
+                <span className="text-xs text-gray-600">Profit</span>
+              </div>
+              <p className={`text-xl font-bold ${profit >= 0 ? 'text-purple-600' : 'text-red-600'}`}>${profit.toFixed(2)}</p>
             </div>
           </div>
-          <div className="text-right flex flex-col justify-end items-start">
-            <Badge className="px-4 bg-[#0D80F2] text-white self-end text-sm rounded-md font-normal">{t("moreInfo")}</Badge>
-            <span className="font-bold">
-              {tCommon("price")} ${load.clientPrice.toFixed(2)}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div className="text-black">
-        <h3 className="font-medium text-xl">
-          {t("driver")} | {load.assignedDriver?.name || t("unassigned")}
-        </h3>
-        <p className="text-xs text-(--color-gray-light) font-normal mt-1">100 km | 2 hours | {load.loadWeight} kg</p>
-      </div>
-      <div>
-        <div className="space-y-">
-          {timeline.map((item, index) => {
-            const { date, time } = formatDateTime(item.date);
-            const isCompleted = item.completed;
 
-            return (
-              <div key={index} className="flex items-start gap-3">
-                <div className="flex flex-col items-center">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isCompleted ? "bg-green-500" : "bg-(--color-primary-yellow-dark)"}`}>
-                    {isCompleted ? <Check className="h-4 w-4 text-white" /> : <X className="h-4 w-4 text-white" />}
-                  </div>
-                  {index < timeline.length - 1 && <div className="w-0.5 h-8 bg-gray-200 mt-1" />}
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm text-black">{item.status}</p>
-                  <p className="text-xs font-normal text-(--color-button-table)">
-                    {date} | {time}
-                  </p>
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="font-semibold text-sm mb-3 text-gray-700">Expense Breakdown</h4>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="flex items-center gap-2">
+                <Fuel className="h-4 w-4 text-gray-500" />
+                <div>
+                  <p className="text-xs text-gray-500">Fuel</p>
+                  <p className="font-semibold text-sm">${(load.fuel || 0).toFixed(2)}</p>
                 </div>
               </div>
-            );
-          })}
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-gray-500" />
+                <div>
+                  <p className="text-xs text-gray-500">Tolls</p>
+                  <p className="font-semibold text-sm">${(load.tolls || 0).toFixed(2)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-gray-500" />
+                <div>
+                  <p className="text-xs text-gray-500">Other</p>
+                  <p className="font-semibold text-sm">${(load.otherExpenses || 0).toFixed(2)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      )}
+
+      {/* Load Details */}
+      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+        <h3 className="font-bold text-lg mb-4 text-black">Load Details</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex items-start gap-3">
+            <Package className="h-5 w-5 text-gray-500 mt-0.5" />
+            <div>
+              <p className="text-xs text-gray-500">Shipping Type</p>
+              <p className="font-semibold">{load.shippingType}</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <Package className="h-5 w-5 text-gray-500 mt-0.5" />
+            <div>
+              <p className="text-xs text-gray-500">Load Weight</p>
+              <p className="font-semibold">{load.loadWeight} KG</p>
+            </div>
+          </div>
+          {load.pallets && (
+            <div className="flex items-start gap-3">
+              <Package className="h-5 w-5 text-gray-500 mt-0.5" />
+              <div>
+                <p className="text-xs text-gray-500">Pallets</p>
+                <p className="font-semibold">{load.pallets}</p>
+              </div>
+            </div>
+          )}
+          <div className="flex items-start gap-3">
+            <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
+            <div>
+              <p className="text-xs text-gray-500">Payment Terms</p>
+              <p className="font-semibold">{load.paymentTerms} Days</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
+            <div>
+              <p className="text-xs text-gray-500">Expected Payout</p>
+              <p className="font-semibold">{formatDate(load.expectedPayoutDate)}</p>
+            </div>
+          </div>
+        </div>
+        {load.notes && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <p className="text-xs text-gray-500 mb-1">Notes</p>
+            <p className="text-sm text-gray-700">{load.notes}</p>
+          </div>
+        )}
       </div>
+
+      {/* Driver Information */}
+      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+        <h3 className="font-bold text-lg mb-4 text-black">
+          {t("driver")} Information
+        </h3>
+        {load.assignedDriver ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <User className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-base">{load.assignedDriver.name}</p>
+                <p className="text-xs text-gray-500">Assigned Driver</p>
+              </div>
+            </div>
+            {load.assignedDriver.phone && (
+              <div className="flex items-center gap-3 text-sm">
+                <Phone className="h-4 w-4 text-gray-500" />
+                <span>{load.assignedDriver.phone}</span>
+              </div>
+            )}
+            {load.assignedDriver.email && (
+              <div className="flex items-center gap-3 text-sm">
+                <Mail className="h-4 w-4 text-gray-500" />
+                <span>{load.assignedDriver.email}</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-4 text-gray-500">
+            <User className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+            <p>{t("unassigned")}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Timeline */}
+      {timeline.length > 0 && (
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="font-bold text-lg mb-4 text-black">Timeline</h3>
+          <div className="space-y-4">
+            {timeline.map((item, index) => {
+              const { date, time } = formatDateTime(item.date);
+              const isCompleted = item.completed;
+
+              return (
+                <div key={index} className="flex items-start gap-3">
+                  <div className="flex flex-col items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isCompleted ? "bg-green-500" : "bg-(--color-primary-yellow-dark)"}`}>
+                      {isCompleted ? <Check className="h-5 w-5 text-white" /> : <X className="h-5 w-5 text-white" />}
+                    </div>
+                    {index < timeline.length - 1 && <div className="w-0.5 h-12 bg-gray-200 mt-1" />}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-base text-black">{item.status}</p>
+                    <p className="text-sm text-(--color-button-table)">
+                      {date} | {time}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* POD Images */}
+      {load.podImages && load.podImages.length > 0 && (
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="font-bold text-lg mb-4 text-black">Proof of Delivery</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {load.podImages.map((image, index) => (
+              <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200">
+                <img src={image} alt={`POD ${index + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Upload POD Button for Driver */}
+      {isDriver && load.status === "accepted" && !load.podImages?.length && (
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="font-bold text-lg mb-4 text-black">Complete Delivery</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Upload proof of delivery to mark this load as completed.
+          </p>
+          <Button
+            onClick={() => router.push(`/load/${load.id}/upload-pod`)}
+            className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full"
+          >
+            <Upload className="w-5 h-5 mr-2" />
+            Upload Proof of Delivery
+          </Button>
+        </div>
+      )}
     </div>
   );
 
@@ -134,12 +337,12 @@ export default function LoadStatusPage() {
       <div className="block md:hidden">
         <MobileLayout showFAB={false}>
           <Header title={t("title")} showBack />
-          <div className="max-w-md mx-auto">{content}</div>
+          {content}
         </MobileLayout>
       </div>
-      <div className="hidden md:block">
+      <div className="hidden md:block min-h-screen bg-gray-50">
         <Header title={t("title")} showBack />
-        <div className="max-w-7xl mx-auto">{content}</div>
+        {content}
       </div>
     </>
   );

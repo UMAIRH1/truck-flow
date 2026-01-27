@@ -175,10 +175,22 @@ class ApiClient {
 
   // Load endpoints
   async createLoad(loadData: {
-    origin: { city: string; postalCode: string };
-    destination: { city: string; postalCode: string };
-    loadAmount: number;
+    pickupLocation: string;
+    dropoffLocation: string;
+    clientName: string;
+    clientPrice: number;
+    driverPrice?: number;
+    shippingType?: string;
+    loadWeight?: number;
+    pallets?: number;
+    loadingDate: Date;
+    loadingTime: string;
     paymentTerms: number;
+    fuel?: number;
+    tolls?: number;
+    otherExpenses?: number;
+    notes?: string;
+    driverId?: string;
   }) {
     return this.request('/loads/', {
       method: 'POST',
@@ -193,6 +205,29 @@ class ApiClient {
 
   async getLoad(id: string) {
     return this.request(`/loads/${id}`);
+  }
+
+  async updateLoad(id: string, loadData: Partial<{
+    pickupLocation: string;
+    dropoffLocation: string;
+    clientName: string;
+    clientPrice: number;
+    driverPrice?: number;
+    shippingType?: string;
+    loadWeight?: number;
+    pallets?: number;
+    loadingDate: Date;
+    loadingTime: string;
+    paymentTerms: number;
+    fuel?: number;
+    tolls?: number;
+    otherExpenses?: number;
+    notes?: string;
+  }>) {
+    return this.request(`/loads/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(loadData),
+    });
   }
 
   async deleteLoad(id: string) {
@@ -215,15 +250,21 @@ class ApiClient {
   }
 
   async uploadPOD(loadId: string, imageFile: File) {
-    const formData = new FormData();
-    formData.append('image', imageFile);
+    // Convert image to base64
+    const { fileToBase64, validateImageFile } = await import('./imageUtils');
+    
+    // Validate file
+    const validation = validateImageFile(imageFile);
+    if (!validation.valid) {
+      throw new Error(validation.error);
+    }
+
+    // Convert to base64
+    const base64Image = await fileToBase64(imageFile);
 
     return this.request(`/loads/${loadId}/pod`, {
       method: 'POST',
-      body: formData,
-      headers: {
-        Authorization: `Bearer ${this.getToken()}`,
-      },
+      body: JSON.stringify({ image: base64Image }),
     });
   }
 
@@ -254,6 +295,58 @@ class ApiClient {
     }
 
     return response.blob();
+  }
+
+  // Update user profile
+  async updateProfile(profileData: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    country?: string;
+    avatar?: string;
+    password?: string;
+  }) {
+    return this.request('/users/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(profileData),
+    });
+  }
+
+  // Upload file (invoice or document)
+  async uploadFile(file: File, type: 'invoice' | 'documents') {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    return this.request('/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${this.getToken()}`,
+      },
+    });
+  }
+
+  // Notification endpoints
+  async getNotifications(limit?: number) {
+    const query = limit ? `?limit=${limit}` : '';
+    return this.request(`/notifications${query}`);
+  }
+
+  async getUnreadCount() {
+    return this.request('/notifications/unread-count');
+  }
+
+  async markNotificationAsRead(id: string) {
+    return this.request(`/notifications/${id}/read`, { method: 'PATCH' });
+  }
+
+  async markAllNotificationsAsRead() {
+    return this.request('/notifications/read-all', { method: 'PATCH' });
+  }
+
+  async deleteNotification(id: string) {
+    return this.request(`/notifications/${id}`, { method: 'DELETE' });
   }
 }
 

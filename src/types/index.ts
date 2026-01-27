@@ -84,7 +84,7 @@ export interface CashflowItem {
 }
 
 // Notification Types
-export type NotificationType = "load_accepted" | "load_uploaded" | "status_updated" | "payment_received";
+export type NotificationType = "load_created" | "load_assigned" | "load_accepted" | "load_rejected" | "load_completed" | "load_cancelled";
 
 export interface Notification {
   id: string;
@@ -93,6 +93,8 @@ export interface Notification {
   message: string;
   timestamp: Date;
   read: boolean;
+  loadId?: string;
+  loadNumber?: string;
 }
 
 // Payment Method Types
