@@ -39,10 +39,10 @@ export default function CashflowPage() {
                 <p className="text-xs font-normal mt-1">{clientsTotal.toLocaleString()}.00</p>
               </div>
             </div>
-            <div className="flex justify-start items-center gap-2 bg-(--color-dangerous) text-white rounded-lg px-2 py-4 md:p-6">
+            <div className="flex justify-start items-center gap-2 bg-(--color-dangerous) text-white rounded-lg p-2 md:p-6">
               <DollarSign />
               <div>
-                <p className="text-[13px] font-bold">{t("cashflow.partnersCashOut")}</p>
+                <p className="text-xs font-semibold">{t("cashflow.partnersCashOut")}</p>
                 <p className="text-xs font-normal mt-1">{partnersTotal.toLocaleString()}.00</p>
               </div>
             </div>
