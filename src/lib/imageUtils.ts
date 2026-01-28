@@ -1,96 +1,85 @@
 /**
- * Image utility functions for compression and validation
+ * Validate image file before upload
  */
+export function validateImageFile(file: File): { valid: boolean; error?: string } {
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
 
-export interface ImageValidation {
-  valid: boolean;
-  error?: string;
-}
-
-/**
- * Validate image file
- */
-export const validateImageFile = (file: File): ImageValidation => {
-  // Check file type
-  if (!file.type.startsWith('image/')) {
-    return { valid: false, error: 'Please select an image file' };
+  if (!allowedTypes.includes(file.type)) {
+    return {
+      valid: false,
+      error: "Invalid file type. Please upload JPG, PNG, GIF, or WebP images.",
+    };
   }
 
-  // Check file size (max 10MB)
-  const maxSize = 10 * 1024 * 1024; // 10MB
   if (file.size > maxSize) {
-    return { valid: false, error: 'Image size must be less than 10MB' };
+    return {
+      valid: false,
+      error: "File size exceeds 5MB limit.",
+    };
   }
 
   return { valid: true };
-};
+}
 
 /**
  * Convert file to base64 string
  */
-export const fileToBase64 = (file: File): Promise<string> => {
+export function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = (error) => reject(error);
   });
-};
+}
 
 /**
- * Compress image to specified dimensions and quality
+ * Compress and resize image, return as base64
  */
-export const compressImage = (
-  file: File,
-  maxWidth: number = 1920,
-  maxHeight: number = 1080,
-  quality: number = 0.8
-): Promise<string> => {
+export function compressImage(file: File, maxWidth: number, maxHeight: number, quality: number = 0.8): Promise<string> {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    
-    reader.onload = (e) => {
-      const img = new Image();
-      img.src = e.target?.result as string;
-      
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
 
-        // Calculate new dimensions
-        if (width > height) {
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width = (width * maxHeight) / height;
-            height = maxHeight;
-          }
+    img.onload = () => {
+      // Calculate new dimensions
+      let { width, height } = img;
+
+      if (width > height) {
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
         }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Failed to get canvas context'));
-          return;
+      } else {
+        if (height > maxHeight) {
+          width = (width * maxHeight) / height;
+          height = maxHeight;
         }
+      }
 
-        ctx.drawImage(img, 0, 0, width, height);
+      canvas.width = width;
+      canvas.height = height;
 
-        // Convert to base64
-        const base64 = canvas.toDataURL(file.type, quality);
-        resolve(base64);
-      };
-
-      img.onerror = () => reject(new Error('Failed to load image'));
+      // Draw and compress
+      ctx?.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          } else {
+            reject(new Error("Compression failed"));
+          }
+        },
+        "image/jpeg",
+        quality,
+      );
     };
 
-    reader.onerror = () => reject(new Error('Failed to read file'));
+    img.onerror = () => reject(new Error("Failed to load image"));
+    img.src = URL.createObjectURL(file);
   });
-};
+}
