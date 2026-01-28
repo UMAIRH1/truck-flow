@@ -151,7 +151,6 @@ class ApiClient {
   async createDriver(driverData: {
     name: string;
     email: string;
-    password: string;
     phone: string;
     preferredLanguage?: string;
   }) {
@@ -234,13 +233,6 @@ class ApiClient {
     return this.request(`/loads/${id}`, { method: 'DELETE' });
   }
 
-  async updateLoad(id: string, loadData: any) {
-    return this.request(`/loads/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(loadData),
-    });
-  }
-
   async assignDriver(loadId: string, driverId: string) {
     return this.request(`/loads/${loadId}/assign`, {
       method: 'PATCH',
@@ -254,25 +246,6 @@ class ApiClient {
 
   async declineLoad(loadId: string) {
     return this.request(`/loads/${loadId}/decline`, { method: 'PATCH' });
-  }
-
-  async uploadPOD(loadId: string, imageFile: File) {
-    // Convert image to base64
-    const { fileToBase64, validateImageFile } = await import('./imageUtils');
-    
-    // Validate file
-    const validation = validateImageFile(imageFile);
-    if (!validation.valid) {
-      throw new Error(validation.error);
-    }
-
-    // Convert to base64
-    const base64Image = await fileToBase64(imageFile);
-
-    return this.request(`/loads/${loadId}/pod`, {
-      method: 'POST',
-      body: JSON.stringify({ image: base64Image }),
-    });
   }
 
   // Dashboard endpoints
