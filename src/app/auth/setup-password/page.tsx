@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Lock, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, Lock, CheckCircle, Loader2 } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
 
-export default function SetupPasswordPage() {
+function SetupPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -190,5 +190,17 @@ export default function SetupPasswordPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SetupPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
+      </div>
+    }>
+      <SetupPasswordForm />
+    </Suspense>
   );
 }

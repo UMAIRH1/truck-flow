@@ -167,6 +167,7 @@
     "accepted": "Accepted",
     "pending": "Pending",
     "rejected": "Rejected",
+    "dispute": "Dispute",
     "completed": "Completed",
     "inProgress": "In Progress",
     "delivered": "Delivered",

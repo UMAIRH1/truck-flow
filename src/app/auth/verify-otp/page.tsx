@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import Link from "next/link";
 
-export default function VerifyOTPPage() {
+function VerifyOTPForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
@@ -273,5 +273,17 @@ export default function VerifyOTPPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyOTPPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
+      </div>
+    }>
+      <VerifyOTPForm />
+    </Suspense>
   );
 }
