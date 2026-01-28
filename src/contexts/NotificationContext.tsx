@@ -70,25 +70,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       const handleNotification = (notification: any) => {
         console.log('New notification received:', notification);
         
-        const newNotification: Notification = {
-          id: notification.id,
-          type: notification.type,
-          title: notification.title,
-          message: notification.message,
-          timestamp: new Date(notification.createdAt),
-          read: notification.read,
-          loadId: notification.loadId,
-          loadNumber: notification.loadNumber,
-        };
-
-        setNotifications((prev) => [newNotification, ...prev]);
-        setUnreadCount((prev) => prev + 1);
-
         // Show toast notification
         toast.info(notification.title, {
           description: notification.message,
           duration: 5000,
         });
+
+        // Refetch all notifications from API
+        fetchNotifications();
       };
 
       socketService.on('notification', handleNotification);
