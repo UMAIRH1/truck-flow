@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { validateSignInForm } from "../validations";
 import { Eye, EyeOff } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -59,10 +60,12 @@ export default function SignInPage() {
 
     try {
       await login(email, password);
+      toast.success("Login successful!");
       router.push("/");
-    } catch {
-      setError("Invalid email or password");
-    } finally {
+    } catch (err: any) {
+      const errorMessage = err?.message || "Invalid email or password";
+      setError(errorMessage);
+      toast.error(errorMessage);
       setIsLoading(false);
     }
   };
@@ -72,9 +75,10 @@ export default function SignInPage() {
     try {
       await loginWithGoogle();
       router.push("/");
-    } catch {
-      setError("Google sign in failed");
-    } finally {
+    } catch (err: any) {
+      const errorMessage = err?.message || "Google sign in failed";
+      setError(errorMessage);
+      toast.error(errorMessage);
       setIsLoading(false);
     }
   };

@@ -6,12 +6,25 @@ import { Locale, defaultLocale, locales } from "@/i18n/config";
 
 const LOCALE_STORAGE_KEY = "truck-flow-locale";
 
-async function loadMessages(locale: Locale): Promise<AbstractIntlMessages> {
-  try {
-    return (await import(`../../messages/${locale}.json`)).default;
-  } catch {
-    return (await import(`../../messages/en.json`)).default;
+// Import default messages at module level to avoid async loading on first render
+import enMessages from "../../messages/en.json";
+import elMessages from "../../messages/el.json";
+
+const messageCache: Record<Locale, AbstractIntlMessages> = {
+  en: enMessages,
+  el: elMessages,
+};
+
+function getMessages(locale: Locale): AbstractIntlMessages {
+  return messageCache[locale] || messageCache.en;
+}
+
+function getInitialLocale(): Locale {
+  if (typeof window !== 'undefined') {
+    const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale | null;
+    return savedLocale && locales.includes(savedLocale) ? savedLocale : defaultLocale;
   }
+  return defaultLocale;
 }
 
 interface TranslationProviderProps {
@@ -19,27 +32,22 @@ interface TranslationProviderProps {
 }
 
 export function TranslationProvider({ children }: TranslationProviderProps) {
-  const [locale, setLocale] = useState<Locale>(defaultLocale);
-  const [messages, setMessages] = useState<AbstractIntlMessages | null>(null);
+  const [locale, setLocale] = useState<Locale>(getInitialLocale);
+  const [messages, setMessages] = useState<AbstractIntlMessages>(() => getMessages(locale));
 
   useEffect(() => {
-    // Get locale from localStorage
-    const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale | null;
-    const currentLocale = savedLocale && locales.includes(savedLocale) ? savedLocale : defaultLocale;
+    // Listen for locale changes from LanguageContext
+    const handleLocaleChange = (event: CustomEvent<Locale>) => {
+      const newLocale = event.detail;
+      setLocale(newLocale);
+      setMessages(getMessages(newLocale));
+    };
 
-    setLocale(currentLocale);
-
-    // Load messages
-    loadMessages(currentLocale).then(setMessages);
+    window.addEventListener('localeChange', handleLocaleChange as EventListener);
+    return () => {
+      window.removeEventListener('localeChange', handleLocaleChange as EventListener);
+    };
   }, []);
-
-  if (!messages) {
-    return (
-      <div className="min-h-screen bg-yellow-400 flex items-center justify-center">
-        <div className="text-black font-bold text-2xl">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>

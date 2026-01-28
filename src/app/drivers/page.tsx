@@ -100,7 +100,7 @@ export default function DriversPage() {
     <MobileLayout showFAB={false} showBottomNav={true}>
       <Header title="Drivers" showBack />
       
-      <div className="max-w-7xl px-6 py-6 mx-auto">
+      <div className="max-w-7xl px-4 py-6 mx-auto lg:px-6">
         {/* Header with Add Button */}
         <div className="flex items-center justify-between mb-6">
           <div>

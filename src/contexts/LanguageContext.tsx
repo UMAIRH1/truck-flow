@@ -15,30 +15,23 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const LOCALE_STORAGE_KEY = "truck-flow-locale";
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(defaultLocale);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Initialize locale from localStorage
-  useEffect(() => {
-    const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale | null;
-    if (savedLocale && locales.includes(savedLocale)) {
-      setLocaleState(savedLocale);
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    // Initialize from localStorage immediately
+    if (typeof window !== 'undefined') {
+      const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale | null;
+      return savedLocale && locales.includes(savedLocale) ? savedLocale : defaultLocale;
     }
-    setIsInitialized(true);
-  }, []);
+    return defaultLocale;
+  });
 
   const setLocale = useCallback((newLocale: Locale) => {
     if (locales.includes(newLocale)) {
       setLocaleState(newLocale);
       localStorage.setItem(LOCALE_STORAGE_KEY, newLocale);
-      // Reload to apply new translations
-      window.location.reload();
+      // Dispatch custom event to notify TranslationProvider
+      window.dispatchEvent(new CustomEvent('localeChange', { detail: newLocale }));
     }
   }, []);
-
-  if (!isInitialized) {
-    return null; // or a loading spinner
-  }
 
   return (
     <LanguageContext.Provider

@@ -89,8 +89,13 @@ class ApiClient {
     try {
       let response = await fetch(url, config);
 
-      // If 401 Unauthorized, try to refresh token
-      if (response.status === 401 && endpoint !== '/auth/refresh-token') {
+      // If 401 Unauthorized, try to refresh token (but not for login/auth endpoints)
+      const isAuthEndpoint = endpoint.includes('/auth/login') || 
+                            endpoint.includes('/auth/refresh-token') ||
+                            endpoint.includes('/auth/setup-password') ||
+                            endpoint.includes('/auth/reset-password');
+      
+      if (response.status === 401 && !isAuthEndpoint) {
         const newToken = await this.refreshAccessToken();
         if (newToken) {
           // Retry request with new token
