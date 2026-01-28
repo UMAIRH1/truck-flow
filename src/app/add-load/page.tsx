@@ -23,6 +23,9 @@ export default function AddLoadPage() {
   const t = useTranslations("addLoad");
   const tHeader = useTranslations("header");
 
+  const [drivers, setDrivers] = useState<any[]>([]);
+  const [isLoadingDrivers, setIsLoadingDrivers] = useState(true);
+
   const [formData, setFormData] = useState({
     pickupLocation: "",
     dropoffLocation: "",
@@ -48,6 +51,24 @@ export default function AddLoadPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch drivers on mount
+  React.useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        const api = (await import("@/lib/api")).default;
+        const response = await api.getDrivers();
+        if (response.success && response.drivers) {
+          setDrivers(response.drivers);
+        }
+      } catch (error) {
+        console.error("Failed to fetch drivers:", error);
+      } finally {
+        setIsLoadingDrivers(false);
+      }
+    };
+    fetchDrivers();
+  }, []);
 
   // Load weight options
   const loadWeightOptions = [
@@ -76,21 +97,10 @@ export default function AddLoadPage() {
     { value: "120", label: `120 ${t("daysPaymentTerm")}` },
   ];
 
-  // Driver options (computed from drivers context)
-
-  // Demo drivers
-  const demoDrivers = [
-    { id: "1", name: "John Smith", isAvailable: true },
-    { id: "2", name: "Mike Johnson", isAvailable: true },
-    { id: "3", name: "Sarah Davis", isAvailable: false },
-    { id: "4", name: "David Wilson", isAvailable: true },
-    { id: "5", name: "Emma Brown", isAvailable: true },
-  ];
-
-  // Driver options (from demo drivers)
-  const demoDriverOptions = demoDrivers.map((driver) => ({
-    value: driver.id,
-    label: `${driver.name}${driver.isAvailable ? "" : ` (${t("unavailable")})`}`,
+  // Driver options from API
+  const driverOptions = drivers.map((driver) => ({
+    value: driver._id,
+    label: driver.name,
   }));
 
   // Pallets options
@@ -160,6 +170,13 @@ export default function AddLoadPage() {
         tolls: parseFloat(formData.tolls) || 0,
         otherExpenses: parseFloat(formData.otherExpenses) || 0,
         podImages: images,
+        assignedDriver: formData.assignedDriverId ? {
+          id: formData.assignedDriverId,
+          name: drivers.find(d => d._id === formData.assignedDriverId)?.name || "",
+          phone: "",
+          email: "",
+          isAvailable: true,
+        } : undefined,
       });
 
       router.push("/");
@@ -245,8 +262,9 @@ export default function AddLoadPage() {
                     icon={BusFront}
                     value={formData.assignedDriverId}
                     onValueChange={(value) => setFormData({ ...formData, assignedDriverId: value })}
-                    placeholder={t("assignDriver")}
-                    options={demoDriverOptions}
+                    placeholder={isLoadingDrivers ? t("loadingDrivers") || "Loading drivers..." : t("assignDriver")}
+                    options={driverOptions}
+                    disabled={isLoadingDrivers}
                   />
                 </div>
               </div>

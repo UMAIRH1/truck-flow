@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { OptimizedImage } from "../ui/optimized-image";
 import { ASSETS } from "@/lib/assets";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 
 interface DriverLoadCardProps {
   load: Load;
@@ -21,6 +22,7 @@ interface DriverLoadCardProps {
 export function DriverLoadCard({ load, showActions = false, onAccept, onDecline, onMapView, className }: DriverLoadCardProps) {
   const t = useTranslations("load");
   const tDriver = useTranslations("driver");
+  const router = useRouter();
 
   const formattedDate = new Date(load.loadingDate).toLocaleDateString("en-US", {
     day: "2-digit",
@@ -29,7 +31,10 @@ export function DriverLoadCard({ load, showActions = false, onAccept, onDecline,
   });
 
   return (
-    <div className={cn("bg-yellow-400 rounded-2xl p-4 shadow-sm", className)}>
+    <div 
+      onClick={() => router.push(`/load/${load.id}`)}
+      className={cn("bg-yellow-400 rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow", className)}
+    >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="bg-(--color-blue-border) p-1.5 rounded-md">
@@ -89,7 +94,7 @@ export function DriverLoadCard({ load, showActions = false, onAccept, onDecline,
       </div>
 
       {showActions && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           <Button onClick={onMapView} className="flex-1 px-4 py-2 bg-(--color-blue-border) text-white text-sm rounded-md font-medium hover:bg-blue-600 transition-colors">
             <MapPin /> {tDriver("mapView")}
           </Button>

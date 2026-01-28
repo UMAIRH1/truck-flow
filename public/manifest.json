@@ -1,0 +1,9 @@
+{
+  "name": "TruckFlow",
+  "short_name": "TruckFlow",
+  "description": "Truck Load Management System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#facc15"
+}

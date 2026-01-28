@@ -1,6 +1,6 @@
 // Cloudinary configuration for direct uploads
-export const CLOUDINARY_CLOUD_NAME = 'djgh5wjsk';
-export const CLOUDINARY_UPLOAD_PRESET = 'jobcrap_upload';
+export const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dearf6hnw';
+export const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'truck-flow';
 
 export interface CloudinaryUploadResponse {
   secure_url: string;

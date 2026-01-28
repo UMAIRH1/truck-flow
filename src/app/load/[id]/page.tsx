@@ -12,11 +12,12 @@ import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/components/shared";
+import api from "@/lib/api";
 
 export default function LoadStatusPage() {
   const params = useParams();
   const router = useRouter();
-  const { getLoadById } = useLoads();
+  const { getLoadById, refreshLoads } = useLoads();
   const { user } = useAuth();
   const t = useTranslations("loadStatus");
   const tCommon = useTranslations("common");
@@ -24,6 +25,16 @@ export default function LoadStatusPage() {
   const load = getLoadById(params.id as string);
   const isManager = user?.role === "manager";
   const isDriver = user?.role === "driver";
+
+  // Debug info (remove in production)
+  console.log("Load Detail Debug:", {
+    loadId: params.id,
+    loadStatus: load?.status,
+    userRole: user?.role,
+    isDriver,
+    isManager,
+    hasPodImages: load?.podImages?.length,
+  });
 
   if (!load) {
     return (
@@ -314,18 +325,85 @@ export default function LoadStatusPage() {
       )}
 
       {/* Upload POD Button for Driver */}
-      {isDriver && load.status === "accepted" && !load.podImages?.length && (
-        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-          <h3 className="font-bold text-lg mb-4 text-black">Complete Delivery</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Upload proof of delivery to mark this load as completed.
-          </p>
+      {isDriver && load.status === "accepted" && (
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 space-y-4">
+          <div>
+            <h3 className="font-bold text-lg mb-2 text-black">Complete Delivery</h3>
+            <p className="text-sm text-gray-600">
+              Upload proof of delivery to mark this load as completed.
+            </p>
+          </div>
           <Button
             onClick={() => router.push(`/load/${load.id}/upload-pod`)}
             className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full"
           >
             <Upload className="w-5 h-5 mr-2" />
             Upload Proof of Delivery
+          </Button>
+        </div>
+      )}
+
+      {/* Show completed status for driver */}
+      {isDriver && load.status === "completed" && (
+        <div className="bg-green-50 rounded-xl p-6 shadow-md border border-green-200">
+          <div className="flex items-center gap-3 mb-2">
+            <Check className="h-6 w-6 text-green-600" />
+            <h3 className="font-bold text-lg text-green-900">Load Completed</h3>
+          </div>
+          <p className="text-sm text-green-700">
+            This load has been marked as completed.
+          </p>
+        </div>
+      )}
+
+      {/* Accept/Reject Buttons for Driver - Pending Loads */}
+      {isDriver && load.status === "pending" && (
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="font-bold text-lg mb-4 text-black">Load Assignment</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            This load has been assigned to you. Please accept or decline.
+          </p>
+          <div className="flex gap-4">
+            <Button
+              onClick={async () => {
+                try {
+                  await api.declineLoad(load.id);
+                  await refreshLoads();
+                  router.push("/");
+                } catch (error) {
+                  console.error("Failed to decline load:", error);
+                }
+              }}
+              variant="outline"
+              className="flex-1 h-12 border-red-500 text-red-500 hover:bg-red-50"
+            >
+              Decline
+            </Button>
+            <Button
+              onClick={async () => {
+                try {
+                  await api.acceptLoad(load.id);
+                  await refreshLoads();
+                } catch (error) {
+                  console.error("Failed to accept load:", error);
+                }
+              }}
+              className="flex-1 h-12 bg-green-500 hover:bg-green-600 text-white"
+            >
+              Accept Load
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Load Button for Manager */}
+      {isManager && load.status !== "completed" && (
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <Button
+            onClick={() => router.push(`/load/${load.id}/edit`)}
+            className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-full"
+          >
+            Edit Load Details
           </Button>
         </div>
       )}

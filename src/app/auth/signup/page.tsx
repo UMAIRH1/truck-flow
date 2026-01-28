@@ -1,15 +1,9 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { validateSignUpForm } from "../validations";
-import { Eye, EyeOff } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 export default function SignUpPage() {
   const router = useRouter();

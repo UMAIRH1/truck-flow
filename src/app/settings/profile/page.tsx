@@ -43,21 +43,32 @@ export default function EditProfilePage() {
     const file = e?.target?.files?.[0];
     if (!file) return;
 
-    // Validate file
-    const { validateImageFile, compressImage } = await import('@/lib/imageUtils');
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
-      alert(validation.error);
-      return;
-    }
-
     try {
-      // Compress and convert to base64
-      const base64 = await compressImage(file, 400, 400, 0.8);
-      setFormData((prev) => ({ ...prev, avatar: base64 }));
+      // Import Cloudinary utilities
+      const { uploadToCloudinary, validateImageFile } = await import('@/lib/cloudinary');
+      
+      // Validate file
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        alert(validation.error);
+        return;
+      }
+
+      // Show loading state
+      setFormData((prev) => ({ ...prev, avatar: 'uploading...' }));
+
+      // Upload to Cloudinary
+      const cloudinaryUrl = await uploadToCloudinary(file);
+      
+      // Update avatar with Cloudinary URL
+      setFormData((prev) => ({ ...prev, avatar: cloudinaryUrl }));
+      
+      console.log('Avatar uploaded to Cloudinary:', cloudinaryUrl);
     } catch (error) {
-      console.error('Error processing image:', error);
-      alert('Failed to process image');
+      console.error('Error uploading avatar:', error);
+      alert('Failed to upload image. Please try again.');
+      // Restore previous avatar on error
+      setFormData((prev) => ({ ...prev, avatar: user?.avatar || '' }));
     }
   };
 
@@ -70,7 +81,11 @@ export default function EditProfilePage() {
             <div className="flex justify-center lg:me-28 md:justify-end ">
               <div className="relative">
                 <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gray-200 overflow-hidden border-4 border-white shadow-lg">
-                  {formData.avatar ? (
+                  {formData.avatar === 'uploading...' ? (
+                    <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : formData.avatar ? (
                     <OptimizedImage src={formData.avatar} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-2xl md:text-3xl font-bold">
