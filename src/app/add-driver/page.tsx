@@ -79,7 +79,14 @@ export default function AddDriverPage() {
     try {
       const response = await api.createDriver(formData);
       if (response.success) {
-        setSuccess(t("driverCreatedSuccess") || "Driver created successfully! Invitation email sent.");
+        // Check if email was sent
+        if (response.emailSent) {
+          setSuccess(t("driverCreatedSuccess") || "Driver created successfully! Invitation email sent.");
+        } else {
+          setSuccess("Driver created successfully! However, the invitation email could not be sent. Please contact the driver manually.");
+          console.error("Email error:", response.emailError);
+        }
+        
         // Reset form
         setFormData({
           name: "",
@@ -87,12 +94,14 @@ export default function AddDriverPage() {
           phone: "",
           preferredLanguage: "en",
         });
-        // Redirect after 2 seconds
+        
+        // Redirect after 3 seconds
         setTimeout(() => {
-          router.push("/");
-        }, 2000);
+          router.push("/drivers");
+        }, 3000);
       }
     } catch (err: any) {
+      console.error("Create driver error:", err);
       setError(err.message || t("createDriverError"));
     } finally {
       setIsSubmitting(false);
