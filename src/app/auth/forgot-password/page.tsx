@@ -31,11 +31,20 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      // TODO: call forgot password API
-      // For now, redirect to send-email page with email in query
-      router.push(`/auth/send-email?email=${encodeURIComponent(email)}`);
-    } catch {
-      setError("Failed to send reset email. Please try again.");
+      const api = (await import("@/lib/api")).default;
+      const response = await api.request("/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.success) {
+        // Redirect to OTP verification page
+        router.push(`/auth/verify-otp?email=${encodeURIComponent(email)}`);
+      } else {
+        setError(response.message || "Failed to send OTP. Please try again.");
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to send OTP. Please try again.");
     } finally {
       setIsLoading(false);
     }

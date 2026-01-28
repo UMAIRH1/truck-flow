@@ -54,14 +54,13 @@ export default function UploadPODPage() {
     setIsUploading(true);
 
     try {
-      // Upload the first image (backend currently supports single image)
-      // Convert base64 to File object
-      const base64Image = images[0];
+      // Images are already Cloudinary URLs from PODUpload component
+      const imageUrl = images[0]; // Use first image
       
-      // Send base64 directly to API
+      // Send Cloudinary URL to API
       const response = await api.request(`/loads/${load.id}/pod`, {
         method: 'POST',
-        body: JSON.stringify({ image: base64Image }),
+        body: JSON.stringify({ image: imageUrl }),
       });
 
       if (response.success) {

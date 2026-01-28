@@ -93,7 +93,7 @@ export function DriverDashboard() {
   }
 
   const driverLoads = loads.filter((load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id);
-  const pendingLoads = loads.filter((l) => l.status === "pending" && !l.assignedDriver); // Available pending loads
+  const pendingLoads = driverLoads.filter((l) => l.status === "pending"); // Driver's pending loads
   const completedLoads = driverLoads.filter((l) => l.status === "completed");
   const acceptedLoads = driverLoads.filter((l) => l.status === "accepted" || l.status === "in-progress");
 
@@ -153,9 +153,9 @@ export function DriverDashboard() {
                     <CreditCard className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <span className="font-semibold text-lg">{t("dashboard.newLoadRequests")}</span>
+                    <span className="font-semibold text-lg">{t("dashboard.assignedLoads")}</span>
                     <p className="text-gray-600 text-sm">
-                      {pendingLoads.length} {t("dashboard.available")}
+                      {driverLoads.length} {t("dashboard.total")}
                     </p>
                   </div>
                 </div>
@@ -164,12 +164,25 @@ export function DriverDashboard() {
             </Link>
           </div>
           <div className="lg:col-span-2 space-y-4">
-            <h3 className="text-xl font-semibold text-gray-900">{t("dashboard.recentLoadRequests")}</h3>
-            <div className="grid gap-4">
-              {pendingLoads.slice(0, 3).map((load) => (
-                <DriverLoadCard key={load.id} load={load} showActions={true} onAccept={() => handleAccept(load.id)} onDecline={() => handleDecline(load.id)} onMapView={() => handleMapView(load.id)} />
-              ))}
-            </div>
+            <h3 className="text-xl font-semibold text-gray-900">{t("dashboard.myAssignedLoads")}</h3>
+            {driverLoads.length === 0 ? (
+              <div className="bg-white rounded-xl p-8 text-center">
+                <p className="text-gray-500">{t("dashboard.noLoadsAssigned")}</p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {driverLoads.slice(0, 5).map((load) => (
+                  <DriverLoadCard 
+                    key={load.id} 
+                    load={load} 
+                    showActions={load.status === "pending"} 
+                    onAccept={() => handleAccept(load.id)} 
+                    onDecline={() => handleDecline(load.id)} 
+                    onMapView={() => handleMapView(load.id)} 
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

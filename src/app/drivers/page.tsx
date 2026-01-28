@@ -1,206 +1,221 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header, MobileLayout } from "@/components/layout";
-import { useLoads } from "@/contexts/LoadContext";
-import { User, Plus, Mail, Phone, CheckCircle, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { User, Mail, Phone, MoreVertical, UserCheck, UserX, Trash2, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+interface Driver {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  isActive: boolean;
+  createdAt: string;
+}
 
 export default function DriversPage() {
-  const { drivers, refreshDrivers } = useLoads();
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    phone: "",
-    preferredLanguage: "en",
-  });
+  const router = useRouter();
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  useEffect(() => {
+    fetchDrivers();
+  }, []);
 
+  const fetchDrivers = async () => {
     try {
-      const response = await api.createDriver(formData);
-      
-      if (response.success) {
-        toast.success("Driver created successfully!");
-        setFormData({
-          name: "",
-          email: "",
-          password: "",
-          phone: "",
-          preferredLanguage: "en",
-        });
-        setShowAddForm(false);
-        refreshDrivers();
+      setIsLoading(true);
+      const response = await api.getDrivers();
+      if (response.success && response.drivers) {
+        setDrivers(response.drivers);
       }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to create driver");
+    } catch (error) {
+      console.error("Failed to fetch drivers:", error);
+      toast.error("Failed to load drivers");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  const handleToggleStatus = async (driverId: string) => {
+  const handleToggleStatus = async (driverId: string, currentStatus: boolean) => {
     try {
-      const response = await api.toggleDriverStatus(driverId);
-      
+      const response = await api.request(`/users/${driverId}/status`, {
+        method: "PATCH",
+      });
+
       if (response.success) {
-        toast.success(response.message);
-        refreshDrivers();
+        toast.success(currentStatus ? "Driver deactivated" : "Driver activated");
+        fetchDrivers();
       }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update driver status");
+    } catch (error) {
+      toast.error("Failed to update driver status");
     }
   };
+
+  const handleDeleteDriver = async (driverId: string, driverName: string) => {
+    if (!confirm(`Are you sure you want to delete ${driverName}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await api.request(`/users/${driverId}`, {
+        method: "DELETE",
+      });
+
+      if (response.success) {
+        toast.success("Driver deleted successfully");
+        fetchDrivers();
+      }
+    } catch (error) {
+      toast.error("Failed to delete driver");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <MobileLayout showFAB={false} showBottomNav={true}>
+        <Header title="Drivers" showBack />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading drivers...</p>
+          </div>
+        </div>
+      </MobileLayout>
+    );
+  }
 
   return (
     <MobileLayout showFAB={false} showBottomNav={true}>
       <Header title="Drivers" showBack />
-
-      <div className="px-4 py-4 max-w-md mx-auto space-y-4 md:max-w-7xl md:px-8">
-        {/* Add Driver Button */}
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="w-full py-3 bg-blue-500 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-600 transition-colors"
-        >
-          <Plus className="h-5 w-5" />
-          {showAddForm ? "Cancel" : "Add New Driver"}
-        </button>
-
-        {/* Add Driver Form */}
-        {showAddForm && (
-          <form onSubmit={handleSubmit} className="bg-white rounded-xl p-4 shadow-sm space-y-3 border border-gray-200">
-            <h3 className="font-semibold text-lg mb-3">Create New Driver</h3>
-            
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Driver Name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
-            </div>
-
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
-            </div>
-
-            <div className="relative">
-              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="tel"
-                placeholder="Phone Number"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
-            </div>
-
-            <div className="relative">
-              <input
-                type="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-                minLength={6}
-              />
-            </div>
-
-            <div className="relative">
-              <select
-                value={formData.preferredLanguage}
-                onChange={(e) => setFormData({ ...formData, preferredLanguage: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                <option value="en">English</option>
-                <option value="el">Greek</option>
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? "Creating..." : "Create Driver"}
-            </button>
-          </form>
-        )}
+      
+      <div className="max-w-7xl px-6 py-6 mx-auto">
+        {/* Header with Add Button */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">All Drivers</h1>
+            <p className="text-gray-600 text-sm mt-1">{drivers.length} total drivers</p>
+          </div>
+          <Button
+            onClick={() => router.push("/add-driver")}
+            className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Driver
+          </Button>
+        </div>
 
         {/* Drivers List */}
-        <div className="space-y-3">
-          <h3 className="font-semibold text-lg">All Drivers ({drivers.length})</h3>
-          
-          {drivers.length === 0 ? (
-            <div className="bg-white rounded-xl p-8 text-center text-gray-500">
-              <User className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p>No drivers yet. Add your first driver above.</p>
-            </div>
-          ) : (
-            drivers.map((driver) => (
-              <div
-                key={driver.id}
-                className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                      <User className="h-6 w-6 text-blue-600" />
+        {drivers.length === 0 ? (
+          <Card className="p-8 text-center">
+            <User className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Drivers Yet</h3>
+            <p className="text-gray-600 mb-4">Get started by adding your first driver</p>
+            <Button
+              onClick={() => router.push("/add-driver")}
+              className="bg-yellow-400 hover:bg-yellow-500 text-black"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Driver
+            </Button>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {drivers.map((driver) => (
+              <Card key={driver._id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    {/* Driver Info */}
+                    <div className="flex items-start gap-4 flex-1">
+                      {/* Avatar */}
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
+                        {driver.name.charAt(0).toUpperCase()}
+                      </div>
+
+                      {/* Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                            {driver.name}
+                          </h3>
+                          <span
+                            className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                              driver.isActive
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {driver.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </div>
+
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Mail className="w-4 h-4" />
+                            <span className="truncate">{driver.email}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Phone className="w-4 h-4" />
+                            <span>{driver.phone}</span>
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-gray-500 mt-2">
+                          Added on {new Date(driver.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-semibold text-base">{driver.name}</h4>
-                        {driver.isAvailable ? (
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-red-500" />
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                        <Mail className="h-4 w-4" />
-                        <span>{driver.email}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                        <Phone className="h-4 w-4" />
-                        <span>{driver.phone}</span>
-                      </div>
-                    </div>
+
+                    {/* Actions Menu */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem
+                          onClick={() => handleToggleStatus(driver._id, driver.isActive)}
+                          className="cursor-pointer"
+                        >
+                          {driver.isActive ? (
+                            <>
+                              <UserX className="w-4 h-4 mr-2" />
+                              Deactivate
+                            </>
+                          ) : (
+                            <>
+                              <UserCheck className="w-4 h-4 mr-2" />
+                              Activate
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteDriver(driver._id, driver.name)}
+                          className="cursor-pointer text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  
-                  <button
-                    onClick={() => handleToggleStatus(driver.id)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      driver.isAvailable
-                        ? "bg-red-50 text-red-600 hover:bg-red-100"
-                        : "bg-green-50 text-green-600 hover:bg-green-100"
-                    }`}
-                  >
-                    {driver.isAvailable ? "Deactivate" : "Activate"}
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </MobileLayout>
   );

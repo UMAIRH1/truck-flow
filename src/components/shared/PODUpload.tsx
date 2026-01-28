@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Camera, X, Upload } from "lucide-react";
+import { Camera, X, Upload, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { uploadToCloudinary, validateImageFile } from "@/lib/cloudinary";
+import { toast } from "sonner";
 
 interface PODUploadProps {
   images: string[];
@@ -15,30 +17,44 @@ interface PODUploadProps {
 export function PODUpload({ images, onImagesChange, maxImages = 5, className }: PODUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const t = useTranslations("podUpload");
 
-  const handleFileSelect = (files: FileList | null) => {
+  const handleFileSelect = async (files: FileList | null) => {
     if (!files) return;
 
-    const newImages: string[] = [];
     const remainingSlots = maxImages - images.length;
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
 
-    Array.from(files)
-      .slice(0, remainingSlots)
-      .forEach((file) => {
-        if (file.type.startsWith("image/")) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            if (e.target?.result) {
-              newImages.push(e.target.result as string);
-              if (newImages.length === Math.min(files.length, remainingSlots)) {
-                onImagesChange([...images, ...newImages]);
-              }
-            }
-          };
-          reader.readAsDataURL(file);
+    setIsUploading(true);
+
+    try {
+      const uploadPromises = filesToUpload.map(async (file) => {
+        // Validate file
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+          toast.error(validation.error);
+          return null;
         }
+
+        // Upload to Cloudinary
+        const url = await uploadToCloudinary(file);
+        return url;
       });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      const validUrls = uploadedUrls.filter((url): url is string => url !== null);
+      
+      if (validUrls.length > 0) {
+        onImagesChange([...images, ...validUrls]);
+        toast.success(`${validUrls.length} image(s) uploaded successfully`);
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload images. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -102,23 +118,32 @@ export function PODUpload({ images, onImagesChange, maxImages = 5, className }: 
           onDragLeave={handleDragLeave}
           className={cn("border-2 border-dashed rounded-xl p-6 text-center transition-colors", isDragging ? "border-yellow-400 bg-yellow-50" : "border-gray-300")}
         >
-          <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-500 mb-4">{t("dragDropImages")}</p>
+          {isUploading ? (
+            <div className="py-4">
+              <Loader2 className="h-8 w-8 text-yellow-400 mx-auto mb-2 animate-spin" />
+              <p className="text-sm text-gray-500">Uploading images...</p>
+            </div>
+          ) : (
+            <>
+              <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-500 mb-4">{t("dragDropImages")}</p>
 
-          <div className="flex gap-2 justify-center">
-            <button type="button" onClick={openCamera} className="flex items-center gap-2 px-4 py-2 bg-yellow-400 rounded-full text-sm font-medium hover:bg-yellow-500 transition-colors">
-              <Camera className="h-4 w-4" />
-              {t("camera")}
-            </button>
-            <button type="button" onClick={openGallery} className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">
-              <Upload className="h-4 w-4" />
-              {t("gallery")}
-            </button>
-          </div>
+              <div className="flex gap-2 justify-center">
+                <button type="button" onClick={openCamera} className="flex items-center gap-2 px-4 py-2 bg-yellow-400 rounded-full text-sm font-medium hover:bg-yellow-500 transition-colors">
+                  <Camera className="h-4 w-4" />
+                  {t("camera")}
+                </button>
+                <button type="button" onClick={openGallery} className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">
+                  <Upload className="h-4 w-4" />
+                  {t("gallery")}
+                </button>
+              </div>
 
-          <p className="text-xs text-gray-400 mt-3">
-            {images.length}/{maxImages} {t("imagesUploaded")}
-          </p>
+              <p className="text-xs text-gray-400 mt-3">
+                {images.length}/{maxImages} {t("imagesUploaded")}
+              </p>
+            </>
+          )}
         </div>
       )}
     </div>

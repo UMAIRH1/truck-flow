@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout";
 import { StatCard, LoadCard, FilterTabs } from "@/components/shared";
 import { useLoads } from "@/contexts/LoadContext";
-import { DollarSign, Clock, CreditCard, Truck, ArrowRight, ChartColumn, Plus } from "lucide-react";
+import { DollarSign, Clock, CreditCard, Truck, ArrowRight, ChartColumn, Plus, Users } from "lucide-react";
 import Link from "next/link";
 import api from "@/lib/api";
 import { useTranslations } from "next-intl";
@@ -140,11 +140,11 @@ export function ManagerDashboard() {
                 <ArrowRight className="h-5 w-5 text-[#374957]" />
               </div>
             </Link>
-            <Link href="/add-driver" className="block">
-              <div className="bg-(--color-yellow-light) rounded-lg p-6 flex items-center justify-between shadow-sm">
+            <Link href="/drivers" className="block">
+              <div className="bg-(--color-yellow-light) rounded-lg p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-3">
-                  <Plus className="h-5 w-5 text-(--color-light-black-border)" />
-                  <span className="font-bold text-sm text-(--color-light-black-border)">Add Drivers</span>
+                  <Users className="h-5 w-5 text-(--color-light-black-border)" />
+                  <span className="font-bold text-sm text-(--color-light-black-border)">{t("dashboard.manageDrivers")}</span>
                 </div>
                 <ArrowRight className="h-5 w-5 text-(--color-light-black-border)" />
               </div>

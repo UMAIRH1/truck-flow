@@ -234,6 +234,13 @@ class ApiClient {
     return this.request(`/loads/${id}`, { method: 'DELETE' });
   }
 
+  async updateLoad(id: string, loadData: any) {
+    return this.request(`/loads/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(loadData),
+    });
+  }
+
   async assignDriver(loadId: string, driverId: string) {
     return this.request(`/loads/${loadId}/assign`, {
       method: 'PATCH',
@@ -310,6 +317,11 @@ class ApiClient {
       method: 'PATCH',
       body: JSON.stringify(profileData),
     });
+  }
+
+  // Get all drivers (manager only)
+  async getDrivers() {
+    return this.request('/users');
   }
 
   // Upload file (invoice or document)

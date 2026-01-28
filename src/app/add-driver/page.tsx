@@ -5,7 +5,7 @@ import { Header, MobileLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, AlertCircle, User, Mail, Phone, Lock } from "lucide-react";
+import { Loader2, AlertCircle, User, Mail, Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/api";
@@ -19,17 +19,16 @@ export default function AddDriverPage() {
     name: "",
     email: "",
     phone: "",
-    password: "",
     preferredLanguage: "en",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [fieldErrors, setFieldErrors] = useState({
     name: "",
     email: "",
     phone: "",
-    password: "",
   });
 
   const validateForm = () => {
@@ -37,7 +36,6 @@ export default function AddDriverPage() {
       name: "",
       email: "",
       phone: "",
-      password: "",
     };
     let isValid = true;
     if (!formData.name.trim()) {
@@ -62,13 +60,6 @@ export default function AddDriverPage() {
       errors.phone = t("phoneInvalid");
       isValid = false;
     }
-    if (!formData.password) {
-      errors.password = t("passwordRequired");
-      isValid = false;
-    } else if (formData.password.length < 6) {
-      errors.password = t("passwordTooShort");
-      isValid = false;
-    }
 
     setFieldErrors(errors);
     return isValid;
@@ -77,6 +68,7 @@ export default function AddDriverPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     if (!validateForm()) {
       return;
@@ -85,8 +77,21 @@ export default function AddDriverPage() {
     setIsSubmitting(true);
 
     try {
-      await api.createDriver(formData);
-      router.push("/");
+      const response = await api.createDriver(formData);
+      if (response.success) {
+        setSuccess(t("driverCreatedSuccess") || "Driver created successfully! Invitation email sent.");
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          preferredLanguage: "en",
+        });
+        // Redirect after 2 seconds
+        setTimeout(() => {
+          router.push("/");
+        }, 2000);
+      }
     } catch (err: any) {
       setError(err.message || t("createDriverError"));
     } finally {
@@ -111,6 +116,14 @@ export default function AddDriverPage() {
             <div className="flex items-center gap-2 p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-red-500">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <p className="text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {success && (
+            <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              <p className="text-sm">{success}</p>
             </div>
           )}
 
@@ -167,22 +180,14 @@ export default function AddDriverPage() {
                 />
                 {fieldErrors.phone && <p className="text-sm text-red-500">{fieldErrors.phone}</p>}
               </div>
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium flex items-center gap-2">
-                  <Lock className="w-4 h-4" />
-                  {t("password")}
-                </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder={t("passwordPlaceholder")}
-                  value={formData.password}
-                  onChange={(e) => handleInputChange("password", e.target.value)}
-                  disabled={isSubmitting}
-                  aria-invalid={!!fieldErrors.password}
-                />
-                {fieldErrors.password && <p className="text-sm text-red-500">{fieldErrors.password}</p>}
+
+              {/* Info Message */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Note:</strong> The driver will receive an email with a link to set their password.
+                </p>
               </div>
+
               <Button type="submit" variant="yellow" disabled={isSubmitting} className="w-full h-12 rounded-lg text-base font-semibold">
                 {isSubmitting ? (
                   <>
