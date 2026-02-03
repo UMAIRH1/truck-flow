@@ -139,28 +139,28 @@ export default function LoadStatusPage() {
                 <DollarSign className="h-4 w-4 text-green-600" />
                 <span className="text-xs text-gray-600">Client Price</span>
               </div>
-              <p className="text-xl font-bold text-green-600">${load.clientPrice.toFixed(2)}</p>
+              <p className="text-xl font-bold text-green-600">€{load.clientPrice.toFixed(2)}</p>
             </div>
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="h-4 w-4 text-blue-600" />
                 <span className="text-xs text-gray-600">Driver Price</span>
               </div>
-              <p className="text-xl font-bold text-blue-600">${(load.driverPrice || 0).toFixed(2)}</p>
+              <p className="text-xl font-bold text-blue-600">€{(load.driverPrice || 0).toFixed(2)}</p>
             </div>
             <div className="bg-orange-50 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <AlertCircle className="h-4 w-4 text-orange-600" />
                 <span className="text-xs text-gray-600">Total Expenses</span>
               </div>
-              <p className="text-xl font-bold text-orange-600">${((load.fuel || 0) + (load.tolls || 0) + (load.otherExpenses || 0)).toFixed(2)}</p>
+              <p className="text-xl font-bold text-orange-600">€{((load.fuel || 0) + (load.tolls || 0) + (load.otherExpenses || 0)).toFixed(2)}</p>
             </div>
             <div className={`${profit >= 0 ? 'bg-purple-50' : 'bg-red-50'} p-4 rounded-lg`}>
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className={`h-4 w-4 ${profit >= 0 ? 'text-purple-600' : 'text-red-600'}`} />
                 <span className="text-xs text-gray-600">Profit</span>
               </div>
-              <p className={`text-xl font-bold ${profit >= 0 ? 'text-purple-600' : 'text-red-600'}`}>${profit.toFixed(2)}</p>
+              <p className={`text-xl font-bold ${profit >= 0 ? 'text-purple-600' : 'text-red-600'}`}>€{profit.toFixed(2)}</p>
             </div>
           </div>
 
@@ -171,21 +171,21 @@ export default function LoadStatusPage() {
                 <Fuel className="h-4 w-4 text-gray-500" />
                 <div>
                   <p className="text-xs text-gray-500">Fuel</p>
-                  <p className="font-semibold text-sm">${(load.fuel || 0).toFixed(2)}</p>
+                  <p className="font-semibold text-sm">€{(load.fuel || 0).toFixed(2)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-gray-500" />
                 <div>
                   <p className="text-xs text-gray-500">Tolls</p>
-                  <p className="font-semibold text-sm">${(load.tolls || 0).toFixed(2)}</p>
+                  <p className="font-semibold text-sm">€{(load.tolls || 0).toFixed(2)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-gray-500" />
                 <div>
                   <p className="text-xs text-gray-500">Other</p>
-                  <p className="font-semibold text-sm">${(load.otherExpenses || 0).toFixed(2)}</p>
+                  <p className="font-semibold text-sm">€{(load.otherExpenses || 0).toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -333,13 +333,23 @@ export default function LoadStatusPage() {
               Upload proof of delivery to mark this load as completed.
             </p>
           </div>
-          <Button
-            onClick={() => router.push(`/load/${load.id}/upload-pod`)}
-            className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full"
-          >
-            <Upload className="w-5 h-5 mr-2" />
-            Upload Proof of Delivery
-          </Button>
+          <div className="space-y-3">
+            <Button
+              onClick={() => router.push(`/load/${load.id}/upload-pod`)}
+              className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full"
+            >
+              <Upload className="w-5 h-5 mr-2" />
+              Upload Proof of Delivery
+            </Button>
+            <Button
+              onClick={() => router.push(`/load/${load.id}/upload-documents`)}
+              variant="outline"
+              className="w-full h-12"
+            >
+              <Upload className="w-5 h-5 mr-2" />
+              Upload Invoice & Documents
+            </Button>
+          </div>
         </div>
       )}
 
@@ -393,6 +403,25 @@ export default function LoadStatusPage() {
               Accept Load
             </Button>
           </div>
+        </div>
+      )}
+
+      {/* Reassign Button for Manager - Rejected Loads */}
+      {isManager && load.status === "rejected" && (
+        <div className="bg-red-50 rounded-xl p-6 shadow-md border border-red-200">
+          <div className="mb-4">
+            <h3 className="font-bold text-lg text-red-900 mb-2">Load Rejected</h3>
+            <p className="text-sm text-red-700">
+              This load was rejected by the driver. You can reassign it to another driver.
+            </p>
+          </div>
+          <Button
+            onClick={() => router.push(`/load/${load.id}/reassign`)}
+            className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full"
+          >
+            <User className="w-5 h-5 mr-2" />
+            Reassign to Another Driver
+          </Button>
         </div>
       )}
 

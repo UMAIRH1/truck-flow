@@ -96,6 +96,7 @@ export function DriverDashboard() {
   const pendingLoads = driverLoads.filter((l) => l.status === "pending"); // Driver's pending loads
   const completedLoads = driverLoads.filter((l) => l.status === "completed");
   const acceptedLoads = driverLoads.filter((l) => l.status === "accepted" || l.status === "in-progress");
+  const rejectedLoads = driverLoads.filter((l) => l.status === "rejected"); // Driver's rejected loads
 
   // Use API stats if available, otherwise calculate from loads
   const stats = dashboardStats || {
@@ -141,27 +142,46 @@ export function DriverDashboard() {
 
       <div className="px-6 py-8 max-w-7xl mx-auto space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <div className="grid grid-cols-2 mb-3 gap-6">
-              <StatCard icon={DollarSign} label={t("dashboard.totalEarning")} value={`$ ${stats.totalEarnings.toLocaleString()}.00`} />
-              <StatCard icon={Clock} label={t("dashboard.pendingPayments")} value={`$ ${stats.pendingEarnings.toLocaleString()}.00`} />
+          <div className="lg:col-span-1 space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <StatCard icon={DollarSign} label={t("dashboard.totalEarning")} value={`€ ${stats.totalEarnings.toLocaleString()}.00`} />
+              <StatCard icon={Clock} label={t("dashboard.pendingPayments")} value={`€ ${stats.pendingEarnings.toLocaleString()}.00`} />
             </div>
-            <Link href="/my-loads" className="block">
-              <div className="bg-white rounded-xl p-6 flex items-center justify-between shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-gray-900">
-                    <CreditCard className="h-6 w-6 text-white" />
+            
+            {/* Load Status Cards */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("dashboard.assignedLoads")}</h3>
+              <div className="space-y-3">
+                <Link href="/my-loads?tab=pending" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                    <span className="text-gray-700">{t("tabs.pending")}</span>
                   </div>
-                  <div>
-                    <span className="font-semibold text-lg">{t("dashboard.assignedLoads")}</span>
-                    <p className="text-gray-600 text-sm">
-                      {driverLoads.length} {t("dashboard.total")}
-                    </p>
+                  <span className="font-semibold text-gray-900">{pendingLoads.length}</span>
+                </Link>
+                <Link href="/my-loads?tab=accepted" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span className="text-gray-700">{t("tabs.accepted")}</span>
                   </div>
-                </div>
-                <ArrowRight className="h-6 w-6 text-gray-400" />
+                  <span className="font-semibold text-gray-900">{acceptedLoads.length}</span>
+                </Link>
+                <Link href="/my-loads?tab=rejected" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                    <span className="text-gray-700">{t("tabs.rejected")}</span>
+                  </div>
+                  <span className="font-semibold text-gray-900">{rejectedLoads.length}</span>
+                </Link>
+                <Link href="/my-loads?tab=completed" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <span className="text-gray-700">{t("tabs.completed")}</span>
+                  </div>
+                  <span className="font-semibold text-gray-900">{completedLoads.length}</span>
+                </Link>
               </div>
-            </Link>
+            </div>
           </div>
           <div className="lg:col-span-2 space-y-4">
             <h3 className="text-xl font-semibold text-gray-900">{t("dashboard.myAssignedLoads")}</h3>
@@ -170,18 +190,21 @@ export function DriverDashboard() {
                 <p className="text-gray-500">{t("dashboard.noLoadsAssigned")}</p>
               </div>
             ) : (
-              <div className="grid gap-4">
-                {driverLoads.slice(0, 5).map((load) => (
-                  <DriverLoadCard 
-                    key={load.id} 
-                    load={load} 
-                    showActions={load.status === "pending"} 
-                    onAccept={() => handleAccept(load.id)} 
-                    onDecline={() => handleDecline(load.id)} 
-                    onMapView={() => handleMapView(load.id)} 
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid gap-4">
+                  {driverLoads.slice(0, 5).map((load) => (
+                    <DriverLoadCard 
+                      key={load.id} 
+                      load={load}
+                      showStatusLabel={true}
+                      showActions={load.status === "pending"} 
+                      onAccept={() => handleAccept(load.id)} 
+                      onDecline={() => handleDecline(load.id)} 
+                      onMapView={() => handleMapView(load.id)} 
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>

@@ -13,15 +13,17 @@ import { useRouter } from "next/navigation";
 interface DriverLoadCardProps {
   load: Load;
   showActions?: boolean;
+  showStatusLabel?: boolean;
   onAccept?: () => void;
   onDecline?: () => void;
   onMapView?: () => void;
   className?: string;
 }
 
-export function DriverLoadCard({ load, showActions = false, onAccept, onDecline, onMapView, className }: DriverLoadCardProps) {
+export function DriverLoadCard({ load, showActions = false, showStatusLabel = false, onAccept, onDecline, onMapView, className }: DriverLoadCardProps) {
   const t = useTranslations("load");
   const tDriver = useTranslations("driver");
+  const tTabs = useTranslations("tabs");
   const router = useRouter();
 
   const formattedDate = new Date(load.loadingDate).toLocaleDateString("en-US", {
@@ -29,6 +31,26 @@ export function DriverLoadCard({ load, showActions = false, onAccept, onDecline,
     month: "short",
     year: "numeric",
   });
+
+  // Get status label and color
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case "pending":
+        return { label: tTabs("pending"), color: "bg-yellow-500", textColor: "text-yellow-900" };
+      case "accepted":
+        return { label: tTabs("accepted"), color: "bg-green-500", textColor: "text-green-900" };
+      case "rejected":
+        return { label: tTabs("rejected"), color: "bg-red-500", textColor: "text-red-900" };
+      case "in-progress":
+        return { label: tTabs("inProgress"), color: "bg-blue-500", textColor: "text-blue-900" };
+      case "completed":
+        return { label: tTabs("completed"), color: "bg-gray-500", textColor: "text-gray-900" };
+      default:
+        return { label: status, color: "bg-gray-500", textColor: "text-gray-900" };
+    }
+  };
+
+  const statusConfig = getStatusConfig(load.status);
 
   return (
     <div 
@@ -42,9 +64,20 @@ export function DriverLoadCard({ load, showActions = false, onAccept, onDecline,
           </div>
           <span className="font-bold text-(--color-stat-gray) text-base">{load.clientName}</span>
         </div>
-        <span className="font-bold text-(--color-stat-gray) text-base">
-          {t("loadPrice")} ${load.clientPrice}
-        </span>
+        <div className="flex items-center gap-2">
+          {showStatusLabel && (
+            <span className={cn(
+              "px-3 py-1 rounded-full text-xs font-semibold",
+              statusConfig.color,
+              statusConfig.textColor
+            )}>
+              {statusConfig.label}
+            </span>
+          )}
+          <span className="font-bold text-(--color-stat-gray) text-base">
+            €{load.clientPrice}
+          </span>
+        </div>
       </div>
       <div className="flex justify-between items-end">
         <div className="space-y-2  mb-4 text-(--color-dark-gray) text-xs font-normal">

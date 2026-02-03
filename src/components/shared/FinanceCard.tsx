@@ -28,7 +28,7 @@ export function FinanceCard({ label, value, trend, showArrow = false, onClick, c
               </span>
             )}
           </div>
-          <p className="text-xl font-semibold text-(--color-stat-gray) mt-1">{typeof value === "number" ? `$${value.toFixed(2)}` : value}</p>
+          <p className="text-xl font-semibold text-(--color-stat-gray) mt-1">{typeof value === "number" ? `€${value.toFixed(2)}` : value}</p>
         </div>
         <div className="flex items-center gap-2">{showArrow && <ChevronRight className="h-5 w-5 text-black" />}</div>
       </div>

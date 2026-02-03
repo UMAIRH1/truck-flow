@@ -357,7 +357,19 @@
     "thisYear": "Φέτος"
   },
   "notifications": {
-    "title": "Ειδοποιήσεις"
+    "title": "Ειδοποιήσεις",
+    "newLoad": "Νέο Φορτίο Δημιουργήθηκε",
+    "newLoadCreated": "Το φορτίο #{loadNumber} από {pickup} προς {dropoff} δημιουργήθηκε",
+    "loadAssigned": "Νέο Φορτίο Ανατέθηκε",
+    "loadAssignedToYou": "Σας ανατέθηκε το φορτίο #{loadNumber} από {pickup} προς {dropoff}",
+    "loadAccepted": "Φορτίο Αποδεκτό",
+    "driverAcceptedLoad": "Ο/Η {driverName} αποδέχτηκε το φορτίο #{loadNumber}",
+    "loadRejected": "Φορτίο Απορρίφθηκε",
+    "driverRejectedLoad": "Ο/Η {driverName} απέρριψε το φορτίο #{loadNumber}",
+    "loadCompleted": "Φορτίο Ολοκληρώθηκε",
+    "driverCompletedLoad": "Ο/Η {driverName} ολοκλήρωσε το φορτίο #{loadNumber}",
+    "documentsUploaded": "Έγγραφα Ανέβηκαν",
+    "driverUploadedDocuments": "Ο/Η {driverName} ανέβασε έγγραφα για το φορτίο #{loadNumber}"
   },
   "export": {
     "exportLoads": "Εξαγωγή Φορτίων",

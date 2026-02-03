@@ -54,7 +54,7 @@ export default function TotalEarningPage() {
           <aside className="lg:col-span-1 flex flex-col gap-4 lg:sticky lg:top-24">
             <div className="bg-(--color-yellow-light) text-(--color-stat-gray) rounded-xl p-6">
               <p className="text-sm">{metricTitle}</p>
-              <p className="text-3xl font-bold mt-1">${metricValue.toLocaleString()}.00</p>
+              <p className="text-3xl font-bold mt-1">€{metricValue.toLocaleString()}.00</p>
             </div>
             <div className="hidden lg:block bg-white rounded-2xl p-4 text-sm text-gray-500">{t("common.updatedJustNow")}</div>
           </aside>

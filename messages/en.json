@@ -368,7 +368,19 @@
     "thisYear": "This Year"
   },
   "notifications": {
-    "title": "Notifications"
+    "title": "Notifications",
+    "newLoad": "New Load Created",
+    "newLoadCreated": "Load #{loadNumber} from {pickup} to {dropoff} has been created",
+    "loadAssigned": "New Load Assigned",
+    "loadAssignedToYou": "You have been assigned load #{loadNumber} from {pickup} to {dropoff}",
+    "loadAccepted": "Load Accepted",
+    "driverAcceptedLoad": "{driverName} accepted load #{loadNumber}",
+    "loadRejected": "Load Rejected",
+    "driverRejectedLoad": "{driverName} rejected load #{loadNumber}",
+    "loadCompleted": "Load Completed",
+    "driverCompletedLoad": "{driverName} completed load #{loadNumber}",
+    "documentsUploaded": "Documents Uploaded",
+    "driverUploadedDocuments": "{driverName} has uploaded documents for load #{loadNumber}"
   },
   "export": {
     "exportLoads": "Export Loads",

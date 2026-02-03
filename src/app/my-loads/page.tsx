@@ -1,19 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Header, MobileLayout } from "@/components/layout";
 import { DriverLoadCard, FilterTabs } from "@/components/shared";
 import { useLoads } from "@/contexts/LoadContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-export default function MyLoadsPage() {
+function MyLoadsContent() {
   const { loads, updateLoadStatus } = useLoads();
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("pending");
   const t = useTranslations();
+
+  // Set active tab from URL query parameter
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['pending', 'accepted', 'rejected', 'completed'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   // Filter loads for this driver
   const driverLoads = loads.filter(
@@ -23,12 +32,14 @@ export default function MyLoadsPage() {
   const tabs = [
     { id: "pending", label: t("tabs.pending") },
     { id: "accepted", label: t("tabs.accepted") },
+    { id: "rejected", label: t("tabs.rejected") },
     { id: "completed", label: t("tabs.completed") },
   ];
 
   const filteredLoads = driverLoads.filter((load) => {
     if (activeTab === "pending") return load.status === "pending";
     if (activeTab === "accepted") return load.status === "accepted" || load.status === "in-progress";
+    if (activeTab === "rejected") return load.status === "rejected";
     if (activeTab === "completed") return load.status === "completed";
     return true;
   });
@@ -90,5 +101,17 @@ export default function MyLoadsPage() {
         </MobileLayout>
       </div>
     </>
+  );
+}
+
+export default function MyLoadsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400"></div>
+      </div>
+    }>
+      <MyLoadsContent />
+    </Suspense>
   );
 }

@@ -49,11 +49,11 @@ export default function CashflowPage() {
           </div>
           <FilterTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
           <div className="flex gap-4 px-2 md:justify-center bg-white border border-gray-100 py-2 rounded-md text-center">
-            <span className="text-sm font-bold">$ {outstandingTotal.toLocaleString()}.00</span>
+            <span className="text-sm font-bold">€ {outstandingTotal.toLocaleString()}.00</span>
             <span className="text-[#E0E0E0]">|</span>
-            <span className="text-sm text-(--color-cloud-bg)">$ {overdueTotal.toLocaleString()}.00</span>
+            <span className="text-sm text-(--color-cloud-bg)">€ {overdueTotal.toLocaleString()}.00</span>
             <span className="text-[#E0E0E0]">|</span>
-            <span className="text-sm text-(--color-cloud-bg)">$ {dueThisWeekTotal.toLocaleString()}.00</span>
+            <span className="text-sm text-(--color-cloud-bg)">€ {dueThisWeekTotal.toLocaleString()}.00</span>
           </div>
           <div className="space-y-3 md:space-y-4">
             {filteredItems.map((item) => (

@@ -5,6 +5,7 @@ import { Notification } from '@/types';
 import api from '@/lib/api';
 import socketService from '@/lib/socket';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -23,6 +24,67 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [rawNotifications, setRawNotifications] = useState<any[]>([]);
+  const t = useTranslations('notifications');
+
+  // Helper function to translate notification text
+  // Remove useCallback to allow it to update when t changes
+  const translateNotification = (notif: any) => {
+    let translatedTitle = notif.title;
+    let translatedMessage = notif.message;
+
+    console.log('Translating notification:', {
+      id: notif._id,
+      titleKey: notif.titleKey,
+      messageKey: notif.messageKey,
+      params: notif.params,
+      hasKeys: !!(notif.titleKey && notif.messageKey)
+    });
+
+    // If translation keys exist, use them
+    if (notif.titleKey) {
+      try {
+        const key = notif.titleKey.replace('notifications.', '');
+        translatedTitle = t(key);
+        console.log(`Translated title key "${key}":`, translatedTitle);
+      } catch (e) {
+        console.log('Translation error for title:', notif.titleKey, e);
+        // Fallback to original title if translation fails
+        translatedTitle = notif.title;
+      }
+    }
+
+    if (notif.messageKey) {
+      try {
+        const key = notif.messageKey.replace('notifications.', '');
+        translatedMessage = t(key, notif.params || {});
+        console.log(`Translated message key "${key}":`, translatedMessage);
+      } catch (e) {
+        console.log('Translation error for message:', notif.messageKey, e);
+        // Fallback to original message if translation fails
+        translatedMessage = notif.message;
+      }
+    }
+
+    return {
+      id: notif._id,
+      type: notif.type,
+      title: translatedTitle,
+      message: translatedMessage,
+      timestamp: new Date(notif.createdAt),
+      read: notif.read,
+      loadId: notif.loadId,
+      loadNumber: notif.loadNumber,
+    };
+  };
+
+  // Re-translate notifications whenever language changes (t changes)
+  useEffect(() => {
+    if (rawNotifications.length > 0) {
+      const translated = rawNotifications.map(notif => translateNotification(notif));
+      setNotifications(translated);
+    }
+  }, [t, rawNotifications]);
 
   // Fetch notifications from backend
   const fetchNotifications = useCallback(async () => {
@@ -35,16 +97,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
       const response = await api.getNotifications(50);
       if (response.success && response.data) {
-        const formattedNotifications = response.data.map((notif: any) => ({
-          id: notif._id,
-          type: notif.type,
-          title: notif.title,
-          message: notif.message,
-          timestamp: new Date(notif.createdAt),
-          read: notif.read,
-          loadId: notif.loadId,
-          loadNumber: notif.loadNumber,
-        }));
+        // Store raw notifications
+        setRawNotifications(response.data);
+        // Translate and set notifications
+        const formattedNotifications = response.data.map((notif: any) => translateNotification(notif));
         setNotifications(formattedNotifications);
         setUnreadCount(formattedNotifications.filter((n: Notification) => !n.read).length);
       }
@@ -70,9 +126,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       const handleNotification = (notification: any) => {
         console.log('New notification received:', notification);
         
-        // Show toast notification
-        toast.info(notification.title, {
-          description: notification.message,
+        // Translate the notification
+        const translated = translateNotification(notification);
+        
+        // Show toast notification with translated text
+        toast.info(translated.title, {
+          description: translated.message,
           duration: 5000,
         });
 
@@ -88,6 +147,21 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       };
     } else {
       setIsLoading(false);
+    }
+  }, [fetchNotifications]);
+
+  // Re-translate notifications when language changes
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      // Refresh notifications to get them re-translated
+      fetchNotifications();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('localeChange', handleLanguageChange);
+      return () => {
+        window.removeEventListener('localeChange', handleLanguageChange);
+      };
     }
   }, [fetchNotifications]);
 

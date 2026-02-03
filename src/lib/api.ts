@@ -70,6 +70,12 @@ class ApiClient {
       }
     }
 
+    // Add language preference header
+    if (typeof window !== 'undefined') {
+      const locale = localStorage.getItem('truck-flow-locale') || 'en';
+      headers['Accept-Language'] = locale;
+    }
+
     return headers;
   }
 

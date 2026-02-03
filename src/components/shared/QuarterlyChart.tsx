@@ -43,7 +43,7 @@ export function QuarterlyChart({
             <div className="flex-1 h-8 overflow-hidden">
               <div className="h-full bg-(--color-border-primary-light) border-r-2 border-(--color-cloud-bg) transition-all duration-500" style={{ width: `${percentage}%` }} />
             </div>
-            <span className="text-sm font-medium text-(--color-primary-gray-text) w-20 text-right">${item.value.toLocaleString()}</span>
+            <span className="text-sm font-medium text-(--color-primary-gray-text) w-20 text-right">€{item.value.toLocaleString()}</span>
           </div>
         );
       })}

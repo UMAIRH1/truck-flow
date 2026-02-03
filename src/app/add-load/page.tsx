@@ -222,16 +222,38 @@ export default function AddLoadPage() {
                   />
                 </div>
                 <div>
-                  <SelectWithIcon
-                    icon={BusFront}
-                    value={formData.loadWeight}
-                    onValueChange={(value) => setFormData({ ...formData, loadWeight: value })}
+                  <InputWithIcon
+                    icon={Scale}
+                    id="loadWeight"
+                    type="number"
                     placeholder={t("loadWeight")}
-                    options={loadWeightOptions}
+                    value={formData.loadWeight}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || 0;
+                      if (value <= 24000) {
+                        setFormData({ ...formData, loadWeight: e.target.value });
+                      }
+                    }}
+                    min="0"
+                    max="24000"
                   />
                 </div>
                 <div>
-                  <SelectWithIcon icon={BusFront} value={formData.pallets} onValueChange={(value) => setFormData({ ...formData, pallets: value })} placeholder={t("pallets")} options={palletOptions} />
+                  <InputWithIcon
+                    icon={Package}
+                    id="pallets"
+                    type="number"
+                    placeholder={t("pallets")}
+                    value={formData.pallets}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || 0;
+                      if (value <= 33) {
+                        setFormData({ ...formData, pallets: e.target.value });
+                      }
+                    }}
+                    min="0"
+                    max="33"
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

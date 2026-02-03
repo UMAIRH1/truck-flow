@@ -69,7 +69,7 @@ export function LoadCard({ load, showStatus = true, showDriver = true, onClick, 
         </div>
         <div className="text-right">
           <span className="font-medium text-base text-(--color-stat-gray)">
-            {t("price")} ${load.clientPrice.toFixed(2)}
+            {t("price")} €{load.clientPrice.toFixed(2)}
           </span>
         </div>
       </div>

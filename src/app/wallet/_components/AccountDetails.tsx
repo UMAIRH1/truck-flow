@@ -45,7 +45,7 @@ const AccountDetails = () => {
                 <item.icon className="h-4 md:h-5 w-4 md:w-5 text-gray-500" />
                 <span className="text-xs md:text-sm text-gray-500">{item.label}</span>
               </div>
-              <p className="font-semibold md:text-xl">$ {item.value.toLocaleString()}.00</p>
+              <p className="font-semibold md:text-xl">€ {item.value.toLocaleString()}.00</p>
             </div>
           ))}
         </div>

@@ -123,9 +123,9 @@ export function ManagerDashboard() {
           <div className="space-y-4 lg:col-span-1">
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
               <Link href="/total-earning">
-                <StatCard icon={DollarSign} label={t("dashboard.totalEarning")} value={`$ ${stats.totalIncome.toLocaleString()}.00`} className="hover:shadow-md transition-shadow" />
+                <StatCard icon={DollarSign} label={t("dashboard.totalEarning")} value={`€ ${stats.totalIncome.toLocaleString()}.00`} className="hover:shadow-md transition-shadow" />
               </Link>
-              <StatCard icon={CreditCard} label={t("dashboard.unpaidAmount")} value={`$ ${stats.pendingPayments.toLocaleString()}.00`} />
+              <StatCard icon={CreditCard} label={t("dashboard.unpaidAmount")} value={`€ ${stats.pendingPayments.toLocaleString()}.00`} />
               <StatCard icon={Clock} label={t("dashboard.upcomingPayments")} value={`$ ${upcomingPayments.toLocaleString()}.00`} />
               <Link href="/active-loads">
                 <StatCard icon={Truck} label={t("dashboard.activeLoads")} value={activeLoadCount} className="hover:shadow-md transition-shadow" />
