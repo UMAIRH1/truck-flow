@@ -375,12 +375,16 @@
     "loadAssignedToYou": "You have been assigned load #{loadNumber} from {pickup} to {dropoff}",
     "loadAccepted": "Load Accepted",
     "driverAcceptedLoad": "{driverName} accepted load #{loadNumber}",
+    "driverAcceptedLoadDetails": "{driverName} accepted load #{loadNumber} ({pickup} → {dropoff})",
     "loadRejected": "Load Rejected",
     "driverRejectedLoad": "{driverName} rejected load #{loadNumber}",
+    "driverRejectedLoadDetails": "{driverName} rejected load #{loadNumber} ({pickup} → {dropoff})",
     "loadCompleted": "Load Completed",
     "driverCompletedLoad": "{driverName} completed load #{loadNumber}",
+    "driverCompletedLoadDetails": "{driverName} completed load #{loadNumber} ({pickup} → {dropoff})",
     "documentsUploaded": "Documents Uploaded",
-    "driverUploadedDocuments": "{driverName} has uploaded documents for load #{loadNumber}"
+    "driverUploadedDocuments": "{driverName} has uploaded documents for load #{loadNumber}",
+    "driverUploadedDocumentsDetails": "{driverName} uploaded documents for load #{loadNumber} ({pickup} → {dropoff})"
   },
   "export": {
     "exportLoads": "Export Loads",

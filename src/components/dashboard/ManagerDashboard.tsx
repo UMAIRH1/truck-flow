@@ -106,12 +106,13 @@ export function ManagerDashboard() {
   const tabs = [
     { id: "accepted", label: t("tabs.accepted") },
     { id: "pending", label: t("tabs.pending") },
+    { id: "completed", label: t("tabs.completed") },
     { id: "rejected", label: t("tabs.rejected") },
-    { id: "dispute", label: t("tabs.dispute") },
   ];
 
   const filteredLoads = loads.filter((load) => {
-    if (activeTab === "accepted") return load.status === "accepted" || load.status === "completed";
+    if (activeTab === "accepted") return load.status === "accepted" || load.status === "in-progress";
+    if (activeTab === "completed") return load.status === "completed";
     return load.status === activeTab;
   });
 

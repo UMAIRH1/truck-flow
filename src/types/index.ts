@@ -37,6 +37,8 @@ export interface Load {
   status: LoadStatus;
   notes?: string;
   podImages?: string[];
+  invoices?: string[];
+  documents?: string[];
   fuel?: number;
   tolls?: number;
   otherExpenses?: number;

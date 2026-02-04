@@ -364,12 +364,16 @@
     "loadAssignedToYou": "Σας ανατέθηκε το φορτίο #{loadNumber} από {pickup} προς {dropoff}",
     "loadAccepted": "Φορτίο Αποδεκτό",
     "driverAcceptedLoad": "Ο/Η {driverName} αποδέχτηκε το φορτίο #{loadNumber}",
+    "driverAcceptedLoadDetails": "Ο/Η {driverName} αποδέχτηκε το φορτίο #{loadNumber} ({pickup} → {dropoff})",
     "loadRejected": "Φορτίο Απορρίφθηκε",
     "driverRejectedLoad": "Ο/Η {driverName} απέρριψε το φορτίο #{loadNumber}",
+    "driverRejectedLoadDetails": "Ο/Η {driverName} απέρριψε το φορτίο #{loadNumber} ({pickup} → {dropoff})",
     "loadCompleted": "Φορτίο Ολοκληρώθηκε",
     "driverCompletedLoad": "Ο/Η {driverName} ολοκλήρωσε το φορτίο #{loadNumber}",
+    "driverCompletedLoadDetails": "Ο/Η {driverName} ολοκλήρωσε το φορτίο #{loadNumber} ({pickup} → {dropoff})",
     "documentsUploaded": "Έγγραφα Ανέβηκαν",
-    "driverUploadedDocuments": "Ο/Η {driverName} ανέβασε έγγραφα για το φορτίο #{loadNumber}"
+    "driverUploadedDocuments": "Ο/Η {driverName} ανέβασε έγγραφα για το φορτίο #{loadNumber}",
+    "driverUploadedDocumentsDetails": "Ο/Η {driverName} ανέβασε έγγραφα για το φορτίο #{loadNumber} ({pickup} → {dropoff})"
   },
   "export": {
     "exportLoads": "Εξαγωγή Φορτίων",

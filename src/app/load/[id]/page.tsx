@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Header, MobileLayout } from "@/components/layout";
 import { useLoads } from "@/contexts/LoadContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { Clock, Check, BusFront, ArrowDownLeft, ArrowUpRight, X, DollarSign, Package, Calendar, Fuel, AlertCircle, User, Phone, Mail, MapPin, Upload } from "lucide-react";
+import { Clock, Check, BusFront, ArrowDownLeft, ArrowUpRight, X, DollarSign, Package, Calendar, Fuel, AlertCircle, User, Phone, Mail, MapPin, Upload, FileText } from "lucide-react";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { ASSETS } from "@/lib/assets";
 import { Badge } from "@/components/ui/badge";
@@ -26,14 +26,18 @@ export default function LoadStatusPage() {
   const isManager = user?.role === "manager";
   const isDriver = user?.role === "driver";
 
-  // Debug info (remove in production)
+  // Debug info
   console.log("Load Detail Debug:", {
     loadId: params.id,
     loadStatus: load?.status,
     userRole: user?.role,
     isDriver,
     isManager,
-    hasPodImages: load?.podImages?.length,
+    hasPodImages: load?.podImages?.length || 0,
+    hasInvoices: load?.invoices?.length || 0,
+    hasDocuments: load?.documents?.length || 0,
+    invoices: load?.invoices,
+    documents: load?.documents,
   });
 
   if (!load) {
@@ -319,6 +323,72 @@ export default function LoadStatusPage() {
               <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200">
                 <img src={image} alt={`POD ${index + 1}`} className="w-full h-full object-cover" />
               </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Invoices */}
+      {load.invoices && load.invoices.length > 0 && (
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="font-bold text-lg mb-4 text-black">Invoices</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {load.invoices.map((file, index) => (
+              <a
+                key={index}
+                href={file}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-yellow-400 transition-colors group"
+              >
+                {file.endsWith('.pdf') || file.includes('/raw/upload/') ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gray-50 group-hover:bg-yellow-50">
+                    <FileText className="h-16 w-16 text-gray-400 group-hover:text-yellow-600 mb-2" />
+                    <p className="text-xs text-gray-600 text-center">Invoice {index + 1}</p>
+                    <p className="text-xs text-blue-600 mt-1">Click to download</p>
+                  </div>
+                ) : (
+                  <>
+                    <img src={file} alt={`Invoice ${index + 1}`} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                      <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-semibold">View</span>
+                    </div>
+                  </>
+                )}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Other Documents */}
+      {load.documents && load.documents.length > 0 && (
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="font-bold text-lg mb-4 text-black">Other Documents</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {load.documents.map((file, index) => (
+              <a
+                key={index}
+                href={file}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-yellow-400 transition-colors group"
+              >
+                {file.endsWith('.pdf') || file.includes('/raw/upload/') ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gray-50 group-hover:bg-yellow-50">
+                    <FileText className="h-16 w-16 text-gray-400 group-hover:text-yellow-600 mb-2" />
+                    <p className="text-xs text-gray-600 text-center">Document {index + 1}</p>
+                    <p className="text-xs text-blue-600 mt-1">Click to download</p>
+                  </div>
+                ) : (
+                  <>
+                    <img src={file} alt={`Document ${index + 1}`} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                      <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-semibold">View</span>
+                    </div>
+                  </>
+                )}
+              </a>
             ))}
           </div>
         </div>
