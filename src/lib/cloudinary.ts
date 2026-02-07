@@ -19,15 +19,19 @@ export async function uploadToCloudinary(file: File): Promise<string> {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-  formData.append('cloud_name', CLOUDINARY_CLOUD_NAME);
-
-  // Determine upload type based on file type
-  const uploadType = file.type === 'application/pdf' ? 'raw' : 'image';
+  
+  // Determine upload type and file extension
+  const isImage = file.type.startsWith('image/');
+  const uploadType = isImage ? 'image' : 'raw';
+  
+  // Get file extension
+  const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
   
   console.log('Uploading to Cloudinary:', { 
     fileName: file.name, 
     fileType: file.type, 
     uploadType,
+    extension: fileExtension,
     cloudName: CLOUDINARY_CLOUD_NAME,
     preset: CLOUDINARY_UPLOAD_PRESET
   });
@@ -45,18 +49,29 @@ export async function uploadToCloudinary(file: File): Promise<string> {
       const errorData = await response.json();
       console.error('Cloudinary error response:', errorData);
       
-      // If PDF upload fails, try as image (some presets only allow images)
       if (uploadType === 'raw') {
-        console.warn('PDF upload failed, this might be because the upload preset does not allow raw files');
-        throw new Error('PDF upload not supported. Please configure your Cloudinary upload preset to allow raw files, or upload images only.');
+        console.error('Raw file upload failed. Please check your Cloudinary upload preset configuration.');
+        console.error('Error details:', errorData);
+        throw new Error(
+          `Failed to upload ${fileExtension.toUpperCase()} file. ` +
+          `Your Cloudinary upload preset "${CLOUDINARY_UPLOAD_PRESET}" may not allow raw file uploads. ` +
+          `Please enable "Resource Type: Raw" in your Cloudinary preset settings.`
+        );
       }
       
       throw new Error(errorData.error?.message || 'Failed to upload file to Cloudinary');
     }
 
     const data: CloudinaryUploadResponse = await response.json();
-    console.log('Cloudinary upload successful:', data.secure_url);
-    return data.secure_url;
+    
+    // For non-image files, ensure the URL includes the proper file extension
+    let finalUrl = data.secure_url;
+    if (!isImage && fileExtension && !finalUrl.endsWith(`.${fileExtension}`)) {
+      finalUrl = `${finalUrl}.${fileExtension}`;
+    }
+    
+    console.log('Cloudinary upload successful:', finalUrl);
+    return finalUrl;
   } catch (error) {
     console.error('Cloudinary upload error:', error);
     throw error;
@@ -67,27 +82,35 @@ export async function uploadToCloudinary(file: File): Promise<string> {
  * Validate image file before upload
  */
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = 10 * 1024 * 1024; // 10MB (increased for documents)
   const allowedTypes = [
+    // Images
     'image/jpeg', 
     'image/jpg', 
     'image/png', 
     'image/gif', 
     'image/webp',
-    'application/pdf'
+    // Documents
+    'application/pdf',
+    'application/msword', // .doc
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/vnd.ms-excel', // .xls
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    'text/plain', // .txt
+    'text/csv', // .csv
   ];
 
   if (!allowedTypes.includes(file.type)) {
     return {
       valid: false,
-      error: `Invalid file type: ${file.type}. Please upload JPG, PNG, GIF, WebP, or PDF files.`,
+      error: `Invalid file type: ${file.type}. Allowed: Images (JPG, PNG, GIF, WebP), PDF, Word, Excel, TXT, CSV`,
     };
   }
 
   if (file.size > maxSize) {
     return {
       valid: false,
-      error: `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds 5MB limit.`,
+      error: `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds 10MB limit.`,
     };
   }
 

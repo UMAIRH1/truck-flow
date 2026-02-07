@@ -11,3 +11,4 @@ export { QuarterlyChart } from "./QuarterlyChart";
 export { PODUpload } from "./PODUpload";
 export { ExportExcelButton } from "./ExportExcelButton";
 export { LanguageSwitcher } from "./LanguageSwitcher";
+export { DocumentViewer } from "./DocumentViewer";

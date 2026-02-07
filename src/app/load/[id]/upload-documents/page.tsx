@@ -204,8 +204,8 @@ export default function UploadDocumentsPage() {
             <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
               <li>Upload invoice for this load</li>
               <li>Upload any additional documents (receipts, bills, etc.)</li>
-              <li>Supported formats: JPG, PNG, PDF</li>
-              <li>Max file size: 5MB per file</li>
+              <li>Supported formats: Images, PDF, Word, Excel, TXT, CSV</li>
+              <li>Max file size: 10MB per file</li>
             </ul>
           </div>
         </div>
@@ -225,24 +225,31 @@ export default function UploadDocumentsPage() {
           {/* Invoice Preview */}
           {invoiceFiles.length > 0 && (
             <div className="grid grid-cols-2 gap-3 mb-4">
-              {invoiceFiles.map((file, index) => (
-                <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
-                  {file.endsWith('.pdf') || file.includes('/raw/upload/') ? (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-4">
-                      <FileText className="h-12 w-12 text-gray-400 mb-2" />
-                      <p className="text-xs text-gray-600 text-center">PDF Document</p>
-                    </div>
-                  ) : (
-                    <img src={file} alt={`Invoice ${index + 1}`} className="w-full h-full object-cover" />
-                  )}
-                  <button
-                    onClick={() => removeFile(index, "invoice")}
-                    className="absolute top-1 right-1 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
+              {invoiceFiles.map((file, index) => {
+                const isImage = file.match(/\.(jpg|jpeg|png|gif|webp)$/i) || 
+                               (!file.includes('/raw/upload/') && file.includes('/image/upload/'));
+                const extension = file.split('.').pop()?.toUpperCase() || 'FILE';
+                
+                return (
+                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                    {isImage ? (
+                      <img src={file} alt={`Invoice ${index + 1}`} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                        <FileText className="h-12 w-12 text-gray-400 mb-2" />
+                        <p className="text-xs text-gray-600 text-center font-semibold">{extension}</p>
+                        <p className="text-xs text-gray-500 text-center">Document</p>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => removeFile(index, "invoice")}
+                      className="absolute top-1 right-1 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -250,7 +257,7 @@ export default function UploadDocumentsPage() {
           <label className="block">
             <input
               type="file"
-              accept="image/*,application/pdf,.pdf"
+              accept="image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
               multiple
               onChange={(e) => handleFileUpload(e, "invoice")}
               className="hidden"
@@ -265,7 +272,7 @@ export default function UploadDocumentsPage() {
               <p className="text-sm text-gray-600">
                 {isUploading ? "Uploading..." : "Click to upload invoice"}
               </p>
-              <p className="text-xs text-gray-400 mt-1">JPG, PNG, or PDF (max 5MB)</p>
+              <p className="text-xs text-gray-400 mt-1">Images, PDF, Word, Excel (max 10MB)</p>
             </div>
           </label>
         </CardContent>
@@ -285,24 +292,31 @@ export default function UploadDocumentsPage() {
           {/* Documents Preview */}
           {documentFiles.length > 0 && (
             <div className="grid grid-cols-2 gap-3 mb-4">
-              {documentFiles.map((file, index) => (
-                <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
-                  {file.endsWith('.pdf') || file.includes('/raw/upload/') ? (
-                    <div className="w-full h-full flex flex-col items-center justify-center p-4">
-                      <FileText className="h-12 w-12 text-gray-400 mb-2" />
-                      <p className="text-xs text-gray-600 text-center">PDF Document</p>
-                    </div>
-                  ) : (
-                    <img src={file} alt={`Document ${index + 1}`} className="w-full h-full object-cover" />
-                  )}
-                  <button
-                    onClick={() => removeFile(index, "documents")}
-                    className="absolute top-1 right-1 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
+              {documentFiles.map((file, index) => {
+                const isImage = file.match(/\.(jpg|jpeg|png|gif|webp)$/i) || 
+                               (!file.includes('/raw/upload/') && file.includes('/image/upload/'));
+                const extension = file.split('.').pop()?.toUpperCase() || 'FILE';
+                
+                return (
+                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                    {isImage ? (
+                      <img src={file} alt={`Document ${index + 1}`} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                        <FileText className="h-12 w-12 text-gray-400 mb-2" />
+                        <p className="text-xs text-gray-600 text-center font-semibold">{extension}</p>
+                        <p className="text-xs text-gray-500 text-center">Document</p>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => removeFile(index, "documents")}
+                      className="absolute top-1 right-1 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -310,7 +324,7 @@ export default function UploadDocumentsPage() {
           <label className="block">
             <input
               type="file"
-              accept="image/*,application/pdf,.pdf"
+              accept="image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
               multiple
               onChange={(e) => handleFileUpload(e, "documents")}
               className="hidden"
@@ -325,7 +339,7 @@ export default function UploadDocumentsPage() {
               <p className="text-sm text-gray-600">
                 {isUploading ? "Uploading..." : "Click to upload documents"}
               </p>
-              <p className="text-xs text-gray-400 mt-1">JPG, PNG, or PDF (max 5MB)</p>
+              <p className="text-xs text-gray-400 mt-1">Images, PDF, Word, Excel (max 10MB)</p>
             </div>
           </label>
         </CardContent>

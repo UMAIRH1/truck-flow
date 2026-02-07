@@ -12,7 +12,9 @@ import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/components/shared";
+import { DocumentViewer } from "@/components/shared/DocumentViewer";
 import api from "@/lib/api";
+import { useState } from "react";
 
 export default function LoadStatusPage() {
   const params = useParams();
@@ -21,10 +23,26 @@ export default function LoadStatusPage() {
   const { user } = useAuth();
   const t = useTranslations("loadStatus");
   const tCommon = useTranslations("common");
+  
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState("");
+  const [viewerFilename, setViewerFilename] = useState("");
 
   const load = getLoadById(params.id as string);
   const isManager = user?.role === "manager";
   const isDriver = user?.role === "driver";
+
+  const openDocument = (url: string, filename: string) => {
+    setViewerUrl(url);
+    setViewerFilename(filename);
+    setViewerOpen(true);
+  };
+
+  const closeViewer = () => {
+    setViewerOpen(false);
+    setViewerUrl("");
+    setViewerFilename("");
+  };
 
   // Debug info
   console.log("Load Detail Debug:", {
@@ -320,9 +338,16 @@ export default function LoadStatusPage() {
           <h3 className="font-bold text-lg mb-4 text-black">Proof of Delivery</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {load.podImages.map((image, index) => (
-              <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200">
+              <button
+                key={index}
+                onClick={() => openDocument(image, `pod-${index + 1}.jpg`)}
+                className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-yellow-400 transition-colors group cursor-pointer"
+              >
                 <img src={image} alt={`POD ${index + 1}`} className="w-full h-full object-cover" />
-              </div>
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                  <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-semibold">View</span>
+                </div>
+              </button>
             ))}
           </div>
         </div>
@@ -333,30 +358,46 @@ export default function LoadStatusPage() {
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
           <h3 className="font-bold text-lg mb-4 text-black">Invoices</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {load.invoices.map((file, index) => (
-              <a
-                key={index}
-                href={file}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-yellow-400 transition-colors group"
-              >
-                {file.endsWith('.pdf') || file.includes('/raw/upload/') ? (
-                  <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gray-50 group-hover:bg-yellow-50">
-                    <FileText className="h-16 w-16 text-gray-400 group-hover:text-yellow-600 mb-2" />
-                    <p className="text-xs text-gray-600 text-center">Invoice {index + 1}</p>
-                    <p className="text-xs text-blue-600 mt-1">Click to download</p>
-                  </div>
-                ) : (
-                  <>
-                    <img src={file} alt={`Invoice ${index + 1}`} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
-                      <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-semibold">View</span>
+            {load.invoices.map((file, index) => {
+              // Check if it's an image or document
+              const isImage = file.match(/\.(jpg|jpeg|png|gif|webp)$/i) || 
+                             (!file.includes('/raw/upload/') && file.includes('/image/upload/'));
+              
+              // Get file extension for non-images
+              const extension = file.split('.').pop()?.toUpperCase() || 'FILE';
+              
+              // For Cloudinary raw files, ensure proper extension in URL
+              let downloadUrl = file;
+              if (file.includes('/raw/upload/') && !file.match(/\.\w+$/)) {
+                // Try to add common extensions
+                const possibleExt = file.includes('pdf') ? 'pdf' : 'pdf';
+                downloadUrl = `${file}.${possibleExt}`;
+              }
+              
+              return (
+                <button
+                  key={index}
+                  onClick={() => openDocument(downloadUrl, `invoice-${index + 1}.${extension.toLowerCase()}`)}
+                  className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-yellow-400 transition-colors group cursor-pointer"
+                >
+                  {isImage ? (
+                    <>
+                      <img src={file} alt={`Invoice ${index + 1}`} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                        <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-semibold">View</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gray-50 group-hover:bg-yellow-50">
+                      <FileText className="h-16 w-16 text-gray-400 group-hover:text-yellow-600 mb-2" />
+                      <p className="text-xs text-gray-600 text-center font-semibold">{extension}</p>
+                      <p className="text-xs text-gray-600 text-center mt-1">Invoice {index + 1}</p>
+                      <p className="text-xs text-blue-600 mt-2">Click to view</p>
                     </div>
-                  </>
-                )}
-              </a>
-            ))}
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -366,30 +407,46 @@ export default function LoadStatusPage() {
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
           <h3 className="font-bold text-lg mb-4 text-black">Other Documents</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {load.documents.map((file, index) => (
-              <a
-                key={index}
-                href={file}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-yellow-400 transition-colors group"
-              >
-                {file.endsWith('.pdf') || file.includes('/raw/upload/') ? (
-                  <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gray-50 group-hover:bg-yellow-50">
-                    <FileText className="h-16 w-16 text-gray-400 group-hover:text-yellow-600 mb-2" />
-                    <p className="text-xs text-gray-600 text-center">Document {index + 1}</p>
-                    <p className="text-xs text-blue-600 mt-1">Click to download</p>
-                  </div>
-                ) : (
-                  <>
-                    <img src={file} alt={`Document ${index + 1}`} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
-                      <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-semibold">View</span>
+            {load.documents.map((file, index) => {
+              // Check if it's an image or document
+              const isImage = file.match(/\.(jpg|jpeg|png|gif|webp)$/i) || 
+                             (!file.includes('/raw/upload/') && file.includes('/image/upload/'));
+              
+              // Get file extension for non-images
+              const extension = file.split('.').pop()?.toUpperCase() || 'FILE';
+              
+              // For Cloudinary raw files, ensure proper extension in URL
+              let downloadUrl = file;
+              if (file.includes('/raw/upload/') && !file.match(/\.\w+$/)) {
+                // Try to add common extensions
+                const possibleExt = file.includes('pdf') ? 'pdf' : 'pdf';
+                downloadUrl = `${file}.${possibleExt}`;
+              }
+              
+              return (
+                <button
+                  key={index}
+                  onClick={() => openDocument(downloadUrl, `document-${index + 1}.${extension.toLowerCase()}`)}
+                  className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-yellow-400 transition-colors group cursor-pointer"
+                >
+                  {isImage ? (
+                    <>
+                      <img src={file} alt={`Document ${index + 1}`} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                        <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-semibold">View</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gray-50 group-hover:bg-yellow-50">
+                      <FileText className="h-16 w-16 text-gray-400 group-hover:text-yellow-600 mb-2" />
+                      <p className="text-xs text-gray-600 text-center font-semibold">{extension}</p>
+                      <p className="text-xs text-gray-600 text-center mt-1">Document {index + 1}</p>
+                      <p className="text-xs text-blue-600 mt-2">Click to view</p>
                     </div>
-                  </>
-                )}
-              </a>
-            ))}
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -521,6 +578,15 @@ export default function LoadStatusPage() {
         <Header title={t("title")} showBack />
         {content}
       </div>
+      
+      {/* Document Viewer Modal */}
+      {viewerOpen && (
+        <DocumentViewer
+          url={viewerUrl}
+          filename={viewerFilename}
+          onClose={closeViewer}
+        />
+      )}
     </>
   );
 }

@@ -55,6 +55,8 @@ function transformLoadFromAPI(apiLoad: any): Load {
     status: apiLoad.status || "pending",
     notes: apiLoad.notes,
     podImages: apiLoad.podImage ? [apiLoad.podImage] : apiLoad.podImages || [],
+    invoices: apiLoad.invoices || [],
+    documents: apiLoad.documents || [],
     createdAt: apiLoad.createdAt ? new Date(apiLoad.createdAt) : new Date(),
     updatedAt: apiLoad.updatedAt ? new Date(apiLoad.updatedAt) : new Date(),
     completedAt: apiLoad.completedAt ? new Date(apiLoad.completedAt) : undefined,
