@@ -343,6 +343,7 @@
     "last3Months": "Τελευταίοι 3 Μήνες"
   },
   "cashflow": {
+    "title": "Ταμειακή Ροή",
     "clientsCashIn": "Πελάτες (Εισροές)",
     "partnersCashOut": "Συνεργάτες (Εκροές)",
     "overdueBy": "Καθυστέρηση",

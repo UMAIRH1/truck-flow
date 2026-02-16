@@ -10,13 +10,15 @@ import { CashflowItem } from "@/types";
 
 export default function CashflowPage() {
   const [activeTab, setActiveTab] = useState("outstanding");
-  const t = useTranslations();
+  const t = useTranslations("cashflow");
+  const tCommon = useTranslations("common");
+  const tTabs = useTranslations("tabs");
   const { loads } = useLoads();
 
   const tabs = [
-    { id: "outstanding", label: t("tabs.outstanding") },
-    { id: "overdue", label: t("tabs.overdue") },
-    { id: "due-this-week", label: t("tabs.dueThisWeek") },
+    { id: "outstanding", label: tTabs("outstanding") },
+    { id: "overdue", label: tTabs("overdue") },
+    { id: "due-this-week", label: tTabs("dueThisWeek") },
   ];
 
   // Convert loads to cashflow items
@@ -101,21 +103,21 @@ export default function CashflowPage() {
 
   return (
     <MobileLayout showFAB={true} showBottomNav={true}>
-      <Header title={t("header.cashflow")} showBack />
+      <Header title={t("title")} showBack />
       <div className="max-sm:bg-(--color-yellow-light)">
         <div className="px-4 py-4 max-w-md mx-auto space-y-4 md:max-w-7xl md:px-8 md:py-12 rounded-t-2xl bg-white md:min-h-screen">
           <div className="flex gap-3 md:grid md:grid-cols-2 md:gap-6">
             <div className="flex justify-start items-center gap-2 bg-(--color-greenish) text-white rounded-lg px-2 py-4 md:p-6">
               <DollarSign />
               <div>
-                <p className="text-[13px] font-bold">{t("cashflow.clientsCashIn")}</p>
+                <p className="text-[13px] font-bold">{t("clientsCashIn")}</p>
                 <p className="text-xs font-normal mt-1">€{clientsTotal.toLocaleString()}.00</p>
               </div>
             </div>
             <div className="flex justify-start items-center gap-2 bg-(--color-dangerous) text-white rounded-lg p-2 md:p-6">
               <DollarSign />
               <div>
-                <p className="text-xs font-semibold">{t("cashflow.partnersCashOut")}</p>
+                <p className="text-xs font-semibold">{t("partnersCashOut")}</p>
                 <p className="text-xs font-normal mt-1">€{partnersTotal.toLocaleString()}.00</p>
               </div>
             </div>
@@ -131,7 +133,7 @@ export default function CashflowPage() {
           <div className="space-y-3 md:space-y-4">
             {filteredItems.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                {t("common.noDataFound")}
+                {tCommon("noLoadsFound")}
               </div>
             ) : (
               filteredItems.map((item) => (

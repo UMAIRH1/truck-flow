@@ -354,6 +354,7 @@
     "last3Months": "Last 3 Months"
   },
   "cashflow": {
+    "title": "Cashflow",
     "clientsCashIn": "Clients (Cash In)",
     "partnersCashOut": "Partners (Cash Out)",
     "overdueBy": "Overdue by",
