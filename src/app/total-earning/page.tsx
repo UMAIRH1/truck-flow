@@ -11,7 +11,7 @@ export default function TotalEarningPage() {
   const { loads } = useLoads();
   const completedLoads = loads.filter((l) => l.status === "completed");
   const totalIncome = completedLoads.reduce((sum, load) => sum + load.clientPrice, 0);
-  const totalExpense = completedLoads.reduce((sum, load) => sum + (load.driverPrice || 0) + (load.fuel || 0) + (load.tolls || 0) + (load.otherExpenses || 0), 0);
+  const totalExpense = completedLoads.reduce((sum, load) => sum + (load.driverPrice || 0), 0);
   const profit = totalIncome - totalExpense;
   const [metric, setMetric] = useState<string>("income");
   const t = useTranslations();

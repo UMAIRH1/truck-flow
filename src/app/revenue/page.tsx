@@ -15,7 +15,7 @@ export default function RevenuePage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const filteredCompletedLoads = selectedDate ? completedLoads.filter((l) => new Date(l.loadingDate).toDateString() === selectedDate.toDateString()) : completedLoads;
   const totalIncome = filteredCompletedLoads.reduce((sum, load) => sum + load.clientPrice, 0);
-  const totalExpense = filteredCompletedLoads.reduce((sum, load) => sum + (load.driverPrice || 0) + (load.fuel || 0) + (load.tolls || 0) + (load.otherExpenses || 0), 0);
+  const totalExpense = filteredCompletedLoads.reduce((sum, load) => sum + (load.driverPrice || 0), 0);
   const profit = totalIncome - totalExpense;
   const t = useTranslations();
 

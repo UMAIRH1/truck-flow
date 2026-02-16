@@ -75,7 +75,7 @@ export function DriverLoadCard({ load, showActions = false, showStatusLabel = fa
             </span>
           )}
           <span className="font-bold text-(--color-stat-gray) text-base">
-            €{load.clientPrice}
+            €{load.driverPrice || 0}
           </span>
         </div>
       </div>

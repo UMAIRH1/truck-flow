@@ -24,9 +24,9 @@ function MyLoadsContent() {
     }
   }, [searchParams]);
 
-  // Filter loads for this driver
+  // Filter loads for this driver - only show loads assigned to them
   const driverLoads = loads.filter(
-    (load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id || load.status === "pending", // Show all pending loads for demo
+    (load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id
   );
 
   const tabs = [

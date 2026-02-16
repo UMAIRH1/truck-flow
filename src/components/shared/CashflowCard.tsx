@@ -55,7 +55,7 @@ export function CashflowCard({ item, className }: CashflowCardProps) {
           <hr className="my-2 border-(--color-arsenic-text)" />
           <div className="mt-1 space-y-0.5 text-xs text-(--color-gray-light)">
             <p>
-              {t("amount")}: <span className="font-bold">${item.amount.toLocaleString()}</span>{" "}
+              {t("amount")}: <span className="font-bold">€{item.amount.toLocaleString()}</span>{" "}
             </p>
             <p>
               {t("since")}: {formattedSince}

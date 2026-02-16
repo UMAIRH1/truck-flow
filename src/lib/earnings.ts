@@ -23,7 +23,7 @@ export function aggregateMonthlyMetrics(loads: Load[], metric: "income" | "expen
       const t = new Date(load.loadingDate).getTime();
       if (t < from || t > to) return sum;
       const income = load.clientPrice || 0;
-      const expense = (load.driverPrice || 0) + (load.fuel || 0) + (load.tolls || 0) + (load.otherExpenses || 0);
+      const expense = (load.driverPrice || 0);
       const v = metric === "income" ? income : metric === "expense" ? expense : income - expense;
       return sum + v;
     }, 0);
@@ -63,7 +63,7 @@ export function aggregateQuarterlyMetrics(loads: Load[], metric: "income" | "exp
     if (d.getFullYear() !== y) continue;
     const q = Math.floor(d.getMonth() / 3);
     const income = load.clientPrice || 0;
-    const expense = (load.driverPrice || 0) + (load.fuel || 0) + (load.tolls || 0) + (load.otherExpenses || 0);
+    const expense = (load.driverPrice || 0);
     const v = metric === "income" ? income : metric === "expense" ? expense : income - expense;
     quarters[q].value += v;
   }
@@ -99,7 +99,7 @@ export function aggregateLastFourQuarters(loads: Load[], metric: "income" | "exp
       const t = new Date(load.loadingDate).getTime();
       if (t < start.getTime() || t > end.getTime()) return sum;
       const income = load.clientPrice || 0;
-      const expense = (load.driverPrice || 0) + (load.fuel || 0) + (load.tolls || 0) + (load.otherExpenses || 0);
+      const expense = (load.driverPrice || 0);
       const v = metric === "income" ? income : metric === "expense" ? expense : income - expense;
       return sum + v;
     }, 0);

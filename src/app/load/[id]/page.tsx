@@ -89,7 +89,7 @@ export default function LoadStatusPage() {
     return new Date(date).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
   };
 
-  const profit = load.clientPrice - (load.driverPrice || 0) - (load.fuel || 0) - (load.tolls || 0) - (load.otherExpenses || 0);
+  const profit = load.clientPrice - (load.driverPrice || 0);
 
   const content = (
     <div className="px-4 py-4 space-y-6 max-w-4xl mx-auto">
@@ -215,6 +215,30 @@ export default function LoadStatusPage() {
         </div>
       )}
 
+      {/* Driver-specific Payment Details */}
+      {isDriver && (
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="font-bold text-lg mb-4 text-black">Payment Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="h-4 w-4 text-green-600" />
+                <span className="text-xs text-gray-600">Your Payment</span>
+              </div>
+              <p className="text-2xl font-bold text-green-600">€{(load.driverPrice || 0).toFixed(2)}</p>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="h-4 w-4 text-blue-600" />
+                <span className="text-xs text-gray-600">Payment Terms</span>
+              </div>
+              <p className="text-lg font-bold text-blue-600">{load.paymentTerms} Days</p>
+              <p className="text-xs text-gray-500 mt-1">Expected: {formatDate(load.expectedPayoutDate)}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Load Details */}
       <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
         <h3 className="font-bold text-lg mb-4 text-black">Load Details</h3>
@@ -242,20 +266,24 @@ export default function LoadStatusPage() {
               </div>
             </div>
           )}
-          <div className="flex items-start gap-3">
-            <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
-            <div>
-              <p className="text-xs text-gray-500">Payment Terms</p>
-              <p className="font-semibold">{load.paymentTerms} Days</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
-            <div>
-              <p className="text-xs text-gray-500">Expected Payout</p>
-              <p className="font-semibold">{formatDate(load.expectedPayoutDate)}</p>
-            </div>
-          </div>
+          {isManager && (
+            <>
+              <div className="flex items-start gap-3">
+                <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
+                <div>
+                  <p className="text-xs text-gray-500">Payment Terms</p>
+                  <p className="font-semibold">{load.paymentTerms} Days</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
+                <div>
+                  <p className="text-xs text-gray-500">Expected Payout</p>
+                  <p className="font-semibold">{formatDate(load.expectedPayoutDate)}</p>
+                </div>
+              </div>
+            </>
+          )}
         </div>
         {load.notes && (
           <div className="mt-4 pt-4 border-t border-gray-200">

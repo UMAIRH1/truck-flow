@@ -193,7 +193,14 @@ export default function AddLoadPage() {
     const fuel = parseFloat(formData.fuel) || 0;
     const tolls = parseFloat(formData.tolls) || 0;
     const other = parseFloat(formData.otherExpenses) || 0;
-    return income - driverCost - fuel - tolls - other;
+    
+    // Gross Profit = Client Price - Driver Price
+    const grossProfit = income - driverCost;
+    
+    // Net Profit = Gross Profit - All Expenses
+    const netProfit = grossProfit - fuel - tolls - other;
+    
+    return { grossProfit, netProfit };
   };
 
   return (
@@ -406,8 +413,14 @@ export default function AddLoadPage() {
               </div>
 
               <div className="flex md:flex-row flex-col gap-4">
-                <Button type="button" variant="outline" className="bg-blue-500 text-white h-12" size="lg" onClick={() => router.push("/")}>
-                  Profit Calculation: ${calculateProfit().toFixed(2)}
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="bg-blue-500 text-white h-12 flex flex-col items-center justify-center py-1" 
+                  size="lg"
+                >
+                  <span className="text-xs">Gross Profit: €{calculateProfit().grossProfit.toFixed(2)}</span>
+                  <span className="text-xs font-bold">Net Profit: €{calculateProfit().netProfit.toFixed(2)}</span>
                 </Button>
                 <Button type="submit" size="lg" disabled={isSubmitting} className="bg-black h-12 hover:bg-blue-600 text-white ">
                   {isSubmitting ? t("creatingLoad") : t("submitAndAdd")}
