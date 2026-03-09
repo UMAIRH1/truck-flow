@@ -21,15 +21,15 @@ export function BottomNav() {
 
   const managerNavItems: NavItem[] = [
     { href: "/", label: t("home"), icon: <Home className="h-5 w-5" /> },
-    { href: "/revenue", label: t("revenue"), icon: <DollarSign className="h-5 w-5" /> },
-    { href: "/load-history", label: t("loadHistory"), icon: <History className="h-5 w-5" /> },
+    { href: "/routes", label: "Routes", icon: <Truck className="h-5 w-5" /> },
+    { href: "/dashboard", label: "Dashboard", icon: <DollarSign className="h-5 w-5" /> },
     { href: "/settings", label: t("settings"), icon: <Settings className="h-5 w-5" /> },
   ];
 
   const driverNavItems: NavItem[] = [
     { href: "/", label: t("home"), icon: <Home className="h-5 w-5" /> },
-    { href: "/wallet", label: t("myWallet"), icon: <Wallet className="h-5 w-5" /> },
-    { href: "/my-loads", label: t("myLoads"), icon: <Truck className="h-5 w-5" /> },
+    { href: "/routes", label: "Routes", icon: <Truck className="h-5 w-5" /> },
+    { href: "/wallet", label: t("wallet"), icon: <Wallet className="h-5 w-5" /> },
     { href: "/settings", label: t("settings"), icon: <Settings className="h-5 w-5" /> },
   ];
 

@@ -201,6 +201,10 @@ class ApiClient {
     otherExpenses?: number;
     notes?: string;
     driverId?: string;
+    fuelConsumption?: number;
+    fuelPricePerLiter?: number;
+    driverDailyCost?: number;
+    truckCostPerKm?: number;
   }) {
     return this.request('/loads/', {
       method: 'POST',
@@ -248,6 +252,29 @@ class ApiClient {
     return this.request(`/loads/${loadId}/assign`, {
       method: 'PATCH',
       body: JSON.stringify({ driverId }),
+    });
+  }
+
+  async calculateDistance(pickupLocation: string, dropoffLocation: string) {
+    return this.request('/loads/calculate-distance', {
+      method: 'POST',
+      body: JSON.stringify({ pickupLocation, dropoffLocation }),
+    });
+  }
+
+  async calculateCosts(costData: {
+    distance: number;
+    clientPrice: number;
+    fuelConsumption?: number;
+    fuelPricePerLiter?: number;
+    driverDailyCost?: number;
+    truckCostPerKm?: number;
+    tolls?: number;
+    otherExpenses?: number;
+  }) {
+    return this.request('/loads/calculate-costs', {
+      method: 'POST',
+      body: JSON.stringify(costData),
     });
   }
 
@@ -343,6 +370,77 @@ class ApiClient {
 
   async deleteNotification(id: string) {
     return this.request(`/notifications/${id}`, { method: 'DELETE' });
+  }
+
+  // Route endpoints
+  async createRoute(routeData: {
+    routeName: string;
+    assignedDriverId: string;
+    assignedTruck?: {
+      truckNumber?: string;
+      truckType?: string;
+      capacity?: number;
+    };
+    startDate: Date;
+    endDate?: Date;
+    fuelConsumption?: number;
+    fuelPricePerLiter?: number;
+    driverDailyCost?: number;
+    truckCostPerKm?: number;
+    tolls?: number;
+    otherExpenses?: number;
+    notes?: string;
+    loadIds?: string[];
+  }) {
+    return this.request('/routes/', {
+      method: 'POST',
+      body: JSON.stringify(routeData),
+    });
+  }
+
+  async getAllRoutes(status?: string) {
+    const query = status ? `?status=${status}` : '';
+    return this.request(`/routes${query}`);
+  }
+
+  async getRoute(id: string) {
+    return this.request(`/routes/${id}`);
+  }
+
+  async updateRoute(id: string, routeData: any) {
+    return this.request(`/routes/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(routeData),
+    });
+  }
+
+  async deleteRoute(id: string) {
+    return this.request(`/routes/${id}`, { method: 'DELETE' });
+  }
+
+  async addLoadsToRoute(routeId: string, loadIds: string[]) {
+    return this.request(`/routes/${routeId}/loads`, {
+      method: 'POST',
+      body: JSON.stringify({ loadIds }),
+    });
+  }
+
+  async removeLoadFromRoute(routeId: string, loadId: string) {
+    return this.request(`/routes/${routeId}/loads/${loadId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async acceptRoute(routeId: string) {
+    return this.request(`/routes/${routeId}/accept`, {
+      method: 'PATCH',
+    });
+  }
+
+  async rejectRoute(routeId: string) {
+    return this.request(`/routes/${routeId}/reject`, {
+      method: 'PATCH',
+    });
   }
 }
 

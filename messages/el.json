@@ -27,7 +27,8 @@
     "loadHistory": "Ιστορικό Φορτίων",
     "settings": "Ρυθμίσεις",
     "myWallet": "Το Πορτοφόλι μου",
-    "myLoads": "Τα Φορτία μου"
+    "myLoads": "Τα Φορτία μου",
+    "wallet": "Πορτοφόλι"
   },
   "header": {
     "notifications": "Ειδοποιήσεις",
@@ -285,7 +286,9 @@
     "uploadedFiles": "Ανεβασμένα Αρχεία",
     "noFilesUploaded": "Δεν έχουν ανέβει αρχεία ακόμα",
     "deleteFile": "Διαγραφή αρχείου",
-    "last3Months": "Τελευταίοι 3 Μήνες"
+    "last3Months": "Τελευταίοι 3 Μήνες",
+    "paymentHistory": "Ιστορικό Πληρωμών",
+    "noPaymentHistory": "Δεν υπάρχει ιστορικό πληρωμών ακόμα"
   },
   "addLoad": {
     "title": "Προσθήκη Φορτίου",

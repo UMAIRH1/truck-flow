@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LoadProvider } from "@/contexts/LoadContext";
+import { RouteProvider } from "@/contexts/RouteContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TranslationProvider } from "@/providers/TranslationProvider";
@@ -43,7 +44,9 @@ export default function RootLayout({
           <LanguageProvider>
             <AuthProvider>
               <NotificationProvider>
-                <LoadProvider>{children}</LoadProvider>
+                <LoadProvider>
+                  <RouteProvider>{children}</RouteProvider>
+                </LoadProvider>
               </NotificationProvider>
             </AuthProvider>
           </LanguageProvider>

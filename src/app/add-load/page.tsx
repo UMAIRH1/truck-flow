@@ -44,12 +44,20 @@ export default function AddLoadPage() {
     tolls: "",
     otherExpenses: "",
     notes: "",
+    // Cost model fields
+    fuelConsumption: "30",
+    fuelPricePerLiter: "",
+    driverDailyCost: "",
+    truckCostPerKm: "",
   });
 
   const [images, setImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
+  const [distance, setDistance] = useState<number | null>(null);
+  const [isCalculatingDistance, setIsCalculatingDistance] = useState(false);
+  const [costBreakdown, setCostBreakdown] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch drivers on mount
@@ -69,6 +77,72 @@ export default function AddLoadPage() {
     };
     fetchDrivers();
   }, []);
+
+  // Calculate distance when locations change
+  React.useEffect(() => {
+    const calculateDistance = async () => {
+      if (!formData.pickupLocation || !formData.dropoffLocation) {
+        setDistance(null);
+        return;
+      }
+
+      setIsCalculatingDistance(true);
+      try {
+        const api = (await import("@/lib/api")).default;
+        const response = await api.calculateDistance(
+          formData.pickupLocation,
+          formData.dropoffLocation
+        );
+        if (response.success && response.distance) {
+          setDistance(response.distance);
+        }
+      } catch (error: any) {
+        console.error("Failed to calculate distance:", error);
+        setDistance(null);
+        // Don't show error to user - distance calculation is optional
+        // Load can still be created without distance
+      } finally {
+        setIsCalculatingDistance(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(calculateDistance, 1200); // Increased debounce to 1.2s
+    return () => clearTimeout(debounceTimer);
+  }, [formData.pickupLocation, formData.dropoffLocation]);
+
+  // Calculate costs when relevant fields change
+  React.useEffect(() => {
+    const calculateCosts = async () => {
+      if (!distance || !formData.clientPrice) {
+        setCostBreakdown(null);
+        return;
+      }
+
+      try {
+        const api = (await import("@/lib/api")).default;
+        const response = await api.calculateCosts({
+          distance,
+          clientPrice: parseFloat(formData.clientPrice),
+          fuelConsumption: parseFloat(formData.fuelConsumption) || 30,
+          fuelPricePerLiter: parseFloat(formData.fuelPricePerLiter) || 0,
+          driverDailyCost: parseFloat(formData.driverDailyCost) || 0,
+          truckCostPerKm: parseFloat(formData.truckCostPerKm) || 0,
+          tolls: parseFloat(formData.tolls) || 0,
+          otherExpenses: parseFloat(formData.otherExpenses) || 0,
+        });
+        if (response.success && response.costs) {
+          setCostBreakdown(response.costs);
+        }
+      } catch (error) {
+        console.error("Failed to calculate costs:", error);
+        setCostBreakdown(null);
+      }
+    };
+
+    const debounceTimer = setTimeout(calculateCosts, 500);
+    return () => clearTimeout(debounceTimer);
+  }, [distance, formData.clientPrice, formData.fuelConsumption, formData.fuelPricePerLiter, 
+      formData.driverDailyCost, formData.truckCostPerKm, formData.tolls, formData.otherExpenses]);
 
   // Load weight options
   const loadWeightOptions = [
@@ -170,6 +244,11 @@ export default function AddLoadPage() {
         tolls: parseFloat(formData.tolls) || 0,
         otherExpenses: parseFloat(formData.otherExpenses) || 0,
         podImages: images,
+        // Cost model fields
+        fuelConsumption: parseFloat(formData.fuelConsumption) || 30,
+        fuelPricePerLiter: parseFloat(formData.fuelPricePerLiter) || 0,
+        driverDailyCost: parseFloat(formData.driverDailyCost) || 0,
+        truckCostPerKm: parseFloat(formData.truckCostPerKm) || 0,
         assignedDriver: formData.assignedDriverId ? {
           id: formData.assignedDriverId,
           name: drivers.find(d => d._id === formData.assignedDriverId)?.name || "",
@@ -218,6 +297,18 @@ export default function AddLoadPage() {
                   onDropoffChange={(value: string) => setFormData({ ...formData, dropoffLocation: value })}
                   t={t}
                 />
+                {distance !== null && (
+                  <div className="mt-2 text-sm text-gray-600 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    <span>Distance: <strong>{distance} km</strong></span>
+                  </div>
+                )}
+                {isCalculatingDistance && (
+                  <div className="mt-2 text-sm text-gray-500 flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Calculating distance...</span>
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -369,6 +460,54 @@ export default function AddLoadPage() {
                   />
                 </div>
               </div>
+
+              {/* Cost Model Fields */}
+              <div className="border-t pt-4 mt-2">
+                <h3 className="text-sm font-semibold mb-3 text-gray-700">Cost Model (Optional)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <InputWithIcon
+                      icon={Fuel}
+                      id="fuelConsumption"
+                      type="number"
+                      placeholder="Fuel L/100km"
+                      value={formData.fuelConsumption}
+                      onChange={(e) => setFormData({ ...formData, fuelConsumption: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <InputWithIcon
+                      icon={DollarSign}
+                      id="fuelPricePerLiter"
+                      type="number"
+                      placeholder="Fuel Price/L"
+                      value={formData.fuelPricePerLiter}
+                      onChange={(e) => setFormData({ ...formData, fuelPricePerLiter: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <InputWithIcon
+                      icon={User}
+                      id="driverDailyCost"
+                      type="number"
+                      placeholder="Driver Daily Cost"
+                      value={formData.driverDailyCost}
+                      onChange={(e) => setFormData({ ...formData, driverDailyCost: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <InputWithIcon
+                      icon={Truck}
+                      id="truckCostPerKm"
+                      type="number"
+                      placeholder="Truck Cost/km"
+                      value={formData.truckCostPerKm}
+                      onChange={(e) => setFormData({ ...formData, truckCostPerKm: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-12 gap-2 md:gap-4">
                 <div className="col-span-8">
                   <Textarea
@@ -413,6 +552,19 @@ export default function AddLoadPage() {
               </div>
 
               <div className="flex md:flex-row flex-col gap-4">
+                {costBreakdown && (
+                  <div className="flex-1 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold mb-2 text-blue-900">Cost Breakdown</h4>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>Fuel Cost:</div><div className="font-semibold">€{costBreakdown.fuelCost.toFixed(2)}</div>
+                      <div>Driver Cost:</div><div className="font-semibold">€{costBreakdown.driverCost.toFixed(2)}</div>
+                      <div>Truck Cost:</div><div className="font-semibold">€{costBreakdown.truckCost.toFixed(2)}</div>
+                      <div className="border-t pt-1">Total Cost:</div><div className="border-t pt-1 font-bold">€{costBreakdown.totalCost.toFixed(2)}</div>
+                      <div className="text-green-700">Profit:</div><div className="font-bold text-green-700">€{costBreakdown.profit.toFixed(2)}</div>
+                      <div className="text-gray-600">Profit/km:</div><div className="font-semibold text-gray-600">€{costBreakdown.profitPerKm.toFixed(2)}</div>
+                    </div>
+                  </div>
+                )}
                 <Button 
                   type="button" 
                   variant="outline" 

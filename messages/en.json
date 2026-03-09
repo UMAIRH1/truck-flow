@@ -27,7 +27,8 @@
     "loadHistory": "Load History",
     "settings": "Settings",
     "myWallet": "My Wallet",
-    "myLoads": "My Loads"
+    "myLoads": "My Loads",
+    "wallet": "Wallet"
   },
   "header": {
     "notifications": "Notifications",
@@ -295,7 +296,9 @@
     "uploadedFiles": "Uploaded Files",
     "noFilesUploaded": "No files uploaded yet",
     "deleteFile": "Delete file",
-    "last3Months": "Last 3 Months"
+    "last3Months": "Last 3 Months",
+    "paymentHistory": "Payment History",
+    "noPaymentHistory": "No payment history yet"
   },
   "addLoad": {
     "title": "Add Load",
