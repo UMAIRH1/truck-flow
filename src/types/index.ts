@@ -21,6 +21,8 @@ export type ShippingType = "FTL" | "LTL" | "Partial" | "Expedited";
 
 export interface Load {
   id: string;
+  loadNumber?: string;
+  routeId?: string;
   pickupLocation: string;
   dropoffLocation: string;
   clientName: string;
@@ -42,6 +44,11 @@ export interface Load {
   fuel?: number;
   tolls?: number;
   otherExpenses?: number;
+  // Cost model fields
+  fuelConsumption?: number;
+  fuelPricePerLiter?: number;
+  driverDailyCost?: number;
+  truckCostPerKm?: number;
   createdAt: Date;
   updatedAt: Date;
   completedAt?: Date;
