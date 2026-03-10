@@ -46,8 +46,14 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync ./out/ s3://${{ secrets.AWS_S3_BUCKET }}/ \
+          aws s3 sync ./public/ s3://${{ secrets.AWS_S3_BUCKET }}/ \
             --delete \
+            --cache-control max-age=31536000,public \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude "node_modules/*" \
+            --exclude ".next/*"
+          aws s3 sync ./.next/static/ s3://${{ secrets.AWS_S3_BUCKET }}/_next/static/ \
             --cache-control max-age=31536000,public
 
       - name: Invalidate CloudFront (if using CloudFront)

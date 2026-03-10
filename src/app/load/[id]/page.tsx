@@ -7,8 +7,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Clock, Check, BusFront, ArrowDownLeft, ArrowUpRight, X, DollarSign, Package, Calendar, Fuel, AlertCircle, User, Phone, Mail, MapPin, Upload, FileText } from "lucide-react";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { ASSETS } from "@/lib/assets";
-import { Badge } from "@/components/ui/badge";
-import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/components/shared";
@@ -23,7 +21,7 @@ export default function LoadStatusPage() {
   const { user } = useAuth();
   const t = useTranslations("loadStatus");
   const tCommon = useTranslations("common");
-  
+
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerUrl, setViewerUrl] = useState("");
   const [viewerFilename, setViewerFilename] = useState("");
@@ -98,7 +96,7 @@ export default function LoadStatusPage() {
         <div className="mb-4 flex items-center justify-center">
           <OptimizedImage src={ASSETS.images.icons.truck} alt="Load Status" width={200} height={100} />
         </div>
-        
+
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="bg-(--color-blue-border) p-2 rounded-md">
@@ -388,12 +386,12 @@ export default function LoadStatusPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {load.invoices.map((file, index) => {
               // Check if it's an image or document
-              const isImage = file.match(/\.(jpg|jpeg|png|gif|webp)$/i) || 
-                             (!file.includes('/raw/upload/') && file.includes('/image/upload/'));
-              
+              const isImage = file.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                (!file.includes('/raw/upload/') && file.includes('/image/upload/'));
+
               // Get file extension for non-images
               const extension = file.split('.').pop()?.toUpperCase() || 'FILE';
-              
+
               // For Cloudinary raw files, ensure proper extension in URL
               let downloadUrl = file;
               if (file.includes('/raw/upload/') && !file.match(/\.\w+$/)) {
@@ -401,7 +399,7 @@ export default function LoadStatusPage() {
                 const possibleExt = file.includes('pdf') ? 'pdf' : 'pdf';
                 downloadUrl = `${file}.${possibleExt}`;
               }
-              
+
               return (
                 <button
                   key={index}
@@ -437,12 +435,12 @@ export default function LoadStatusPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {load.documents.map((file, index) => {
               // Check if it's an image or document
-              const isImage = file.match(/\.(jpg|jpeg|png|gif|webp)$/i) || 
-                             (!file.includes('/raw/upload/') && file.includes('/image/upload/'));
-              
+              const isImage = file.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                (!file.includes('/raw/upload/') && file.includes('/image/upload/'));
+
               // Get file extension for non-images
               const extension = file.split('.').pop()?.toUpperCase() || 'FILE';
-              
+
               // For Cloudinary raw files, ensure proper extension in URL
               let downloadUrl = file;
               if (file.includes('/raw/upload/') && !file.match(/\.\w+$/)) {
@@ -450,7 +448,7 @@ export default function LoadStatusPage() {
                 const possibleExt = file.includes('pdf') ? 'pdf' : 'pdf';
                 downloadUrl = `${file}.${possibleExt}`;
               }
-              
+
               return (
                 <button
                   key={index}
@@ -606,7 +604,7 @@ export default function LoadStatusPage() {
         <Header title={t("title")} showBack />
         {content}
       </div>
-      
+
       {/* Document Viewer Modal */}
       {viewerOpen && (
         <DocumentViewer
