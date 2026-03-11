@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Header, MobileLayout } from "@/components/layout";
 import { useLoads } from "@/contexts/LoadContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { Clock, Check, BusFront, ArrowDownLeft, ArrowUpRight, X, DollarSign, Package, Calendar, Fuel, AlertCircle, User, Phone, Mail, MapPin, Upload, FileText } from "lucide-react";
+import { Truck, Clock, Check, BusFront, ArrowDownLeft, ArrowUpRight, X, DollarSign, Package, Calendar, Fuel, AlertCircle, User, Phone, Mail, MapPin, Upload, FileText } from "lucide-react";
 import { OptimizedImage } from "@/components/ui/optimized-image";
 import { ASSETS } from "@/lib/assets";
 import { Button } from "@/components/ui/button";
@@ -477,8 +477,34 @@ export default function LoadStatusPage() {
         </div>
       )}
 
-      {/* Upload POD Button for Driver */}
+      {/* Start Journey Button for Driver */}
       {isDriver && load.status === "accepted" && (
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 space-y-4">
+          <div>
+            <h3 className="font-bold text-lg mb-2 text-black">Ready to Start?</h3>
+            <p className="text-sm text-gray-600">
+              Click the button below when you are ready to start the journey for this load.
+            </p>
+          </div>
+          <Button
+            onClick={async () => {
+              try {
+                await api.startLoad(load.id);
+                await refreshLoads();
+              } catch (error) {
+                console.error("Failed to start load:", error);
+              }
+            }}
+            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full flex items-center justify-center gap-2"
+          >
+            <Truck className="w-5 h-5" />
+            Start Journey
+          </Button>
+        </div>
+      )}
+
+      {/* Upload POD Button for Driver - Only in Progress */}
+      {isDriver && load.status === "in-progress" && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 space-y-4">
           <div>
             <h3 className="font-bold text-lg mb-2 text-black">Complete Delivery</h3>

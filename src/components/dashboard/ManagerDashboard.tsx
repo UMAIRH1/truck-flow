@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 interface DashboardStats {
   totalLoads: number;
   acceptedLoads: number;
+  inProgressLoads: number;
   completedLoads: number;
   pendingLoads: number;
   declinedLoads: number;
@@ -48,10 +49,12 @@ export function ManagerDashboard() {
         const completedLoads = getLoadsByStatus("completed");
         const acceptedLoads = getLoadsByStatus("accepted");
         const pendingLoads = getLoadsByStatus("pending");
+        const inProgressLoads = getLoadsByStatus("in-progress");
 
         setDashboardStats({
           totalLoads: loads.length,
           acceptedLoads: acceptedLoads.length,
+          inProgressLoads: inProgressLoads.length,
           completedLoads: completedLoads.length,
           pendingLoads: pendingLoads.length,
           declinedLoads: 0,
@@ -111,6 +114,7 @@ export function ManagerDashboard() {
   const stats = dashboardStats || {
     totalLoads: loads.length,
     acceptedLoads: 0,
+    inProgressLoads: 0,
     completedLoads: 0,
     pendingLoads: 0,
     declinedLoads: 0,
@@ -129,13 +133,15 @@ export function ManagerDashboard() {
 
   const tabs = [
     { id: "accepted", label: t("tabs.accepted") },
+    { id: "in-progress", label: t("tabs.inProgress") },
     { id: "pending", label: t("tabs.pending") },
     { id: "completed", label: t("tabs.completed") },
     { id: "rejected", label: t("tabs.rejected") },
   ];
 
   const filteredLoads = loads.filter((load) => {
-    if (activeTab === "accepted") return load.status === "accepted" || load.status === "in-progress";
+    if (activeTab === "accepted") return load.status === "accepted";
+    if (activeTab === "in-progress") return load.status === "in-progress";
     if (activeTab === "completed") return load.status === "completed";
     return load.status === activeTab;
   });
