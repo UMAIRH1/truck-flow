@@ -61,6 +61,7 @@ class ApiClient {
   private getHeaders(includeAuth = true): HeadersInit {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
     };
 
     if (includeAuth) {
@@ -346,6 +347,7 @@ class ApiClient {
       body: formData,
       headers: {
         Authorization: `Bearer ${this.getToken()}`,
+        'ngrok-skip-browser-warning': 'true',
       },
     });
   }
