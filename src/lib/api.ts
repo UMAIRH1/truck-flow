@@ -124,7 +124,11 @@ class ApiClient {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'API request failed');
+        // Prefer detailed error if message is generic 'Server error'
+        const errorMessage = (data.message === 'Server error' && data.error) 
+          ? `${data.message}: ${data.error}` 
+          : (data.message || data.error || 'API request failed');
+        throw new Error(errorMessage);
       }
 
       return data;
