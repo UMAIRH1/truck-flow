@@ -16,11 +16,12 @@ interface DriverLoadCardProps {
   showStatusLabel?: boolean;
   onAccept?: () => void;
   onDecline?: () => void;
+  onStart?: () => void;
   onMapView?: () => void;
   className?: string;
 }
 
-export function DriverLoadCard({ load, showActions = false, showStatusLabel = false, onAccept, onDecline, onMapView, className }: DriverLoadCardProps) {
+export function DriverLoadCard({ load, showActions = false, showStatusLabel = false, onAccept, onDecline, onStart, onMapView, className }: DriverLoadCardProps) {
   const t = useTranslations("load");
   const tDriver = useTranslations("driver");
   const tTabs = useTranslations("tabs");
@@ -42,7 +43,7 @@ export function DriverLoadCard({ load, showActions = false, showStatusLabel = fa
       case "rejected":
         return { label: tTabs("rejected"), color: "bg-red-500", textColor: "text-red-900" };
       case "in-progress":
-        return { label: tTabs("inProgress"), color: "bg-blue-500", textColor: "text-blue-900" };
+        return { label: tTabs("inProgress") || "In Progress", color: "bg-blue-600", textColor: "text-white" };
       case "completed":
         return { label: tTabs("completed"), color: "bg-gray-500", textColor: "text-gray-900" };
       default:
@@ -128,15 +129,24 @@ export function DriverLoadCard({ load, showActions = false, showStatusLabel = fa
 
       {showActions && (
         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-          <Button onClick={onMapView} className="flex-1 px-4 py-2 bg-(--color-blue-border) text-white text-sm rounded-md font-medium hover:bg-blue-600 transition-colors">
-            <MapPin /> {tDriver("mapView")}
-          </Button>
-          <Button onClick={onDecline} className="flex-1 px-4 py-2 bg-(--color-dangerous) text-white text-sm rounded-md font-medium hover:bg-red-600 transition-colors">
-            <X /> {tDriver("decline")}
-          </Button>
-          <Button onClick={onAccept} className="flex-1 px-4 py-2 bg-(--color-greenish) text-white text-sm rounded-md font-medium hover:bg-green-600 transition-colors">
-            <Check /> {tDriver("accept")}
-          </Button>
+          {load.status === "pending" && (
+            <>
+              <Button onClick={onMapView} className="flex-1 px-4 py-2 bg-(--color-blue-border) text-white text-sm rounded-md font-medium hover:bg-blue-600 transition-colors">
+                <MapPin /> {tDriver("mapView")}
+              </Button>
+              <Button onClick={onDecline} className="flex-1 px-4 py-2 bg-(--color-dangerous) text-white text-sm rounded-md font-medium hover:bg-red-600 transition-colors">
+                <X /> {tDriver("decline")}
+              </Button>
+              <Button onClick={onAccept} className="flex-1 px-4 py-2 bg-(--color-greenish) text-white text-sm rounded-md font-medium hover:bg-green-600 transition-colors">
+                <Check /> {tDriver("accept")}
+              </Button>
+            </>
+          )}
+          {load.status === "accepted" && onStart && (
+            <Button onClick={onStart} className="w-full px-4 py-2 bg-blue-600 text-white text-sm rounded-md font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+              <Truck className="h-4 w-4" /> Start Journey
+            </Button>
+          )}
         </div>
       )}
     </div>

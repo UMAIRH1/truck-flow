@@ -287,6 +287,10 @@ class ApiClient {
     return this.request(`/loads/${loadId}/decline`, { method: 'PATCH' });
   }
 
+  async startLoad(loadId: string) {
+    return this.request(`/loads/${loadId}/start`, { method: 'PATCH' });
+  }
+
   // Dashboard endpoints
   async getManagerDashboard() {
     return this.request('/dashboard/manager');

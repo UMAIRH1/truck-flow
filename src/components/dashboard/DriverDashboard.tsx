@@ -21,7 +21,7 @@ interface DriverDashboardStats {
 }
 
 export function DriverDashboard() {
-  const { loads, updateLoadStatus, assignDriver, isLoading, error } = useLoads();
+  const { loads, updateLoadStatus, assignDriver, refreshLoads, isLoading, error } = useLoads();
   const { user } = useAuth();
   const router = useRouter();
   const [dashboardStats, setDashboardStats] = useState<DriverDashboardStats | null>(null);
@@ -124,6 +124,15 @@ export function DriverDashboard() {
     }
   };
 
+  const handleStart = async (loadId: string) => {
+    try {
+      await api.startLoad(loadId);
+      await refreshLoads();
+    } catch (error) {
+      console.error("Failed to start load journey:", error);
+    }
+  };
+
   const handleDecline = async (loadId: string) => {
     try {
       await updateLoadStatus(loadId, "rejected");
@@ -197,9 +206,10 @@ export function DriverDashboard() {
                       key={load.id} 
                       load={load}
                       showStatusLabel={true}
-                      showActions={load.status === "pending"} 
+                      showActions={load.status === "pending" || load.status === "accepted"} 
                       onAccept={() => handleAccept(load.id)} 
                       onDecline={() => handleDecline(load.id)} 
+                      onStart={() => handleStart(load.id)}
                       onMapView={() => handleMapView(load.id)} 
                     />
                   ))}

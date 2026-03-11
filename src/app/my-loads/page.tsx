@@ -9,7 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 function MyLoadsContent() {
-  const { loads, updateLoadStatus } = useLoads();
+  const { loads, updateLoadStatus, startLoad } = useLoads();
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -19,7 +19,7 @@ function MyLoadsContent() {
   // Set active tab from URL query parameter
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && ['pending', 'accepted', 'rejected', 'completed'].includes(tab)) {
+    if (tab && ['pending', 'accepted', 'in-progress', 'rejected', 'completed'].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -32,13 +32,15 @@ function MyLoadsContent() {
   const tabs = [
     { id: "pending", label: t("tabs.pending") },
     { id: "accepted", label: t("tabs.accepted") },
+    { id: "in-progress", label: t("tabs.inProgress") || "In Progress" },
     { id: "rejected", label: t("tabs.rejected") },
     { id: "completed", label: t("tabs.completed") },
   ];
 
   const filteredLoads = driverLoads.filter((load) => {
     if (activeTab === "pending") return load.status === "pending";
-    if (activeTab === "accepted") return load.status === "accepted" || load.status === "in-progress";
+    if (activeTab === "accepted") return load.status === "accepted";
+    if (activeTab === "in-progress") return load.status === "in-progress";
     if (activeTab === "rejected") return load.status === "rejected";
     if (activeTab === "completed") return load.status === "completed";
     return true;
@@ -52,6 +54,10 @@ function MyLoadsContent() {
     updateLoadStatus(loadId, "rejected");
   };
 
+  const handleStart = (loadId: string) => {
+    startLoad(loadId);
+  };
+
   const handleMapView = (loadId: string) => {
     router.push(`/map/${loadId}`);
   };
@@ -60,9 +66,10 @@ function MyLoadsContent() {
     <DriverLoadCard
       key={load.id}
       load={load}
-      showActions={activeTab === "pending"}
+      showActions={activeTab === "pending" || activeTab === "accepted"}
       onAccept={() => handleAccept(load.id)}
       onDecline={() => handleDecline(load.id)}
+      onStart={() => handleStart(load.id)}
       onMapView={() => handleMapView(load.id)}
     />
   ));

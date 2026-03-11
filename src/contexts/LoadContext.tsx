@@ -15,6 +15,7 @@ interface LoadContextType {
   deleteLoad: (id: string) => Promise<void>;
   assignDriver: (loadId: string, driver: Driver) => Promise<void>;
   updateLoadStatus: (loadId: string, status: LoadStatus) => Promise<void>;
+  startLoad: (loadId: string) => Promise<void>;
   uploadPOD: (loadId: string, images: string[]) => Promise<void>;
   getLoadById: (id: string) => Load | undefined;
   getLoadsByStatus: (status: LoadStatus) => Load[];
@@ -241,6 +242,25 @@ export function LoadProvider({ children }: { children: ReactNode }) {
     [updateLoad]
   );
 
+  const startLoad = useCallback(
+    async (loadId: string) => {
+      try {
+        const response = await api.startLoad(loadId);
+        
+        if (response.success && response.load) {
+          const updatedLoad = transformLoadFromAPI(response.load);
+          setLoads((prev) =>
+            prev.map((load) => (load.id === loadId ? updatedLoad : load))
+          );
+        }
+      } catch (err: any) {
+        console.error("Failed to start load journey:", err);
+        throw new Error(err.message || "Failed to start load journey");
+      }
+    },
+    []
+  );
+
   const uploadPOD = useCallback(async (loadId: string, images: string[]) => {
     try {
       // Note: This expects image URLs, but the API expects File objects
@@ -298,6 +318,7 @@ export function LoadProvider({ children }: { children: ReactNode }) {
         deleteLoad,
         assignDriver,
         updateLoadStatus,
+        startLoad,
         uploadPOD,
         getLoadById,
         getLoadsByStatus,
