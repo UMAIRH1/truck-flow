@@ -74,6 +74,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       timestamp: new Date(notif.createdAt),
       read: notif.read,
       loadId: notif.loadId,
+      routeId: notif.routeId,
       loadNumber: notif.loadNumber,
     };
   };

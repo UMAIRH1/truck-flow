@@ -4,10 +4,21 @@ import { Header, MobileLayout } from "@/components/layout";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { Bell } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 
 export default function NotificationsPage() {
   const { notifications, markAsRead } = useNotifications();
   const t = useTranslations();
+  const router = useRouter();
+
+  const handleNotificationClick = (notification: any) => {
+    markAsRead(notification.id);
+    if (notification.loadId) {
+      router.push(`/active-loads/${notification.loadId}`);
+    } else if (notification.routeId) {
+      router.push(`/routes/${notification.routeId}`);
+    }
+  };
 
   const groupedNotifications = notifications.reduce(
     (groups, notification) => {
@@ -65,7 +76,7 @@ export default function NotificationsPage() {
               {items.map((notification) => (
                 <div
                   key={notification.id}
-                  onClick={() => markAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                   className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors md:p-6"
                 >
                   <div className="flex items-start gap-3 md:gap-4">

@@ -162,7 +162,13 @@
     "myAssignedLoads": "My Assigned Loads",
     "noLoadsAssigned": "No loads assigned yet",
     "assignedLoads": "Assigned Loads",
-    "total": "total"
+    "total": "total",
+    "totalCost": "Total Cost",
+    "totalProfit": "Total Profit",
+    "avgRevenuePerKm": "Avg €/km",
+    "avgProfitPerKm": "Profit/km",
+    "profitPerTruck": "Profit per Truck",
+    "profitPerDriver": "Profit per Driver"
   },
   "tabs": {
     "accepted": "Accepted",

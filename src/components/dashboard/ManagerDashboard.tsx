@@ -15,8 +15,15 @@ interface DashboardStats {
   completedLoads: number;
   pendingLoads: number;
   declinedLoads: number;
-  totalIncome: number;
+  totalRevenue: number;
+  totalCost: number;
+  totalProfit: number;
   pendingPayments: number;
+  avgRevenuePerKm: number;
+  avgProfitPerKm: number;
+  profitPerDriver: Record<string, { profit: number; name?: string }>;
+  profitPerTruck: Record<string, number>;
+  recentProfitRoutes: Array<{ id: string; name: string; profit: number; date: string }>;
 }
 
 export function ManagerDashboard() {
@@ -48,8 +55,15 @@ export function ManagerDashboard() {
           completedLoads: completedLoads.length,
           pendingLoads: pendingLoads.length,
           declinedLoads: 0,
-          totalIncome: completedLoads.reduce((sum, load) => sum + load.clientPrice, 0),
+          totalRevenue: completedLoads.reduce((sum, load) => sum + load.clientPrice, 0),
+          totalCost: 0,
+          totalProfit: 0,
           pendingPayments: acceptedLoads.reduce((sum, load) => sum + load.clientPrice, 0),
+          avgRevenuePerKm: 0,
+          avgProfitPerKm: 0,
+          profitPerDriver: {},
+          profitPerTruck: {},
+          recentProfitRoutes: [],
         });
       } finally {
         setIsLoadingStats(false);
@@ -96,8 +110,18 @@ export function ManagerDashboard() {
   // Use API stats if available, otherwise calculate from loads
   const stats = dashboardStats || {
     totalLoads: loads.length,
-    totalIncome: completedLoads.reduce((sum, load) => sum + load.clientPrice, 0),
+    acceptedLoads: 0,
+    completedLoads: 0,
+    pendingLoads: 0,
+    declinedLoads: 0,
+    totalRevenue: completedLoads.reduce((sum, load) => sum + load.clientPrice, 0),
+    totalCost: 0,
+    totalProfit: 0,
     pendingPayments: loads.filter((l) => l.status === "completed" && new Date(l.expectedPayoutDate) > new Date()).reduce((sum, load) => sum + load.clientPrice, 0),
+    avgRevenuePerKm: 0,
+    avgProfitPerKm: 0,
+    profitPerDriver: {},
+    profitPerTruck: {},
   };
 
   const upcomingPayments = loads.filter((l) => l.status === "accepted" || l.status === "in-progress").reduce((sum, load) => sum + load.clientPrice, 0);
@@ -120,14 +144,15 @@ export function ManagerDashboard() {
     <div className="min-h-screen">
       <Header title={t("header.dashboard")} />
       <div className=" max-w-7xl mx-auto bg-(--color-yellow-light)">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-4  py-6 lg:px-6 rounded-t-2xl md:rounded-none bg-(--color-white)">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 px-4 py-6 lg:px-6 rounded-t-2xl md:rounded-none bg-(--color-white)">
           <div className="space-y-4 lg:col-span-1">
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
-              <Link href="/total-earning">
-                <StatCard icon={DollarSign} label={t("dashboard.totalEarning")} value={`€ ${stats.totalIncome.toLocaleString()}.00`} className="hover:shadow-md transition-shadow" />
-              </Link>
-              <StatCard icon={CreditCard} label={t("dashboard.unpaidAmount")} value={`€ ${stats.pendingPayments.toLocaleString()}.00`} />
-              <StatCard icon={Clock} label={t("dashboard.upcomingPayments")} value={`$ ${upcomingPayments.toLocaleString()}.00`} />
+              <StatCard icon={DollarSign} label={t("dashboard.totalRevenue") || "Total Revenue"} value={`€ ${(stats as any).totalRevenue?.toLocaleString() || 0}.00`} className="text-blue-600" />
+              <StatCard icon={DollarSign} label={t("dashboard.totalCost") || "Total Cost"} value={`€ ${(stats as any).totalCost?.toLocaleString() || 0}.00`} className="text-red-500" />
+              <StatCard icon={DollarSign} label={t("dashboard.totalProfit") || "Total Profit"} value={`€ ${(stats as any).totalProfit?.toLocaleString() || 0}.00`} className="text-green-600 font-bold" />
+              <StatCard icon={ArrowRight} label={t("dashboard.avgRevenuePerKm") || "Avg €/km"} value={`€ ${(stats as any).avgRevenuePerKm || 0}`} />
+              <StatCard icon={ArrowRight} label={t("dashboard.avgProfitPerKm") || "Profit/km"} value={`€ ${(stats as any).avgProfitPerKm || 0}`} />
+              <StatCard icon={Clock} label={t("dashboard.upcomingPayments")} value={`€ ${upcomingPayments.toLocaleString()}.00`} />
               <Link href="/active-loads">
                 <StatCard icon={Truck} label={t("dashboard.activeLoads")} value={activeLoadCount} className="hover:shadow-md transition-shadow" />
               </Link>
@@ -150,8 +175,61 @@ export function ManagerDashboard() {
                 <ArrowRight className="h-5 w-5 text-(--color-light-black-border)" />
               </div>
             </Link>
+
+            {/* Profit per Driver/Truck (Phase 2 Additions) */}
+            {dashboardStats && (
+              <div className="space-y-4 pt-4 border-t">
+                <div className="bg-white rounded-lg p-4 shadow-sm border">
+                  <h3 className="text-sm font-bold mb-3">{t("dashboard.profitPerDriver")}</h3>
+                  <div className="space-y-2">
+                    {Object.entries(dashboardStats.profitPerDriver || {}).length > 0 ? (
+                      Object.entries(dashboardStats.profitPerDriver).map(([id, data]: [string, any]) => (
+                        <div key={id} className="flex justify-between text-sm py-1 border-b last:border-0 border-gray-50">
+                          <span className="text-gray-600">Driver {id.slice(-4)}</span>
+                          <span className="font-medium text-green-600">€ {data.profit.toLocaleString()}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-gray-400 italic">No data yet</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg p-4 shadow-sm border">
+                  <h3 className="text-sm font-bold mb-3">{t("dashboard.profitPerTruck")}</h3>
+                  <div className="space-y-2">
+                    {Object.entries(dashboardStats.profitPerTruck || {}).length > 0 ? (
+                      Object.entries(dashboardStats.profitPerTruck).map(([num, profit]) => (
+                        <div key={num} className="flex justify-between text-sm py-1 border-b last:border-0 border-gray-50">
+                           <span className="text-gray-600">{num}</span>
+                           <span className="font-medium text-green-600">€ {profit.toLocaleString()}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-gray-400 italic">No data yet</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg p-4 shadow-sm border">
+                  <h3 className="text-sm font-bold mb-3">{t("dashboard.profitPerRoute") || "Profit per Route"}</h3>
+                  <div className="space-y-2">
+                    {dashboardStats.recentProfitRoutes && dashboardStats.recentProfitRoutes.length > 0 ? (
+                      dashboardStats.recentProfitRoutes.map((route) => (
+                        <div key={route.id} className="flex justify-between text-sm py-1 border-b last:border-0 border-gray-50">
+                           <span className="text-gray-600">{route.name}</span>
+                           <span className="font-medium text-green-600">€ {route.profit.toLocaleString()}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-gray-400 italic">No data yet</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <div className="flex items-center justify-center lg:justify-between">
               <h2 className="font-semibold text-center text-black">{t("dashboard.dailyLoadDetails")}</h2>
               <div className="hidden lg:flex items-center gap-3">

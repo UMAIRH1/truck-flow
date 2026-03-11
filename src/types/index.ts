@@ -103,6 +103,7 @@ export interface Notification {
   timestamp: Date;
   read: boolean;
   loadId?: string;
+  routeId?: string;
   loadNumber?: string;
 }
 
