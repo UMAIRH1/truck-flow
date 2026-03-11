@@ -165,8 +165,8 @@
     "total": "total",
     "totalCost": "Total Cost",
     "totalProfit": "Total Profit",
-    "avgRevenuePerKm": "Avg €/km",
-    "avgProfitPerKm": "Profit/km",
+    "totalRevenue": "Total Revenue",
+    "profitPerRoute": "Profit per Route",
     "profitPerTruck": "Profit per Truck",
     "profitPerDriver": "Profit per Driver"
   },

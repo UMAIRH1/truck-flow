@@ -188,6 +188,10 @@ class ApiClient {
     return this.request(`/users/${id}/status`, { method: 'PATCH' });
   }
 
+  async getDriverStats(id: string) {
+    return this.request(`/users/${id}/stats`);
+  }
+
   // Load endpoints
   async createLoad(loadData: {
     pickupLocation: string;

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Header, MobileLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { User, Mail, Phone, MoreVertical, UserCheck, UserX, Trash2, Plus } from "lucide-react";
+import { User, Mail, Phone, MoreVertical, UserCheck, UserX, Trash2, Plus, ChartLine } from "lucide-react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { toast } from "sonner";
@@ -185,6 +185,13 @@ export default function DriversPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem
+                          onClick={() => router.push(`/drivers/${driver._id}`)}
+                          className="cursor-pointer"
+                        >
+                          <ChartLine className="w-4 h-4 mr-2" />
+                          View Performance
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleToggleStatus(driver._id, driver.isActive)}
                           className="cursor-pointer"
