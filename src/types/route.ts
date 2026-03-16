@@ -2,6 +2,8 @@ export interface Route {
   id: string;
   routeName: string;
   routeNumber: string;
+  origin?: string;
+  destination?: string;
   assignedDriver: {
     id: string;
     name: string;

@@ -98,7 +98,7 @@ export default function DashboardPage() {
 
   if (!kpis) {
     return (
-      <MobileLayout showFAB={false}>
+      <MobileLayout showFAB={true}>
         <Header title="Dashboard" showBack />
         <div className="flex items-center justify-center h-64">
           <div className="text-gray-500">Loading dashboard...</div>
@@ -108,7 +108,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <MobileLayout showFAB={false}>
+    <MobileLayout showFAB={true}>
       <Header title="Dashboard" showBack />
       <div className="px-4 py-6 max-w-7xl mx-auto space-y-6">
         {/* Overview Cards */}

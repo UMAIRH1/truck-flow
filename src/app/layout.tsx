@@ -17,10 +17,14 @@ export const metadata: Metadata = {
   title: "Truck Flow - Logistics Management",
   description: "Mobile-first logistics management for managers and drivers",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icons/Logo.svg",
+    apple: "/icons/Logo.svg",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Truck Flow",
+    title: "TruckFlow",
   },
 };
 
@@ -29,7 +33,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#facc15",
+  themeColor: "#FACC15",
 };
 
 export default function RootLayout({

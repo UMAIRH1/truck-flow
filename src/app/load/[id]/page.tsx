@@ -334,20 +334,25 @@ export default function LoadStatusPage() {
           <h3 className="font-bold text-lg mb-4 text-black">Timeline</h3>
           <div className="space-y-4">
             {timeline.map((item, index) => {
-              const { date, time } = formatDateTime(item.date);
-              const isCompleted = item.completed;
+              // Check if timestamp exists and is valid
+              const hasValidDate = item.timestamp && !isNaN(new Date(item.timestamp).getTime());
+              const { date, time } = hasValidDate 
+                ? formatDateTime(item.timestamp) 
+                : { date: 'N/A', time: 'N/A' };
+              const isCompleted = item.status !== 'rejected';
 
               return (
                 <div key={index} className="flex items-start gap-3">
                   <div className="flex flex-col items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isCompleted ? "bg-green-500" : "bg-(--color-primary-yellow-dark)"}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isCompleted ? "bg-green-500" : "bg-red-500"}`}>
                       {isCompleted ? <Check className="h-5 w-5 text-white" /> : <X className="h-5 w-5 text-white" />}
                     </div>
                     {index < timeline.length - 1 && <div className="w-0.5 h-12 bg-gray-200 mt-1" />}
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-base text-black">{item.status}</p>
-                    <p className="text-sm text-(--color-button-table)">
+                    <p className="font-semibold text-base text-black capitalize">{item.status}</p>
+                    {item.note && <p className="text-xs text-gray-600 mt-1">{item.note}</p>}
+                    <p className="text-sm text-(--color-button-table) mt-1">
                       {date} | {time}
                     </p>
                   </div>

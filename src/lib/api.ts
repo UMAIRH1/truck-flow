@@ -389,6 +389,9 @@ class ApiClient {
   // Route endpoints
   async createRoute(routeData: {
     routeName: string;
+    origin?: string;
+    destination?: string;
+    totalDistance?: number;
     assignedDriverId: string;
     assignedTruck?: {
       truckNumber?: string;

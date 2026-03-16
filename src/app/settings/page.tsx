@@ -7,6 +7,7 @@ import { ChevronRight, BusFront } from "lucide-react";
 import Link from "next/link";
 import Modal from "@/app/settings/_components/modal";
 import { useTranslations } from "next-intl";
+import { InstallPWA } from "@/components/shared/InstallPWA";
 
 interface SettingsItem {
   label: string;
@@ -90,6 +91,11 @@ export default function SettingsPage() {
         <MobileLayout showFAB={!showPaymentMethods} showBottomNav={!showPaymentMethods}>
           <Header title={tHeader("settings")} showBack />
           <div className="max-w-md mx-auto space-y-6 bg-(--color-yellow-light)">
+            {/* Install PWA Section */}
+            <div className="px-4 pt-6">
+              <InstallPWA />
+            </div>
+
             <div className=" py-6 px-4 max-sm:rounded-t-2xl sm:rounded-none bg-(--color-white)">
               <div>
                 <h2 className="text-base font-medium text-black mb-3">{t("account")}</h2>
@@ -116,6 +122,9 @@ export default function SettingsPage() {
           <Header title="Settings" />
           <div className="max-w-7xl mx-auto  py-12 grid grid-cols-4 gap-8">
             <aside className="col-span-4 space-y-6">
+              {/* Install PWA Section */}
+              <InstallPWA />
+
               <div className="bg-white rounded-xl p-4 shadow">
                 <h2 className="text-base font-medium text-black mb-3">Account</h2>
                 <div className="space-y-2">

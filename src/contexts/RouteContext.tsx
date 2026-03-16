@@ -32,6 +32,8 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
       id: apiRoute._id,
       routeName: apiRoute.routeName,
       routeNumber: apiRoute.routeNumber,
+      origin: apiRoute.origin,
+      destination: apiRoute.destination,
       assignedDriver: {
         id: apiRoute.assignedDriver?._id || apiRoute.assignedDriver,
         name: apiRoute.assignedDriver?.name || "",

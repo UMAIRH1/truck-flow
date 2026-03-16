@@ -30,7 +30,8 @@ const LoadContext = createContext<LoadContextType | undefined>(undefined);
 // Transform backend load to frontend format
 function transformLoadFromAPI(apiLoad: any): Load {
   return {
-    id: apiLoad.loadNumber || apiLoad._id,
+    id: apiLoad._id,
+    loadNumber: apiLoad.loadNumber,
     pickupLocation: apiLoad.pickupLocation || "",
     dropoffLocation: apiLoad.dropoffLocation || "",
     clientName: apiLoad.clientName || "Unknown Client",

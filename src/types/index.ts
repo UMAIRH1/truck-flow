@@ -57,9 +57,11 @@ export interface Load {
 
 export interface LoadTimelineItem {
   status: string;
-  date: Date;
-  description?: string;
-  completed: boolean;
+  timestamp: Date;
+  note?: string;
+  date?: Date; // Legacy field, use timestamp instead
+  description?: string; // Legacy field, use note instead
+  completed?: boolean; // Legacy field
 }
 
 // Driver Types

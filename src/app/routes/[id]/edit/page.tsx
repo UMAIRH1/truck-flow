@@ -8,15 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
-import { Truck, User, Calendar, DollarSign, Fuel } from "lucide-react";
+import { useRouter, useParams } from "next/navigation";
 import api from "@/lib/api";
 
-export default function CreateRoutePage() {
+export default function EditRoutePage() {
   const router = useRouter();
-  const { createRoute } = useRoutes();
+  const params = useParams();
+  const { routes, updateRoute, addLoadsToRoute, removeLoadFromRoute } = useRoutes();
   const { loads } = useLoads();
   
+  const [route, setRoute] = useState<any>(null);
   const [drivers, setDrivers] = useState<any[]>([]);
   const [isLoadingDrivers, setIsLoadingDrivers] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,7 +29,6 @@ export default function CreateRoutePage() {
     routeName: "",
     origin: "",
     destination: "",
-    assignedDriverId: "",
     truckNumber: "",
     truckType: "",
     truckCapacity: "",
@@ -43,6 +43,36 @@ export default function CreateRoutePage() {
     notes: "",
     selectedLoadIds: [] as string[],
   });
+
+  useEffect(() => {
+    const foundRoute = routes.find(r => r.id === params.id);
+    if (foundRoute) {
+      setRoute(foundRoute);
+      setDistance(foundRoute.totalDistance || null);
+      setFormData({
+        routeName: foundRoute.routeName || "",
+        origin: foundRoute.origin || "",
+        destination: foundRoute.destination || "",
+        truckNumber: foundRoute.assignedTruck?.truckNumber || "",
+        truckType: foundRoute.assignedTruck?.truckType || "",
+        truckCapacity: foundRoute.assignedTruck?.capacity?.toString() || "",
+        startDate: foundRoute.startDate ? new Date(foundRoute.startDate).toISOString().split('T')[0] : "",
+        endDate: foundRoute.endDate ? new Date(foundRoute.endDate).toISOString().split('T')[0] : "",
+        fuelConsumption: foundRoute.fuelConsumption?.toString() || "30",
+        fuelPricePerLiter: foundRoute.fuelPricePerLiter?.toString() || "",
+        driverDailyCost: foundRoute.driverDailyCost?.toString() || "",
+        truckCostPerKm: foundRoute.truckCostPerKm?.toString() || "",
+        tolls: foundRoute.tolls?.toString() || "",
+        otherExpenses: foundRoute.otherExpenses?.toString() || "",
+        notes: foundRoute.notes || "",
+        selectedLoadIds: foundRoute.loads?.map((l: any) => {
+          // Handle both populated loads (objects) and unpopulated (just IDs)
+          if (typeof l === 'string') return l;
+          return l.id || l._id || l;
+        }) || [],
+      });
+    }
+  }, [routes, params.id]);
 
   useEffect(() => {
     const fetchDrivers = async () => {
@@ -60,36 +90,10 @@ export default function CreateRoutePage() {
     fetchDrivers();
   }, []);
 
-  // Calculate distance when origin and destination change
-  useEffect(() => {
-    const calculateDistance = async () => {
-      if (!formData.origin || !formData.destination) {
-        setDistance(null);
-        return;
-      }
-
-      setIsCalculatingDistance(true);
-      try {
-        const response = await api.calculateDistance(
-          formData.origin,
-          formData.destination
-        );
-        if (response.success && response.distance) {
-          setDistance(response.distance);
-        }
-      } catch (error: any) {
-        console.error("Failed to calculate distance:", error);
-        setDistance(null);
-      } finally {
-        setIsCalculatingDistance(false);
-      }
-    };
-
-    const debounceTimer = setTimeout(calculateDistance, 1000);
-    return () => clearTimeout(debounceTimer);
-  }, [formData.origin, formData.destination]);
-
-  const availableLoads = loads.filter(load => !load.routeId && load.status === 'pending');
+  // Available loads: not attached to any route OR attached to this route
+  const availableLoads = loads.filter(load => 
+    !load.routeId || load.routeId === params.id
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,12 +101,12 @@ export default function CreateRoutePage() {
     setIsSubmitting(true);
 
     try {
-      await createRoute({
+      // Update route details
+      await updateRoute(params.id as string, {
         routeName: formData.routeName,
         origin: formData.origin,
         destination: formData.destination,
-        totalDistance: distance || 0,
-        assignedDriverId: formData.assignedDriverId,
+        totalDistance: distance || route.totalDistance || 0,
         assignedTruck: {
           truckNumber: formData.truckNumber,
           truckType: formData.truckType,
@@ -117,12 +121,30 @@ export default function CreateRoutePage() {
         tolls: parseFloat(formData.tolls) || 0,
         otherExpenses: parseFloat(formData.otherExpenses) || 0,
         notes: formData.notes,
-        loadIds: formData.selectedLoadIds,
       });
 
-      router.push("/routes");
+      // Handle load changes
+      const currentLoadIds = route?.loads?.map((l: any) => {
+        if (typeof l === 'string') return l;
+        return l.id || l._id || l;
+      }) || [];
+      const newLoadIds = formData.selectedLoadIds;
+
+      // Loads to add
+      const loadsToAdd = newLoadIds.filter(id => !currentLoadIds.includes(id));
+      if (loadsToAdd.length > 0) {
+        await addLoadsToRoute(params.id as string, loadsToAdd);
+      }
+
+      // Loads to remove
+      const loadsToRemove = currentLoadIds.filter((id: string) => !newLoadIds.includes(id));
+      for (const loadId of loadsToRemove) {
+        await removeLoadFromRoute(params.id as string, loadId);
+      }
+
+      router.push(`/routes/${params.id}`);
     } catch (err: any) {
-      setError(err.message || "Failed to create route");
+      setError(err.message || "Failed to update route");
     } finally {
       setIsSubmitting(false);
     }
@@ -137,9 +159,20 @@ export default function CreateRoutePage() {
     }));
   };
 
+  if (!route) {
+    return (
+      <MobileLayout showFAB={false}>
+        <Header title="Edit Route" showBack />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-500">Loading route...</div>
+        </div>
+      </MobileLayout>
+    );
+  }
+
   return (
     <MobileLayout showFAB={false}>
-      <Header title="Create Route" showBack />
+      <Header title="Edit Route" showBack />
       <div className="px-4 py-6 max-w-4xl mx-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card>
@@ -175,58 +208,44 @@ export default function CreateRoutePage() {
                 </div>
               </div>
 
-              {distance !== null && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <div className="text-sm text-blue-800 flex items-center gap-2">
-                    <span className="font-medium">Calculated Distance:</span>
-                    <span className="font-bold">{distance} km</span>
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Distance (km)</label>
+                  <Input
+                    type="number"
+                    value={distance || ""}
+                    onChange={(e) => setDistance(parseFloat(e.target.value) || null)}
+                    placeholder="Auto-calculated or enter manually"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Distance is auto-calculated from origin/destination</p>
                 </div>
-              )}
-
-              {isCalculatingDistance && (
-                <div className="text-sm text-gray-500 flex items-center gap-2">
-                  <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
-                  <span>Calculating distance...</span>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Tolls (€)</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.tolls}
+                    onChange={(e) => setFormData({ ...formData, tolls: e.target.value })}
+                    placeholder="e.g., 50"
+                  />
                 </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Tolls (€)</label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={formData.tolls}
-                  onChange={(e) => setFormData({ ...formData, tolls: e.target.value })}
-                  placeholder="e.g., 50"
-                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Assign Driver *</label>
-                  <select
-                    value={formData.assignedDriverId}
-                    onChange={(e) => setFormData({ ...formData, assignedDriverId: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md"
-                    required
-                    disabled={isLoadingDrivers}
-                  >
-                    <option value="">Select Driver</option>
-                    {drivers.map((driver) => (
-                      <option key={driver._id} value={driver._id}>
-                        {driver.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
                 <div>
                   <label className="block text-sm font-medium mb-2">Truck Number</label>
                   <Input
                     value={formData.truckNumber}
                     onChange={(e) => setFormData({ ...formData, truckNumber: e.target.value })}
                     placeholder="e.g., TRK-001"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Truck Type</label>
+                  <Input
+                    value={formData.truckType}
+                    onChange={(e) => setFormData({ ...formData, truckType: e.target.value })}
+                    placeholder="e.g., Semi-Trailer"
                   />
                 </div>
               </div>
@@ -308,10 +327,12 @@ export default function CreateRoutePage() {
             </CardContent>
           </Card>
 
-          {availableLoads.length > 0 && (
-            <Card>
-              <CardContent className="pt-6">
-                <h3 className="text-sm font-semibold mb-3">Attach Loads (Optional)</h3>
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-sm font-semibold mb-3">Attach/Detach Loads</h3>
+              {availableLoads.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">No available loads to attach</p>
+              ) : (
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {availableLoads.map((load) => (
                     <label
@@ -327,7 +348,7 @@ export default function CreateRoutePage() {
                       <div className="flex-1">
                         <div className="font-medium">{load.loadNumber}</div>
                         <div className="text-sm text-gray-600">
-                          {load.pickupLocation} → {load.dropoffLocation}
+                          {load.clientName} • {load.pickupLocation} → {load.dropoffLocation}
                         </div>
                       </div>
                       <div className="text-sm font-semibold text-green-600">
@@ -336,9 +357,9 @@ export default function CreateRoutePage() {
                     </label>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              )}
+            </CardContent>
+          </Card>
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -360,7 +381,7 @@ export default function CreateRoutePage() {
               disabled={isSubmitting}
               className="flex-1 bg-black hover:bg-gray-800"
             >
-              {isSubmitting ? "Creating..." : "Create Route"}
+              {isSubmitting ? "Updating..." : "Update Route"}
             </Button>
           </div>
         </form>

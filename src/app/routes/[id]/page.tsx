@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useRouter, useParams } from "next/navigation";
 import { 
   Truck, MapPin, Calendar, DollarSign, CheckCircle, XCircle, 
-  Clock, Package, TrendingUp, Fuel, User 
+  Clock, Package, TrendingUp, Fuel, User, Trash2 
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -16,9 +16,10 @@ export default function RouteDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { user } = useAuth();
-  const { routes, acceptRoute, rejectRoute, loading } = useRoutes();
+  const { routes, acceptRoute, rejectRoute, deleteRoute, loading } = useRoutes();
   const [route, setRoute] = useState<any>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const foundRoute = routes.find(r => r.id === params.id);
@@ -46,6 +47,24 @@ export default function RouteDetailPage() {
       console.error("Failed to reject route:", error);
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!route) return;
+    
+    if (!confirm("Are you sure you want to delete this route? This action cannot be undone.")) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deleteRoute(route.id);
+      router.push("/routes");
+    } catch (error) {
+      console.error("Failed to delete route:", error);
+      alert("Failed to delete route");
+      setIsDeleting(false);
     }
   };
 
@@ -85,6 +104,12 @@ export default function RouteDetailPage() {
               <div>
                 <h1 className="text-2xl font-bold">{route.routeName}</h1>
                 <p className="text-gray-500">{route.routeNumber}</p>
+                {(route.origin || route.destination) && (
+                  <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {route.origin || "Origin"} → {route.destination || "Destination"}
+                  </p>
+                )}
               </div>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(route.status)}`}>
                 {route.status}
@@ -252,6 +277,27 @@ export default function RouteDetailPage() {
             >
               <CheckCircle className="h-4 w-4 mr-2" />
               Accept
+            </Button>
+          </div>
+        )}
+
+        {/* Edit Button for Manager */}
+        {user?.role === 'manager' && route.status === 'pending' && (
+          <div className="flex gap-4">
+            <Button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              variant="outline"
+              className="flex-1 border-red-500 text-red-500 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {isDeleting ? "Deleting..." : "Delete Route"}
+            </Button>
+            <Button
+              onClick={() => router.push(`/routes/${route.id}/edit`)}
+              className="flex-1 bg-black hover:bg-gray-800"
+            >
+              Edit Route
             </Button>
           </div>
         )}
