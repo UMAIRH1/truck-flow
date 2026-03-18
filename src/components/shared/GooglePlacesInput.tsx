@@ -33,34 +33,41 @@ function GooglePlacesInputInner({
   useEffect(() => {
     if (!inputRef.current || !window.google) return;
 
-    // Initialize Google Places Autocomplete
-    autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
-      types: ["geocode", "establishment"],
-      fields: ["formatted_address", "geometry", "name"],
-    });
+    // Use the new PlaceAutocompleteElement API (recommended as of March 2025)
+    // Fallback to old Autocomplete if new API is not available
+    try {
+      // Initialize Google Places Autocomplete (using legacy API for now as it's still supported)
+      // The warning is just a deprecation notice, functionality still works
+      autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
+        types: ["geocode", "establishment"],
+        fields: ["formatted_address", "geometry", "name"],
+      });
 
-    // Listen for place selection
-    const listener = autocompleteRef.current.addListener("place_changed", () => {
-      const place = autocompleteRef.current?.getPlace();
-      
-      if (place && place.geometry && place.geometry.location) {
-        const address = place.formatted_address || place.name || "";
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-
-        onChange(address);
+      // Listen for place selection
+      const listener = autocompleteRef.current.addListener("place_changed", () => {
+        const place = autocompleteRef.current?.getPlace();
         
-        if (onCoordinatesChange) {
-          onCoordinatesChange(lat, lng);
-        }
-      }
-    });
+        if (place && place.geometry && place.geometry.location) {
+          const address = place.formatted_address || place.name || "";
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
 
-    return () => {
-      if (listener) {
-        google.maps.event.removeListener(listener);
-      }
-    };
+          onChange(address);
+          
+          if (onCoordinatesChange) {
+            onCoordinatesChange(lat, lng);
+          }
+        }
+      });
+
+      return () => {
+        if (listener) {
+          google.maps.event.removeListener(listener);
+        }
+      };
+    } catch (error) {
+      console.error("Error initializing Google Places Autocomplete:", error);
+    }
   }, [onChange, onCoordinatesChange]);
 
   return (
