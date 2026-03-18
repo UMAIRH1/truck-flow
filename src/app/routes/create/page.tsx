@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { Truck, User, Calendar, DollarSign, Fuel } from "lucide-react";
+import { GooglePlacesInput } from "@/components/shared";
 import api from "@/lib/api";
 
 export default function CreateRoutePage() {
@@ -157,18 +158,18 @@ export default function CreateRoutePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Origin *</label>
-                  <Input
+                  <GooglePlacesInput
                     value={formData.origin}
-                    onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
+                    onChange={(value) => setFormData({ ...formData, origin: value })}
                     placeholder="e.g., Athens"
                     required
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Destination *</label>
-                  <Input
+                  <GooglePlacesInput
                     value={formData.destination}
-                    onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
+                    onChange={(value) => setFormData({ ...formData, destination: value })}
                     placeholder="e.g., Thessaloniki"
                     required
                   />

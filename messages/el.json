@@ -377,7 +377,9 @@
     "driverCompletedLoadDetails": "Ο/Η {driverName} ολοκλήρωσε το φορτίο #{loadNumber} ({pickup} → {dropoff})",
     "documentsUploaded": "Έγγραφα Ανέβηκαν",
     "driverUploadedDocuments": "Ο/Η {driverName} ανέβασε έγγραφα για το φορτίο #{loadNumber}",
-    "driverUploadedDocumentsDetails": "Ο/Η {driverName} ανέβασε έγγραφα για το φορτίο #{loadNumber} ({pickup} → {dropoff})"
+    "driverUploadedDocumentsDetails": "Ο/Η {driverName} ανέβασε έγγραφα για το φορτίο #{loadNumber} ({pickup} → {dropoff})",
+    "routeAssigned": "Διαδρομή Ανατέθηκε",
+    "routeAssignedToYou": "Σας ανατέθηκε η διαδρομή {routeName}"
   },
   "export": {
     "exportLoads": "Εξαγωγή Φορτίων",

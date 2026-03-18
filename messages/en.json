@@ -394,7 +394,9 @@
     "driverCompletedLoadDetails": "{driverName} completed load #{loadNumber} ({pickup} → {dropoff})",
     "documentsUploaded": "Documents Uploaded",
     "driverUploadedDocuments": "{driverName} has uploaded documents for load #{loadNumber}",
-    "driverUploadedDocumentsDetails": "{driverName} uploaded documents for load #{loadNumber} ({pickup} → {dropoff})"
+    "driverUploadedDocumentsDetails": "{driverName} uploaded documents for load #{loadNumber} ({pickup} → {dropoff})",
+    "routeAssigned": "Route Assigned",
+    "routeAssignedToYou": "You have been assigned to route {routeName}"
   },
   "export": {
     "exportLoads": "Export Loads",

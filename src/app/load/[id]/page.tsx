@@ -510,31 +510,56 @@ export default function LoadStatusPage() {
 
       {/* Upload POD Button for Driver - Only in Progress */}
       {isDriver && load.status === "in-progress" && (
-        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 space-y-4">
-          <div>
-            <h3 className="font-bold text-lg mb-2 text-black">Complete Delivery</h3>
-            <p className="text-sm text-gray-600">
-              Upload proof of delivery to mark this load as completed.
-            </p>
-          </div>
-          <div className="space-y-3">
+        <>
+          {/* Start Navigation Button */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 shadow-lg border-2 border-blue-500 space-y-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-white/20 p-3 rounded-full">
+                <MapPin className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-white">Navigation</h3>
+                <p className="text-sm text-blue-100">
+                  Get turn-by-turn directions to your destination
+                </p>
+              </div>
+            </div>
             <Button
-              onClick={() => router.push(`/load/${load.id}/upload-pod`)}
-              className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full"
+              onClick={() => router.push(`/map/${load.id}`)}
+              className="w-full h-14 bg-white text-blue-600 hover:bg-blue-50 font-semibold rounded-full shadow-lg flex items-center justify-center gap-2 text-lg"
             >
-              <Upload className="w-5 h-5 mr-2" />
-              Upload Proof of Delivery
-            </Button>
-            <Button
-              onClick={() => router.push(`/load/${load.id}/upload-documents`)}
-              variant="outline"
-              className="w-full h-12"
-            >
-              <Upload className="w-5 h-5 mr-2" />
-              Upload Invoice & Documents
+              <MapPin className="w-6 h-6" />
+              Start Navigation
             </Button>
           </div>
-        </div>
+
+          {/* Upload Documents Section */}
+          <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 space-y-4">
+            <div>
+              <h3 className="font-bold text-lg mb-2 text-black">Complete Delivery</h3>
+              <p className="text-sm text-gray-600">
+                Upload proof of delivery to mark this load as completed.
+              </p>
+            </div>
+            <div className="space-y-3">
+              <Button
+                onClick={() => router.push(`/load/${load.id}/upload-pod`)}
+                className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full"
+              >
+                <Upload className="w-5 h-5 mr-2" />
+                Upload Proof of Delivery
+              </Button>
+              <Button
+                onClick={() => router.push(`/load/${load.id}/upload-documents`)}
+                variant="outline"
+                className="w-full h-12"
+              >
+                <Upload className="w-5 h-5 mr-2" />
+                Upload Invoice & Documents
+              </Button>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Show completed status for driver */}
