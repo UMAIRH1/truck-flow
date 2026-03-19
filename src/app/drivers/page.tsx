@@ -133,24 +133,24 @@ export default function DriversPage() {
         ) : (
           <div className="grid gap-4">
             {drivers.map((driver) => (
-              <Card key={driver._id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
+              <Card key={driver._id} className="hover:shadow-md transition-shadow overflow-hidden">
+                <CardContent className="p-3">
+                  <div className="flex items-start justify-between gap-2">
                     {/* Driver Info */}
-                    <div className="flex items-start gap-4 flex-1">
+                    <div className="flex items-start gap-2 flex-1 min-w-0">
                       {/* Avatar */}
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-base font-bold flex-shrink-0">
                         {driver.name.charAt(0).toUpperCase()}
                       </div>
 
                       {/* Details */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 mb-1">
+                          <h3 className="text-sm font-semibold text-gray-900 break-words leading-tight">
                             {driver.name}
                           </h3>
                           <span
-                            className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                            className={`px-1.5 py-0.5 text-xs font-medium rounded-full w-fit ${
                               driver.isActive
                                 ? "bg-green-100 text-green-700"
                                 : "bg-red-100 text-red-700"
@@ -160,19 +160,19 @@ export default function DriversPage() {
                           </span>
                         </div>
 
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Mail className="w-4 h-4" />
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1.5 text-xs text-gray-600 min-w-0">
+                            <Mail className="w-3 h-3 flex-shrink-0" />
                             <span className="truncate">{driver.email}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Phone className="w-4 h-4" />
-                            <span>{driver.phone}</span>
+                          <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                            <Phone className="w-3 h-3 flex-shrink-0" />
+                            <span className="break-all">{driver.phone}</span>
                           </div>
                         </div>
 
-                        <p className="text-xs text-gray-500 mt-2">
-                          Added on {new Date(driver.createdAt).toLocaleDateString()}
+                        <p className="text-xs text-gray-500 mt-1">
+                          Added {new Date(driver.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
@@ -180,7 +180,7 @@ export default function DriversPage() {
                     {/* Actions Menu */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
