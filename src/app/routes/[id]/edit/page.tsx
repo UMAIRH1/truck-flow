@@ -337,21 +337,21 @@ export default function EditRoutePage() {
                   {availableLoads.map((load) => (
                     <label
                       key={load.id}
-                      className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                      className="flex items-start gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
                     >
                       <input
                         type="checkbox"
                         checked={formData.selectedLoadIds.includes(load.id)}
                         onChange={() => toggleLoadSelection(load.id)}
-                        className="w-4 h-4"
+                        className="w-4 h-4 mt-0.5 flex-shrink-0"
                       />
-                      <div className="flex-1">
-                        <div className="font-medium">{load.loadNumber}</div>
-                        <div className="text-sm text-gray-600">
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="font-medium text-sm break-words">{load.loadNumber}</div>
+                        <div className="text-xs text-gray-600 break-words">
                           {load.clientName} • {load.pickupLocation} → {load.dropoffLocation}
                         </div>
                       </div>
-                      <div className="text-sm font-semibold text-green-600">
+                      <div className="text-sm font-semibold text-green-600 flex-shrink-0">
                         €{load.clientPrice}
                       </div>
                     </label>
