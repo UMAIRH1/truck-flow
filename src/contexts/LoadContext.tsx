@@ -34,6 +34,8 @@ function transformLoadFromAPI(apiLoad: any): Load {
     loadNumber: apiLoad.loadNumber,
     pickupLocation: apiLoad.pickupLocation || "",
     dropoffLocation: apiLoad.dropoffLocation || "",
+    pickupCoords: apiLoad.pickupCoords,
+    dropoffCoords: apiLoad.dropoffCoords,
     clientName: apiLoad.clientName || "Unknown Client",
     clientPrice: apiLoad.clientPrice || 0,
     driverPrice: apiLoad.driverPrice || 0,
@@ -144,6 +146,8 @@ export function LoadProvider({ children }: { children: ReactNode }) {
         const apiLoadData = {
           pickupLocation: loadData.pickupLocation,
           dropoffLocation: loadData.dropoffLocation,
+          pickupCoords: loadData.pickupCoords,
+          dropoffCoords: loadData.dropoffCoords,
           clientName: loadData.clientName,
           clientPrice: loadData.clientPrice,
           driverPrice: loadData.driverPrice || 0,

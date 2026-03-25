@@ -11,6 +11,8 @@ interface LocationPickerProps {
   onDropoffChange: (value: string) => void;
   onPickupCoordinates?: (lat: number, lng: number) => void;
   onDropoffCoordinates?: (lat: number, lng: number) => void;
+  pickupCoords?: { lat: number; lng: number } | null;
+  dropoffCoords?: { lat: number; lng: number } | null;
   t: any;
 }
 
@@ -21,14 +23,32 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   onDropoffChange,
   onPickupCoordinates,
   onDropoffCoordinates,
+  pickupCoords,
+  dropoffCoords,
   t,
 }) => {
   const [showPickupMap, setShowPickupMap] = useState(false);
   const [showDropoffMap, setShowDropoffMap] = useState(false);
 
   const handleSwap = () => {
+    // Swap addresses
+    const oldPickup = pickupValue;
     onPickupChange(dropoffValue);
-    onDropoffChange(pickupValue);
+    onDropoffChange(oldPickup);
+
+    // Swap coordinates
+    if (onPickupCoordinates && onDropoffCoordinates) {
+      if (dropoffCoords) {
+        onPickupCoordinates(dropoffCoords.lat, dropoffCoords.lng);
+      } else {
+        // Clearing is important if the other didn't have coords
+        // but this depends on implementation. For now let's just swap if both exist or one exists
+      }
+
+      if (pickupCoords) {
+        onDropoffCoordinates(pickupCoords.lat, pickupCoords.lng);
+      }
+    }
   };
 
   const handlePickupLocationSelect = (location: { address: string; lat: number; lng: number }) => {

@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { Truck, User, Calendar, DollarSign, Fuel } from "lucide-react";
-import { GooglePlacesInput } from "@/components/shared";
+import { GooglePlacesInput, GoogleMapsLoader } from "@/components/shared";
 import api from "@/lib/api";
 
 export default function CreateRoutePage() {
@@ -23,12 +23,22 @@ export default function CreateRoutePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [distance, setDistance] = useState<number | null>(null);
+  const [preRouteDistance, setPreRouteDistance] = useState<number | null>(null);
+  const [routeDistance, setRouteDistance] = useState<number | null>(null);
   const [isCalculatingDistance, setIsCalculatingDistance] = useState(false);
+  const [originSelected, setOriginSelected] = useState(false);
+  const [destinationSelected, setDestinationSelected] = useState(false);
+  const [driverLocationSelected, setDriverLocationSelected] = useState(false);
+
+  const [originCoords, setOriginCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [destinationCoords, setDestinationCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [driverStartingCoords, setDriverStartingCoords] = useState<{lat: number, lng: number} | null>(null);
 
   const [formData, setFormData] = useState({
     routeName: "",
     origin: "",
     destination: "",
+    driverStartingLocation: "", // New field for driver's current position
     assignedDriverId: "",
     truckNumber: "",
     truckType: "",
@@ -61,34 +71,139 @@ export default function CreateRoutePage() {
     fetchDrivers();
   }, []);
 
-  // Calculate distance when origin and destination change
+  // Calculate distance with waypoints when locations and loads are selected
   useEffect(() => {
-    const calculateDistance = async () => {
-      if (!formData.origin || !formData.destination) {
-        setDistance(null);
+    const calculateDistanceWithWaypoints = async () => {
+      // Only calculate if origin and destination are selected
+      if (!formData.origin || !formData.destination || !originSelected || !destinationSelected) {
         return;
       }
 
       setIsCalculatingDistance(true);
       try {
-        const response = await api.calculateDistance(
-          formData.origin,
-          formData.destination
+        // Build waypoints from selected loads
+        const selectedLoads = loads.filter(load => formData.selectedLoadIds.includes(load.id));
+        const waypoints: string[] = [];
+        
+        // Add pickup and delivery locations for each load in sequence
+        selectedLoads.forEach(load => {
+          if (load.pickupCoords) {
+            waypoints.push(`${load.pickupCoords.lat},${load.pickupCoords.lng}`);
+          } else if (load.pickupLocation) {
+            waypoints.push(load.pickupLocation);
+          }
+          
+          if (load.dropoffCoords) {
+            waypoints.push(`${load.dropoffCoords.lat},${load.dropoffCoords.lng}`);
+          } else if (load.dropoffLocation) {
+            waypoints.push(load.dropoffLocation);
+          }
+        });
+
+        // Calculate route distance (origin → waypoints → destination)
+        // Use coordinates if available for better accuracy
+        const startLoc = originCoords ? `${originCoords.lat},${originCoords.lng}` : formData.origin;
+        const endLoc = destinationCoords ? `${destinationCoords.lat},${destinationCoords.lng}` : formData.destination;
+
+        const routeResponse = await api.calculateDistance(
+          startLoc,
+          endLoc,
+          waypoints
         );
-        if (response.success && response.distance) {
-          setDistance(response.distance);
+        
+        if (routeResponse.success && routeResponse.distance) {
+          setRouteDistance(routeResponse.distance);
         }
+
+        // Calculate pre-route distance if driver starting location is provided
+        let preDistance = 0;
+        if (formData.driverStartingLocation && (driverLocationSelected || driverStartingCoords)) {
+          const preStartLoc = driverStartingCoords ? `${driverStartingCoords.lat},${driverStartingCoords.lng}` : formData.driverStartingLocation;
+          
+          const preRouteResponse = await api.calculateDistance(
+            preStartLoc,
+            startLoc
+          );
+          if (preRouteResponse.success && preRouteResponse.distance) {
+            preDistance = preRouteResponse.distance;
+            setPreRouteDistance(preDistance);
+          }
+        } else {
+          setPreRouteDistance(0);
+        }
+
+        // Set total distance
+        const totalDist = (routeResponse.distance || 0) + preDistance;
+        setDistance(totalDist);
+
       } catch (error: any) {
         console.error("Failed to calculate distance:", error);
         setDistance(null);
+        setRouteDistance(null);
+        setPreRouteDistance(null);
       } finally {
         setIsCalculatingDistance(false);
       }
     };
 
-    const debounceTimer = setTimeout(calculateDistance, 1000);
-    return () => clearTimeout(debounceTimer);
-  }, [formData.origin, formData.destination]);
+    calculateDistanceWithWaypoints();
+  }, [
+    originSelected, 
+    destinationSelected, 
+    driverLocationSelected,
+    formData.origin, 
+    formData.destination, 
+    formData.driverStartingLocation,
+    formData.selectedLoadIds,
+    loads,
+    originCoords,
+    destinationCoords,
+    driverStartingCoords
+  ]);
+
+  const calculateEconomics = () => {
+    if (!distance) return null;
+
+    const fc = parseFloat(formData.fuelConsumption) || 30;
+    const fp = parseFloat(formData.fuelPricePerLiter) || 0;
+    const ddc = parseFloat(formData.driverDailyCost) || 0;
+    const tck = parseFloat(formData.truckCostPerKm) || 0;
+    const tolls = parseFloat(formData.tolls) || 0;
+    const other = parseFloat(formData.otherExpenses) || 0;
+
+    // Calculate days based on start and end date
+    let days = 1;
+    if (formData.startDate && formData.endDate) {
+      const start = new Date(formData.startDate);
+      const end = new Date(formData.endDate);
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+    }
+
+    const fuelCost = distance * (fc / 100) * fp;
+    const driverCost = ddc * days; 
+    const truckCost = distance * tck;
+    const totalCost = fuelCost + driverCost + truckCost + tolls + other;
+
+    const selectedLoads = loads.filter(load => formData.selectedLoadIds.includes(load.id));
+    const totalRevenue = selectedLoads.reduce((sum, load) => sum + (load.clientPrice || 0), 0);
+    const profit = totalRevenue - totalCost;
+
+    return {
+      fuelCost,
+      driverCost,
+      truckCost,
+      totalCost,
+      totalRevenue,
+      profit,
+      distance,
+      days,
+      tolls,
+      other
+    };
+  };
+
+  const economics = calculateEconomics();
 
   const availableLoads = loads.filter(load => !load.routeId && load.status === 'pending');
 
@@ -102,7 +217,13 @@ export default function CreateRoutePage() {
         routeName: formData.routeName,
         origin: formData.origin,
         destination: formData.destination,
+        originCoords: originCoords || undefined,
+        destinationCoords: destinationCoords || undefined,
+        driverStartingCoords: driverStartingCoords || undefined,
+        driverStartingLocation: formData.driverStartingLocation || undefined,
         totalDistance: distance || 0,
+        preRouteDistance: preRouteDistance || 0,
+        routeDistance: routeDistance || 0,
         assignedDriverId: formData.assignedDriverId,
         assignedTruck: {
           truckNumber: formData.truckNumber,
@@ -139,8 +260,9 @@ export default function CreateRoutePage() {
   };
 
   return (
-    <MobileLayout showFAB={false}>
-      <Header title="Create Route" showBack />
+    <GoogleMapsLoader>
+      <MobileLayout showFAB={false}>
+        <Header title="Create Route" showBack />
       <div className="px-4 py-6 max-w-4xl mx-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card>
@@ -157,31 +279,72 @@ export default function CreateRoutePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Origin *</label>
+                  <label className="block text-sm font-medium mb-2">Driver Current Location</label>
+                  <GooglePlacesInput
+                    value={formData.driverStartingLocation}
+                    onChange={(value) => setFormData({ ...formData, driverStartingLocation: value })}
+                    onCoordinatesChange={(lat, lng) => setDriverStartingCoords({ lat, lng })}
+                    onPlaceSelected={() => {
+                      console.log("Driver location selected");
+                      setDriverLocationSelected(true);
+                    }}
+                    placeholder="e.g., Faisalabad (optional)"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Where is the driver currently located?</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Route Origin *</label>
                   <GooglePlacesInput
                     value={formData.origin}
                     onChange={(value) => setFormData({ ...formData, origin: value })}
-                    placeholder="e.g., Athens"
+                    onCoordinatesChange={(lat, lng) => setOriginCoords({ lat, lng })}
+                    onPlaceSelected={() => {
+                      console.log("Origin place selected");
+                      setOriginSelected(true);
+                    }}
+                    placeholder="e.g., Lahore"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Destination *</label>
+                  <label className="block text-sm font-medium mb-2">Route Destination *</label>
                   <GooglePlacesInput
                     value={formData.destination}
                     onChange={(value) => setFormData({ ...formData, destination: value })}
-                    placeholder="e.g., Thessaloniki"
+                    onCoordinatesChange={(lat, lng) => setDestinationCoords({ lat, lng })}
+                    onPlaceSelected={() => {
+                      console.log("Destination place selected");
+                      setDestinationSelected(true);
+                    }}
+                    placeholder="e.g., Karachi"
                     required
                   />
                 </div>
               </div>
 
-              {distance !== null && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <div className="text-sm text-blue-800 flex items-center gap-2">
-                    <span className="font-medium">Calculated Distance:</span>
-                    <span className="font-bold">{distance} km</span>
-                  </div>
+              {(distance !== null || preRouteDistance !== null || routeDistance !== null) && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+                  {preRouteDistance !== null && preRouteDistance > 0 && (
+                    <div className="text-sm text-blue-800 flex items-center justify-between">
+                      <span className="font-medium">Pre-Route Distance (Driver → Origin):</span>
+                      <span className="font-bold">{preRouteDistance} km</span>
+                    </div>
+                  )}
+                  {routeDistance !== null && (
+                    <div className="text-sm text-blue-800 flex items-center justify-between">
+                      <span className="font-medium">Route Distance (Origin → Destination):</span>
+                      <span className="font-bold">{routeDistance} km</span>
+                    </div>
+                  )}
+                  {distance !== null && (
+                    <div className="text-sm text-blue-900 flex items-center justify-between border-t border-blue-300 pt-2">
+                      <span className="font-semibold">Total Distance:</span>
+                      <span className="font-bold text-lg">{distance} km</span>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -192,15 +355,27 @@ export default function CreateRoutePage() {
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium mb-2">Tolls (€)</label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={formData.tolls}
-                  onChange={(e) => setFormData({ ...formData, tolls: e.target.value })}
-                  placeholder="e.g., 50"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Tolls (€)</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.tolls}
+                    onChange={(e) => setFormData({ ...formData, tolls: e.target.value })}
+                    placeholder="e.g., 50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Other Expenses (€)</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={formData.otherExpenses}
+                    onChange={(e) => setFormData({ ...formData, otherExpenses: e.target.value })}
+                    placeholder="e.g., 20"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -341,6 +516,48 @@ export default function CreateRoutePage() {
             </Card>
           )}
 
+          {economics && (
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="pt-6">
+                <h3 className="text-sm font-semibold mb-3 text-blue-900">Route Economics Summary</h3>
+                <div className="grid grid-cols-2 gap-y-2 text-sm">
+                  <div className="text-gray-600">Total Distance:</div>
+                  <div className="font-medium text-right">{economics.distance.toFixed(2)} km</div>
+                  
+                  <div className="text-gray-600">Trip Duration:</div>
+                  <div className="font-medium text-right">{economics.days} {economics.days === 1 ? 'day' : 'days'}</div>
+
+                  <div className="text-gray-600">Est. Fuel Cost:</div>
+                  <div className="font-medium text-right">€{economics.fuelCost.toFixed(2)}</div>
+                  
+                  <div className="text-gray-600">Est. Driver Cost:</div>
+                  <div className="font-medium text-right">€{economics.driverCost.toFixed(2)}</div>
+                  
+                  <div className="text-gray-600">Est. Truck Cost:</div>
+                  <div className="font-medium text-right">€{economics.truckCost.toFixed(2)}</div>
+
+                  <div className="text-gray-600">Tolls & Other:</div>
+                  <div className="font-medium text-right">€{(economics.tolls + economics.other).toFixed(2)}</div>
+                  
+                  <div className="border-t border-blue-200 col-span-2 my-1"></div>
+                  
+                  <div className="font-semibold text-blue-900">Total Est. Cost:</div>
+                  <div className="font-bold text-right text-blue-900">€{economics.totalCost.toFixed(2)}</div>
+                  
+                  <div className="font-semibold text-green-700">Total Revenue:</div>
+                  <div className="font-bold text-right text-green-700">€{economics.totalRevenue.toFixed(2)}</div>
+                  
+                  <div className="border-t-2 border-blue-300 col-span-2 my-1"></div>
+                  
+                  <div className="text-lg font-bold text-blue-900">Projected Profit:</div>
+                  <div className={`text-lg font-bold text-right ${economics.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    €{economics.profit.toFixed(2)}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
               {error}
@@ -367,5 +584,6 @@ export default function CreateRoutePage() {
         </form>
       </div>
     </MobileLayout>
+    </GoogleMapsLoader>
   );
 }

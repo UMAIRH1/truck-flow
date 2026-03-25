@@ -16,4 +16,5 @@ export { InstallPWA } from "./InstallPWA";
 export { GoogleMapPicker } from "./GoogleMapPicker";
 export { GoogleMapRoute } from "./GoogleMapRoute";
 export { GooglePlacesInput } from "./GooglePlacesInput";
+export { GoogleMapsLoader } from "./GoogleMapsLoader";
 export { LiveNavigationMap } from "./LiveNavigationMap";

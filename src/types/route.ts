@@ -4,6 +4,10 @@ export interface Route {
   routeNumber: string;
   origin?: string;
   destination?: string;
+  driverStartingLocation?: string; // Driver's current position when route is created
+  originCoords?: { lat: number; lng: number };
+  destinationCoords?: { lat: number; lng: number };
+  driverStartingCoords?: { lat: number; lng: number };
   assignedDriver: {
     id: string;
     name: string;
@@ -19,7 +23,10 @@ export interface Route {
   endDate?: Date;
   status: 'pending' | 'accepted' | 'rejected' | 'in-progress' | 'completed';
   loads: any[]; // Load IDs or populated loads
+  loadSequence?: string[]; // Ordered array of load IDs representing the sequence
   totalDistance: number;
+  preRouteDistance?: number; // Distance from driver starting location to route origin
+  routeDistance?: number; // Distance from origin through all waypoints to destination
   fuelConsumption: number;
   fuelPricePerLiter: number;
   driverDailyCost: number;

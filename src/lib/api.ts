@@ -97,11 +97,11 @@ class ApiClient {
       let response = await fetch(url, config);
 
       // If 401 Unauthorized, try to refresh token (but not for login/auth endpoints)
-      const isAuthEndpoint = endpoint.includes('/auth/login') || 
-                            endpoint.includes('/auth/refresh-token') ||
-                            endpoint.includes('/auth/setup-password') ||
-                            endpoint.includes('/auth/reset-password');
-      
+      const isAuthEndpoint = endpoint.includes('/auth/login') ||
+        endpoint.includes('/auth/refresh-token') ||
+        endpoint.includes('/auth/setup-password') ||
+        endpoint.includes('/auth/reset-password');
+
       if (response.status === 401 && !isAuthEndpoint) {
         const newToken = await this.refreshAccessToken();
         if (newToken) {
@@ -125,8 +125,8 @@ class ApiClient {
 
       if (!response.ok) {
         // Prefer detailed error if message is generic 'Server error'
-        const errorMessage = (data.message === 'Server error' && data.error) 
-          ? `${data.message}: ${data.error}` 
+        const errorMessage = (data.message === 'Server error' && data.error)
+          ? `${data.message}: ${data.error}`
           : (data.message || data.error || 'API request failed');
         throw new Error(errorMessage);
       }
@@ -264,10 +264,14 @@ class ApiClient {
     });
   }
 
-  async calculateDistance(pickupLocation: string, dropoffLocation: string) {
+  async calculateDistance(origin: string, destination: string, waypoints?: string[]) {
     return this.request('/loads/calculate-distance', {
       method: 'POST',
-      body: JSON.stringify({ pickupLocation, dropoffLocation }),
+      body: JSON.stringify({
+        pickupLocation: origin,
+        dropoffLocation: destination,
+        waypoints: waypoints || []
+      }),
     });
   }
 
@@ -316,7 +320,7 @@ class ApiClient {
   }) {
     const query = new URLSearchParams(params as any).toString();
     const url = `${this.baseUrl}/exports/loads${query ? `?${query}` : ''}`;
-    
+
     const response = await fetch(url, {
       headers: this.getHeaders(),
     });

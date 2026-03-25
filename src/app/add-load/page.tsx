@@ -56,6 +56,8 @@ export default function AddLoadPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
   const [distance, setDistance] = useState<number | null>(null);
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [isCalculatingDistance, setIsCalculatingDistance] = useState(false);
   const [costBreakdown, setCostBreakdown] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -89,9 +91,13 @@ export default function AddLoadPage() {
       setIsCalculatingDistance(true);
       try {
         const api = (await import("@/lib/api")).default;
+        
+        const startLoc = pickupCoords ? `${pickupCoords.lat},${pickupCoords.lng}` : formData.pickupLocation;
+        const endLoc = dropoffCoords ? `${dropoffCoords.lat},${dropoffCoords.lng}` : formData.dropoffLocation;
+
         const response = await api.calculateDistance(
-          formData.pickupLocation,
-          formData.dropoffLocation
+          startLoc,
+          endLoc
         );
         if (response.success && response.distance) {
           setDistance(response.distance);
@@ -108,7 +114,7 @@ export default function AddLoadPage() {
 
     const debounceTimer = setTimeout(calculateDistance, 1200); // Increased debounce to 1.2s
     return () => clearTimeout(debounceTimer);
-  }, [formData.pickupLocation, formData.dropoffLocation]);
+  }, [formData.pickupLocation, formData.dropoffLocation, pickupCoords, dropoffCoords]);
 
   // Calculate costs when relevant fields change
   React.useEffect(() => {
@@ -228,6 +234,8 @@ export default function AddLoadPage() {
       await addLoad({
         pickupLocation: formData.pickupLocation,
         dropoffLocation: formData.dropoffLocation,
+        pickupCoords: pickupCoords || undefined,
+        dropoffCoords: dropoffCoords || undefined,
         clientName: formData.clientName,
         clientPrice: parseFloat(formData.clientPrice) || 0,
         driverPrice: parseFloat(formData.driverPrice) || 0,
@@ -295,6 +303,10 @@ export default function AddLoadPage() {
                   dropoffValue={formData.dropoffLocation}
                   onPickupChange={(value: string) => setFormData({ ...formData, pickupLocation: value })}
                   onDropoffChange={(value: string) => setFormData({ ...formData, dropoffLocation: value })}
+                  onPickupCoordinates={(lat, lng) => setPickupCoords({ lat, lng })}
+                  onDropoffCoordinates={(lat, lng) => setDropoffCoords({ lat, lng })}
+                  pickupCoords={pickupCoords}
+                  dropoffCoords={dropoffCoords}
                   t={t}
                 />
                 {distance !== null && (

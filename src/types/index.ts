@@ -25,6 +25,8 @@ export interface Load {
   routeId?: string;
   pickupLocation: string;
   dropoffLocation: string;
+  pickupCoords?: { lat: number; lng: number };
+  dropoffCoords?: { lat: number; lng: number };
   clientName: string;
   clientPrice: number;
   driverPrice: number;
@@ -53,6 +55,44 @@ export interface Load {
   updatedAt: Date;
   completedAt?: Date;
   timeline?: LoadTimelineItem[];
+}
+
+export interface Route {
+  id: string;
+  routeName: string;
+  origin: string;
+  destination: string;
+  driverStartingLocation?: string;
+  originCoords?: { lat: number; lng: number };
+  destinationCoords?: { lat: number; lng: number };
+  driverStartingCoords?: { lat: number; lng: number };
+  totalDistance: number;
+  preRouteDistance: number;
+  routeDistance: number;
+  assignedDriverId: string;
+  assignedDriver?: Driver;
+  assignedTruck: {
+    truckNumber: string;
+    truckType: string;
+    capacity?: number;
+  };
+  startDate: Date;
+  endDate?: Date;
+  status: 'pending' | 'accepted' | 'rejected' | 'in-progress' | 'completed';
+  fuelConsumption: number;
+  fuelPricePerLiter: number;
+  driverDailyCost: number;
+  truckCostPerKm: number;
+  tolls: number;
+  otherExpenses: number;
+  notes?: string;
+  loadIds: string[];
+  loads?: Load[];
+  totalRevenue?: number;
+  profit?: number;
+  profitPerKm?: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface LoadTimelineItem {

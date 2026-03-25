@@ -156,7 +156,7 @@ export function DriverDashboard() {
               <StatCard icon={DollarSign} label={t("dashboard.totalEarning")} value={`€ ${stats.totalEarnings.toLocaleString()}.00`} />
               <StatCard icon={Clock} label={t("dashboard.pendingPayments")} value={`€ ${stats.pendingEarnings.toLocaleString()}.00`} />
             </div>
-            
+
             {/* Load Status Cards */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("dashboard.assignedLoads")}</h3>
@@ -202,15 +202,15 @@ export function DriverDashboard() {
               <>
                 <div className="grid gap-4">
                   {driverLoads.slice(0, 5).map((load) => (
-                    <DriverLoadCard 
-                      key={load.id} 
+                    <DriverLoadCard
+                      key={load.id}
                       load={load}
                       showStatusLabel={true}
-                      showActions={load.status === "pending" || load.status === "accepted"} 
-                      onAccept={() => handleAccept(load.id)} 
-                      onDecline={() => handleDecline(load.id)} 
+                      showActions={load.status === "pending" || load.status === "accepted"}
+                      onAccept={() => handleAccept(load.id)}
+                      onDecline={() => handleDecline(load.id)}
                       onStart={() => handleStart(load.id)}
-                      onMapView={() => handleMapView(load.id)} 
+                      onMapView={() => handleMapView(load.id)}
                     />
                   ))}
                 </div>

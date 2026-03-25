@@ -34,6 +34,10 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
       routeNumber: apiRoute.routeNumber,
       origin: apiRoute.origin,
       destination: apiRoute.destination,
+      driverStartingLocation: apiRoute.driverStartingLocation,
+      originCoords: apiRoute.originCoords,
+      destinationCoords: apiRoute.destinationCoords,
+      driverStartingCoords: apiRoute.driverStartingCoords,
       assignedDriver: {
         id: apiRoute.assignedDriver?._id || apiRoute.assignedDriver,
         name: apiRoute.assignedDriver?.name || "",
@@ -45,7 +49,10 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
       endDate: apiRoute.endDate ? new Date(apiRoute.endDate) : undefined,
       status: apiRoute.status,
       loads: apiRoute.loads || [],
+      loadSequence: apiRoute.loadSequence || [],
       totalDistance: apiRoute.totalDistance || 0,
+      preRouteDistance: apiRoute.preRouteDistance || 0,
+      routeDistance: apiRoute.routeDistance || 0,
       fuelConsumption: apiRoute.fuelConsumption || 30,
       fuelPricePerLiter: apiRoute.fuelPricePerLiter || 0,
       driverDailyCost: apiRoute.driverDailyCost || 0,
@@ -68,7 +75,7 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date(apiRoute.createdAt),
       updatedAt: new Date(apiRoute.updatedAt),
       completedAt: apiRoute.completedAt ? new Date(apiRoute.completedAt) : undefined,
-    };
+    } as any;
   };
 
   const fetchRoutes = async () => {
