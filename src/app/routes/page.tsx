@@ -14,6 +14,12 @@ export default function RoutesPage() {
   const { user } = useAuth();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const isDriver = user?.role === 'driver';
+
+  // Drivers only see their own routes
+  const visibleRoutes = isDriver
+    ? routes.filter(r => r.assignedDriver?.id === user?.id || r.assignedDriver?.name === user?.name)
+    : routes;
 
   // Close menu when clicking outside
   React.useEffect(() => {
@@ -84,13 +90,13 @@ export default function RoutesPage() {
 
         {loading ? (
           <div className="text-center py-12">Loading routes...</div>
-        ) : routes.length === 0 ? (
+        ) : visibleRoutes.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             No routes found. Create your first route!
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {routes.map((route) => (
+            {visibleRoutes.map((route) => (
               <div
                 key={route.id}
                 onClick={() => router.push(`/routes/${route.id}`)}
@@ -152,12 +158,22 @@ export default function RoutesPage() {
                     <MapPin className="h-4 w-4" />
                     <span>{route.totalDistance} km</span>
                   </div>
+                  {!isDriver && (
                   <div className="flex items-center gap-2 text-gray-600">
                     <DollarSign className="h-4 w-4" />
                     <span className="font-semibold text-green-600">
                       €{route.profit.toFixed(2)} profit
                     </span>
                   </div>
+                )}
+                {isDriver && (
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <DollarSign className="h-4 w-4" />
+                    <span className="font-semibold text-blue-600">
+                      €{route.driverCost.toFixed(2)} fee
+                    </span>
+                  </div>
+                )}
                 </div>
 
                 <div className="mt-3 pt-3 border-t text-xs text-gray-500">

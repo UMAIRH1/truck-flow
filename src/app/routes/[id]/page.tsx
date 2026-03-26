@@ -149,69 +149,86 @@ export default function RouteDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Financial Summary */}
-        <Card>
-          <CardContent className="pt-6">
-            <h2 className="text-lg font-semibold mb-4">Financial Summary</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-600">Total Revenue</div>
-                <div className="text-2xl font-bold text-blue-600">€{route.totalRevenue.toFixed(2)}</div>
+        {/* Driver-only: Your Fee */}
+        {isDriver && (
+          <Card>
+            <CardContent className="pt-6">
+              <h2 className="text-lg font-semibold mb-4">Your Fee</h2>
+              <div className="bg-blue-50 p-6 rounded-lg text-center">
+                <div className="text-sm text-gray-600">You will earn</div>
+                <div className="text-3xl font-bold text-blue-600 mt-1">€{route.driverCost.toFixed(2)}</div>
               </div>
-              <div className="bg-red-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-600">Total Cost</div>
-                <div className="text-2xl font-bold text-red-600">€{route.totalCost.toFixed(2)}</div>
-              </div>
-              <div className="bg-green-50 p-4 rounded-lg col-span-2">
-                <div className="text-sm text-gray-600">Net Profit</div>
-                <div className="text-3xl font-bold text-green-600">€{route.profit.toFixed(2)}</div>
-                <div className="text-sm text-gray-500 mt-1">€{route.profitPerKm.toFixed(2)}/km</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Cost Breakdown */}
-        <Card>
-          <CardContent className="pt-6">
-            <h2 className="text-lg font-semibold mb-4">Cost Breakdown</h2>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Fuel className="h-4 w-4 text-gray-500" />
-                  <span>Fuel Cost</span>
+        {/* Manager-only: Financial Summary */}
+        {!isDriver && (
+          <Card>
+            <CardContent className="pt-6">
+              <h2 className="text-lg font-semibold mb-4">Financial Summary</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600">Total Revenue</div>
+                  <div className="text-2xl font-bold text-blue-600">€{route.totalRevenue.toFixed(2)}</div>
                 </div>
-                <span className="font-semibold">€{route.fuelCost.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-gray-500" />
-                  <span>Driver Cost</span>
+                <div className="bg-red-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600">Total Cost</div>
+                  <div className="text-2xl font-bold text-red-600">€{route.totalCost.toFixed(2)}</div>
                 </div>
-                <span className="font-semibold">€{route.driverCost.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Truck className="h-4 w-4 text-gray-500" />
-                  <span>Truck Cost</span>
+                <div className="bg-green-50 p-4 rounded-lg col-span-2">
+                  <div className="text-sm text-gray-600">Net Profit</div>
+                  <div className="text-3xl font-bold text-green-600">€{route.profit.toFixed(2)}</div>
+                  <div className="text-sm text-gray-500 mt-1">€{route.profitPerKm.toFixed(2)}/km</div>
                 </div>
-                <span className="font-semibold">€{route.truckCost.toFixed(2)}</span>
               </div>
-              {route.tolls > 0 && (
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Manager-only: Cost Breakdown */}
+        {!isDriver && (
+          <Card>
+            <CardContent className="pt-6">
+              <h2 className="text-lg font-semibold mb-4">Cost Breakdown</h2>
+              <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span>Tolls</span>
-                  <span className="font-semibold">€{route.tolls.toFixed(2)}</span>
+                  <div className="flex items-center gap-2">
+                    <Fuel className="h-4 w-4 text-gray-500" />
+                    <span>Fuel Cost</span>
+                  </div>
+                  <span className="font-semibold">€{route.fuelCost.toFixed(2)}</span>
                 </div>
-              )}
-              {route.otherExpenses > 0 && (
                 <div className="flex justify-between items-center">
-                  <span>Other Expenses</span>
-                  <span className="font-semibold">€{route.otherExpenses.toFixed(2)}</span>
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-gray-500" />
+                    <span>Driver Cost</span>
+                  </div>
+                  <span className="font-semibold">€{route.driverCost.toFixed(2)}</span>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Truck className="h-4 w-4 text-gray-500" />
+                    <span>Truck Cost</span>
+                  </div>
+                  <span className="font-semibold">€{route.truckCost.toFixed(2)}</span>
+                </div>
+                {route.tolls > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span>Tolls</span>
+                    <span className="font-semibold">€{route.tolls.toFixed(2)}</span>
+                  </div>
+                )}
+                {route.otherExpenses > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span>Other Expenses</span>
+                    <span className="font-semibold">€{route.otherExpenses.toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Loads */}
         <Card>
@@ -237,7 +254,9 @@ export default function RouteDetailPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold text-green-600">€{load.clientPrice}</div>
+                        <div className="font-semibold text-green-600">
+                          {isDriver ? `€${load.driverPrice || 0}` : `€${load.clientPrice}`}
+                        </div>
                         <div className="text-xs text-gray-500">{load.distance} km</div>
                       </div>
                     </div>

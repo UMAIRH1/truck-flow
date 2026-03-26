@@ -2,8 +2,9 @@
 import { Header } from "@/components/layout";
 import { StatCard, DriverLoadCard } from "@/components/shared";
 import { useLoads } from "@/contexts/LoadContext";
+import { useRoutes } from "@/contexts/RouteContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { DollarSign, Clock, CreditCard, ArrowRight } from "lucide-react";
+import { DollarSign, Clock, CreditCard, ArrowRight, Truck, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Driver } from "@/types";
@@ -22,6 +23,7 @@ interface DriverDashboardStats {
 
 export function DriverDashboard() {
   const { loads, updateLoadStatus, assignDriver, refreshLoads, isLoading, error } = useLoads();
+  const { routes } = useRoutes();
   const { user } = useAuth();
   const router = useRouter();
   const [dashboardStats, setDashboardStats] = useState<DriverDashboardStats | null>(null);
@@ -93,10 +95,17 @@ export function DriverDashboard() {
   }
 
   const driverLoads = loads.filter((load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id);
-  const pendingLoads = driverLoads.filter((l) => l.status === "pending"); // Driver's pending loads
+  const pendingLoads = driverLoads.filter((l) => l.status === "pending");
   const completedLoads = driverLoads.filter((l) => l.status === "completed");
   const acceptedLoads = driverLoads.filter((l) => l.status === "accepted" || l.status === "in-progress");
-  const rejectedLoads = driverLoads.filter((l) => l.status === "rejected"); // Driver's rejected loads
+  const rejectedLoads = driverLoads.filter((l) => l.status === "rejected");
+
+  // Filter routes assigned to this driver
+  const driverRoutes = routes.filter(
+    (route) => route.assignedDriver?.id === user?.id || route.assignedDriver?.name === user?.name
+  );
+  const activeRoutes = driverRoutes.filter((r) => r.status === "in-progress" || r.status === "accepted");
+  const pendingRoutes = driverRoutes.filter((r) => r.status === "pending");
 
   // Use API stats if available, otherwise calculate from loads
   const stats = dashboardStats || {
@@ -192,30 +201,95 @@ export function DriverDashboard() {
               </div>
             </div>
           </div>
-          <div className="lg:col-span-2 space-y-4">
-            <h3 className="text-xl font-semibold text-gray-900">{t("dashboard.myAssignedLoads")}</h3>
-            {driverLoads.length === 0 ? (
-              <div className="bg-white rounded-xl p-8 text-center">
-                <p className="text-gray-500">{t("dashboard.noLoadsAssigned")}</p>
+          <div className="lg:col-span-2 space-y-6">
+            {/* My Routes Section */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xl font-semibold text-gray-900">My Routes</h3>
+                <Link href="/routes" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                  View All <ArrowRight className="h-3 w-3" />
+                </Link>
               </div>
-            ) : (
-              <>
-                <div className="grid gap-4">
-                  {driverLoads.slice(0, 5).map((load) => (
-                    <DriverLoadCard
-                      key={load.id}
-                      load={load}
-                      showStatusLabel={true}
-                      showActions={load.status === "pending" || load.status === "accepted"}
-                      onAccept={() => handleAccept(load.id)}
-                      onDecline={() => handleDecline(load.id)}
-                      onStart={() => handleStart(load.id)}
-                      onMapView={() => handleMapView(load.id)}
-                    />
-                  ))}
+              {driverRoutes.length === 0 ? (
+                <div className="bg-white rounded-xl p-8 text-center border border-gray-100">
+                  <Truck className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+                  <p className="text-gray-500">No routes assigned yet</p>
                 </div>
-              </>
-            )}
+              ) : (
+                <div className="grid gap-4">
+                  {driverRoutes.slice(0, 5).map((route) => {
+                    const statusConfig = {
+                      pending: { color: "bg-yellow-100 text-yellow-800", label: "Pending" },
+                      accepted: { color: "bg-green-100 text-green-800", label: "Accepted" },
+                      "in-progress": { color: "bg-blue-100 text-blue-800", label: "In Progress" },
+                      completed: { color: "bg-gray-100 text-gray-800", label: "Completed" },
+                      rejected: { color: "bg-red-100 text-red-800", label: "Rejected" },
+                    }[route.status] || { color: "bg-gray-100 text-gray-800", label: route.status };
+
+                    return (
+                      <div
+                        key={route.id}
+                        onClick={() => router.push(`/routes/${route.id}`)}
+                        className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="bg-blue-500 p-1.5 rounded-md">
+                              <Truck className="h-4 w-4 text-white" />
+                            </div>
+                            <span className="font-bold text-gray-900">{route.routeName}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}>
+                              {statusConfig.label}
+                            </span>
+                            <span className="font-bold text-blue-600">
+                              €{route.driverCost.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-600 flex items-center gap-1 mb-1">
+                          <MapPin className="h-3 w-3" />
+                          {route.origin || "Origin"} → {route.destination || "Destination"}
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <span>{route.totalDistance} km</span>
+                          <span>{route.loads.length} load(s)</span>
+                          <span>{new Date(route.startDate).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* My Loads Section */}
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">{t("dashboard.myAssignedLoads")}</h3>
+              {driverLoads.length === 0 ? (
+                <div className="bg-white rounded-xl p-8 text-center">
+                  <p className="text-gray-500">{t("dashboard.noLoadsAssigned")}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid gap-4">
+                    {driverLoads.slice(0, 5).map((load) => (
+                      <DriverLoadCard
+                        key={load.id}
+                        load={load}
+                        showStatusLabel={true}
+                        showActions={load.status === "pending" || load.status === "accepted"}
+                        onAccept={() => handleAccept(load.id)}
+                        onDecline={() => handleDecline(load.id)}
+                        onStart={() => handleStart(load.id)}
+                        onMapView={() => handleMapView(load.id)}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

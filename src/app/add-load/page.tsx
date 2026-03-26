@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { GoogleMapsLoader } from "@/components/shared";
 import { InputWithIcon } from "./_components/InputWithIcon";
 import { SelectWithIcon } from "./_components/SelectWithIcon";
 import { LocationPicker } from "./_components/LocationPicker";
@@ -298,17 +299,19 @@ export default function AddLoadPage() {
           <Card className="border-none shadow-none py-0">
             <CardContent className="space-y-4 px-0 ">
               <div className="lg:col-span-2">
-                <LocationPicker
-                  pickupValue={formData.pickupLocation}
-                  dropoffValue={formData.dropoffLocation}
-                  onPickupChange={(value: string) => setFormData({ ...formData, pickupLocation: value })}
-                  onDropoffChange={(value: string) => setFormData({ ...formData, dropoffLocation: value })}
-                  onPickupCoordinates={(lat, lng) => setPickupCoords({ lat, lng })}
-                  onDropoffCoordinates={(lat, lng) => setDropoffCoords({ lat, lng })}
-                  pickupCoords={pickupCoords}
-                  dropoffCoords={dropoffCoords}
-                  t={t}
-                />
+                <GoogleMapsLoader>
+                  <LocationPicker
+                    pickupValue={formData.pickupLocation}
+                    dropoffValue={formData.dropoffLocation}
+                    onPickupChange={(value: string) => setFormData({ ...formData, pickupLocation: value })}
+                    onDropoffChange={(value: string) => setFormData({ ...formData, dropoffLocation: value })}
+                    onPickupCoordinates={(lat, lng) => setPickupCoords({ lat, lng })}
+                    onDropoffCoordinates={(lat, lng) => setDropoffCoords({ lat, lng })}
+                    pickupCoords={pickupCoords}
+                    dropoffCoords={dropoffCoords}
+                    t={t}
+                  />
+                </GoogleMapsLoader>
                 {distance !== null && (
                   <div className="mt-2 text-sm text-gray-600 flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
