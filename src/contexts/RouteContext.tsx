@@ -15,6 +15,8 @@ interface RouteContextType {
   deleteRoute: (id: string) => Promise<void>;
   acceptRoute: (id: string) => Promise<void>;
   rejectRoute: (id: string) => Promise<void>;
+  startRoute: (id: string) => Promise<void>;
+  completeRoute: (id: string) => Promise<void>;
   addLoadsToRoute: (routeId: string, loadIds: string[]) => Promise<void>;
   removeLoadFromRoute: (routeId: string, loadId: string) => Promise<void>;
 }
@@ -159,6 +161,36 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const startRoute = async (id: string) => {
+    try {
+      const response = await api.startRoute(id);
+      if (response.success && response.route) {
+        setRoutes((prev) =>
+          prev.map((route) =>
+            route.id === id ? transformRoute(response.route) : route
+          )
+        );
+      }
+    } catch (err: any) {
+      throw new Error(err.message || "Failed to start route");
+    }
+  };
+
+  const completeRoute = async (id: string) => {
+    try {
+      const response = await api.completeRoute(id);
+      if (response.success && response.route) {
+        setRoutes((prev) =>
+          prev.map((route) =>
+            route.id === id ? transformRoute(response.route) : route
+          )
+        );
+      }
+    } catch (err: any) {
+      throw new Error(err.message || "Failed to complete route");
+    }
+  };
+
   const addLoadsToRoute = async (routeId: string, loadIds: string[]) => {
     try {
       const response = await api.addLoadsToRoute(routeId, loadIds);
@@ -208,6 +240,8 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
         deleteRoute,
         acceptRoute,
         rejectRoute,
+        startRoute,
+        completeRoute,
         addLoadsToRoute,
         removeLoadFromRoute,
       }}

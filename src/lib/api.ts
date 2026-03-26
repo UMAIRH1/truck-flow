@@ -463,6 +463,30 @@ class ApiClient {
       method: 'PATCH',
     });
   }
+
+  async startRoute(routeId: string) {
+    return this.request(`/routes/${routeId}/start`, {
+      method: 'PATCH',
+    });
+  }
+
+  async completeRoute(routeId: string) {
+    return this.request(`/routes/${routeId}/complete`, {
+      method: 'PATCH',
+    });
+  }
+
+  async startRouteLoad(routeId: string, loadId: string) {
+    return this.request(`/routes/${routeId}/loads/${loadId}/start`, {
+      method: 'PATCH',
+    });
+  }
+
+  async completeRouteLoad(routeId: string, loadId: string) {
+    return this.request(`/routes/${routeId}/loads/${loadId}/complete`, {
+      method: 'PATCH',
+    });
+  }
 }
 
 export const api = new ApiClient(API_URL);

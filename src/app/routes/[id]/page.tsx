@@ -8,17 +8,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useRouter, useParams } from "next/navigation";
 import { 
   Truck, MapPin, Calendar, DollarSign, CheckCircle, XCircle, 
-  Clock, Package, TrendingUp, Fuel, User, Trash2 
+  Clock, Package, TrendingUp, Fuel, User, Trash2, Play, Navigation, Check
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import api from "@/lib/api";
 
 export default function RouteDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { user } = useAuth();
-  const { routes, acceptRoute, rejectRoute, deleteRoute, loading } = useRoutes();
+  const { routes, acceptRoute, rejectRoute, startRoute, completeRoute, deleteRoute, fetchRoutes, loading } = useRoutes();
   const [route, setRoute] = useState<any>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [loadActionLoading, setLoadActionLoading] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -47,6 +49,62 @@ export default function RouteDetailPage() {
       console.error("Failed to reject route:", error);
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleStartRoute = async () => {
+    if (!route) return;
+    setActionLoading(true);
+    try {
+      await startRoute(route.id);
+    } catch (error) {
+      console.error("Failed to start route:", error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCompleteRoute = async () => {
+    if (!route) return;
+    setActionLoading(true);
+    try {
+      await completeRoute(route.id);
+    } catch (error: any) {
+      console.error("Failed to complete route:", error);
+      alert(error.message || "Failed to complete route");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleStartLoad = async (loadId: string) => {
+    if (!route) return;
+    setLoadActionLoading(loadId);
+    try {
+      await api.startRouteLoad(route.id, loadId);
+      await fetchRoutes();
+    } catch (error: any) {
+      console.error("Failed to start load:", error);
+      alert(error.message || "Failed to start load");
+    } finally {
+      setLoadActionLoading(null);
+    }
+  };
+
+  const handleCompleteLoad = async (loadId: string) => {
+    if (!route) return;
+    setLoadActionLoading(loadId);
+    try {
+      const response = await api.completeRouteLoad(route.id, loadId);
+      await fetchRoutes();
+      if (response.allLoadsCompleted) {
+        alert("All loads completed! You can now complete the route.");
+      }
+    } catch (error: any) {
+      console.error("Failed to complete load:", error);
+      alert(error.message || "Failed to complete load");
+    } finally {
+      setLoadActionLoading(null);
     }
   };
 
@@ -79,6 +137,16 @@ export default function RouteDetailPage() {
     }
   };
 
+  const getLoadStatusConfig = (status: string) => {
+    switch (status) {
+      case "pending": return { color: "bg-yellow-100 text-yellow-800 border-yellow-200", label: "Pending" };
+      case "accepted": return { color: "bg-green-100 text-green-800 border-green-200", label: "Accepted" };
+      case "in-progress": return { color: "bg-blue-100 text-blue-800 border-blue-200", label: "In Progress" };
+      case "completed": return { color: "bg-gray-100 text-gray-800 border-gray-200", label: "Completed" };
+      default: return { color: "bg-gray-100 text-gray-800 border-gray-200", label: status };
+    }
+  };
+
   if (loading || !route) {
     return (
       <MobileLayout showFAB={false}>
@@ -92,6 +160,10 @@ export default function RouteDetailPage() {
 
   const isDriver = user?.role === 'driver';
   const canAcceptReject = isDriver && route.status === 'pending';
+  const canStartRoute = isDriver && route.status === 'accepted';
+  const isRouteInProgress = route.status === 'in-progress';
+  const allLoadsCompleted = route.loads.length > 0 && route.loads.every((l: any) => l.status === 'completed');
+  const canCompleteRoute = isDriver && isRouteInProgress && allLoadsCompleted;
 
   return (
     <MobileLayout showFAB={false}>
@@ -230,38 +302,114 @@ export default function RouteDetailPage() {
           </Card>
         )}
 
-        {/* Loads */}
+        {/* Loads - with driver actions when route is in-progress */}
         <Card>
           <CardContent className="pt-6">
             <h2 className="text-lg font-semibold mb-4">
               Loads ({route.loads.length})
+              {isDriver && isRouteInProgress && (
+                <span className="text-sm font-normal text-gray-500 ml-2">
+                  — {route.loads.filter((l: any) => l.status === 'completed').length}/{route.loads.length} completed
+                </span>
+              )}
             </h2>
             {route.loads.length === 0 ? (
               <p className="text-gray-500 text-center py-4">No loads attached to this route</p>
             ) : (
               <div className="space-y-3">
-                {route.loads.map((load: any) => (
-                  <div
-                    key={load._id || load}
-                    className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer"
-                    onClick={() => router.push(`/loads/${load._id || load}`)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="font-medium">{load.loadNumber || 'Load'}</div>
-                        <div className="text-sm text-gray-600">
-                          {load.pickupLocation} → {load.dropoffLocation}
+                {route.loads.map((load: any) => {
+                  const loadStatus = getLoadStatusConfig(load.status);
+                  const loadId = load._id || load;
+                  const isLoadLoading = loadActionLoading === loadId;
+
+                  return (
+                    <div
+                      key={loadId}
+                      className={`border rounded-lg p-4 transition-all ${
+                        load.status === 'in-progress' ? 'border-blue-400 bg-blue-50 shadow-sm' :
+                        load.status === 'completed' ? 'border-green-300 bg-green-50' :
+                        'hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <div className="font-medium">{load.loadNumber || 'Load'}</div>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${loadStatus.color}`}>
+                              {loadStatus.label}
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-600 mt-1">
+                            {load.pickupLocation} → {load.dropoffLocation}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-green-600">
+                            {isDriver ? `€${load.driverPrice || 0}` : `€${load.clientPrice}`}
+                          </div>
+                          <div className="text-xs text-gray-500">{load.distance} km</div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-semibold text-green-600">
-                          {isDriver ? `€${load.driverPrice || 0}` : `€${load.clientPrice}`}
+
+                      {/* Driver load actions when route is in-progress */}
+                      {isDriver && isRouteInProgress && (
+                        <div className="mt-3 pt-3 border-t" onClick={(e) => e.stopPropagation()}>
+                          {/* Pending/Accepted load - can start */}
+                          {(load.status === 'pending' || load.status === 'accepted') && (
+                            <Button
+                              onClick={() => handleStartLoad(loadId)}
+                              disabled={isLoadLoading}
+                              size="sm"
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                              {isLoadLoading ? (
+                                <Clock className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <Play className="h-4 w-4 mr-2" />
+                              )}
+                              Start This Load
+                            </Button>
+                          )}
+
+                          {/* In-progress load - can navigate or complete */}
+                          {load.status === 'in-progress' && (
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={() => router.push(`/map/${loadId}`)}
+                                size="sm"
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                              >
+                                <Navigation className="h-4 w-4 mr-1" />
+                                Navigate
+                              </Button>
+                              <Button
+                                onClick={() => handleCompleteLoad(loadId)}
+                                disabled={isLoadLoading}
+                                size="sm"
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                              >
+                                {isLoadLoading ? (
+                                  <Clock className="h-4 w-4 mr-1 animate-spin" />
+                                ) : (
+                                  <Check className="h-4 w-4 mr-1" />
+                                )}
+                                Complete
+                              </Button>
+                            </div>
+                          )}
+
+                          {/* Completed load */}
+                          {load.status === 'completed' && (
+                            <div className="flex items-center gap-2 text-green-600 text-sm">
+                              <CheckCircle className="h-4 w-4" />
+                              <span>Completed</span>
+                            </div>
+                          )}
                         </div>
-                        <div className="text-xs text-gray-500">{load.distance} km</div>
-                      </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
@@ -277,7 +425,9 @@ export default function RouteDetailPage() {
           </Card>
         )}
 
-        {/* Action Buttons for Driver */}
+        {/* === DRIVER ACTION BUTTONS === */}
+
+        {/* Pending: Accept/Reject */}
         {canAcceptReject && (
           <div className="flex gap-4">
             <Button
@@ -300,7 +450,82 @@ export default function RouteDetailPage() {
           </div>
         )}
 
-        {/* Edit Button for Manager */}
+        {/* Accepted: Start Route */}
+        {canStartRoute && (
+          <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 space-y-4">
+            <div>
+              <h3 className="font-bold text-lg mb-2 text-black">Ready to Start?</h3>
+              <p className="text-sm text-gray-600">
+                Click the button below when you are ready to begin this route. You&apos;ll be able to start and complete each load individually.
+              </p>
+            </div>
+            <Button
+              onClick={handleStartRoute}
+              disabled={actionLoading}
+              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full flex items-center justify-center gap-2"
+            >
+              <Truck className="w-5 h-5" />
+              {actionLoading ? "Starting..." : "Start Route"}
+            </Button>
+          </div>
+        )}
+
+        {/* In-Progress: Complete Route (when all loads done) */}
+        {canCompleteRoute && (
+          <div className="bg-green-50 rounded-xl p-6 shadow-md border border-green-300 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-green-500 p-3 rounded-full">
+                <CheckCircle className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-green-900">All Loads Completed!</h3>
+                <p className="text-sm text-green-700">
+                  All loads have been delivered. You can now complete the route.
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={handleCompleteRoute}
+              disabled={actionLoading}
+              className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full flex items-center justify-center gap-2"
+            >
+              <CheckCircle className="w-5 h-5" />
+              {actionLoading ? "Completing..." : "Complete Route"}
+            </Button>
+          </div>
+        )}
+
+        {/* In-Progress: Navigation hint when loads still pending */}
+        {isDriver && isRouteInProgress && !allLoadsCompleted && (
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 shadow-lg border-2 border-blue-500">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-white/20 p-3 rounded-full">
+                <Navigation className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-white">Route In Progress</h3>
+                <p className="text-sm text-blue-100">
+                  Start each load above, navigate to delivery, then mark as complete.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Completed: Success message */}
+        {isDriver && route.status === 'completed' && (
+          <div className="bg-green-50 rounded-xl p-6 shadow-md border border-green-200">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="h-6 w-6 text-green-600" />
+              <h3 className="font-bold text-lg text-green-900">Route Completed</h3>
+            </div>
+            <p className="text-sm text-green-700 mt-2">
+              This route has been marked as completed. All loads delivered successfully.
+            </p>
+          </div>
+        )}
+
+        {/* === MANAGER ACTION BUTTONS === */}
         {user?.role === 'manager' && route.status === 'pending' && (
           <div className="flex gap-4">
             <Button
