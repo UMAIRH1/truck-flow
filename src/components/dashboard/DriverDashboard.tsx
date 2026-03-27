@@ -94,7 +94,7 @@ export function DriverDashboard() {
     );
   }
 
-  const driverLoads = loads.filter((load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id);
+  const driverLoads = loads.filter((load) => (load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id) && !load.routeId);
   const pendingLoads = driverLoads.filter((l) => l.status === "pending");
   const completedLoads = driverLoads.filter((l) => l.status === "completed");
   const acceptedLoads = driverLoads.filter((l) => l.status === "accepted" || l.status === "in-progress");
@@ -200,6 +200,7 @@ export function DriverDashboard() {
                 </Link>
               </div>
             </div>
+
           </div>
           <div className="lg:col-span-2 space-y-6">
             {/* My Routes Section */}
@@ -290,6 +291,7 @@ export function DriverDashboard() {
                 </>
               )}
             </div>
+
           </div>
         </div>
       </div>

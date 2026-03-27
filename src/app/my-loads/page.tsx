@@ -24,9 +24,9 @@ function MyLoadsContent() {
     }
   }, [searchParams]);
 
-  // Filter loads for this driver - only show loads assigned to them
+  // Filter loads for this driver - only show loads assigned to them and NOT attached to an active route
   const driverLoads = loads.filter(
-    (load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id
+    (load) => (load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id) && !load.routeId
   );
 
   const tabs = [

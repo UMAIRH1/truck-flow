@@ -32,6 +32,7 @@ function transformLoadFromAPI(apiLoad: any): Load {
   return {
     id: apiLoad._id,
     loadNumber: apiLoad.loadNumber,
+    routeId: apiLoad.routeId,
     pickupLocation: apiLoad.pickupLocation || "",
     dropoffLocation: apiLoad.dropoffLocation || "",
     pickupCoords: apiLoad.pickupCoords,
