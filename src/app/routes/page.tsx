@@ -4,12 +4,14 @@ import React, { useState } from "react";
 import { Header, MobileLayout } from "@/components/layout";
 import { useRoutes } from "@/contexts/RouteContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Plus, Truck, MapPin, DollarSign, MoreVertical, Edit, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function RoutesPage() {
   const router = useRouter();
+  const t = useTranslations();
   const { routes, loading, deleteRoute } = useRoutes();
   const { user } = useAuth();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -38,6 +40,17 @@ export default function RoutesPage() {
       case "in-progress": return "bg-blue-100 text-blue-800";
       case "completed": return "bg-gray-100 text-gray-800";
       default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "pending": return t("tabs.pending");
+      case "accepted": return t("tabs.accepted");
+      case "rejected": return t("tabs.rejected");
+      case "in-progress": return t("tabs.inProgress");
+      case "completed": return t("tabs.completed");
+      default: return status;
     }
   };
 
@@ -73,26 +86,26 @@ export default function RoutesPage() {
 
   return (
     <MobileLayout showFAB={true}>
-      <Header title="Routes" showBack />
+      <Header title={t("routes.allRoutes")} showBack />
       <div className="px-4 py-6 max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">All Routes</h1>
+          <h1 className="text-2xl font-bold">{t("routes.allRoutes")}</h1>
           {user?.role === "manager" && (
             <Button
               onClick={() => router.push("/routes/create")}
               className="bg-black hover:bg-gray-800"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Create Route
+              {t("routes.createRoute")}
             </Button>
           )}
         </div>
 
         {loading ? (
-          <div className="text-center py-12">Loading routes...</div>
+          <div className="text-center py-12">{t("common.loading")}</div>
         ) : visibleRoutes.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            No routes found. Create your first route!
+            {t("routes.noRoutesFound")}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -108,13 +121,13 @@ export default function RoutesPage() {
                     <p className="text-sm text-gray-500">{route.routeNumber}</p>
                     {(route.origin || route.destination) && (
                       <p className="text-sm text-gray-600 mt-1">
-                        {route.origin || "Origin"} → {route.destination || "Destination"}
+                        {route.origin || t("routes.origin")} → {route.destination || t("routes.destination")}
                       </p>
                     )}
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(route.status)}`}>
-                      {route.status}
+                      {getStatusLabel(route.status)}
                     </span>
                     {user?.role === "manager" && (
                       <div className="relative">
@@ -133,14 +146,14 @@ export default function RoutesPage() {
                               className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
                             >
                               <Edit className="h-4 w-4" />
-                              Edit
+                              {t("common.edit")}
                             </button>
                             <button
                               onClick={(e) => handleDelete(e, route.id)}
                               className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2 text-red-600"
                             >
                               <Trash2 className="h-4 w-4" />
-                              Delete
+                              {t("common.delete")}
                             </button>
                           </div>
                         )}
@@ -156,13 +169,13 @@ export default function RoutesPage() {
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <MapPin className="h-4 w-4" />
-                    <span>{route.totalDistance} km</span>
+                    <span>{route.totalDistance} {t("routes.km")}</span>
                   </div>
                   {!isDriver && (
                   <div className="flex items-center gap-2 text-gray-600">
                     <DollarSign className="h-4 w-4" />
                     <span className="font-semibold text-green-600">
-                      €{route.profit.toFixed(2)} profit
+                      €{route.profit.toFixed(2)} {t("routes.profit")}
                     </span>
                   </div>
                 )}
@@ -170,14 +183,14 @@ export default function RoutesPage() {
                   <div className="flex items-center gap-2 text-gray-600">
                     <DollarSign className="h-4 w-4" />
                     <span className="font-semibold text-blue-600">
-                      €{route.driverCost.toFixed(2)} fee
+                      €{route.driverCost.toFixed(2)} {t("routes.fee")}
                     </span>
                   </div>
                 )}
                 </div>
 
                 <div className="mt-3 pt-3 border-t text-xs text-gray-500">
-                  {route.loads.length} load(s) • {new Date(route.startDate).toLocaleDateString()}
+                  {t("routes.loadCount", { count: route.loads.length })} • {new Date(route.startDate).toLocaleDateString()}
                 </div>
               </div>
             ))}

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Header, MobileLayout } from "@/components/layout";
 import { useRoutes } from "@/contexts/RouteContext";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter, useParams } from "next/navigation";
@@ -16,6 +17,7 @@ import api from "@/lib/api";
 export default function RouteDetailPage() {
   const router = useRouter();
   const params = useParams();
+  const t = useTranslations();
   const { user } = useAuth();
   const { routes, acceptRoute, rejectRoute, startRoute, completeRoute, deleteRoute, fetchRoutes, loading } = useRoutes();
   const [route, setRoute] = useState<any>(null);
@@ -139,20 +141,31 @@ export default function RouteDetailPage() {
 
   const getLoadStatusConfig = (status: string) => {
     switch (status) {
-      case "pending": return { color: "bg-yellow-100 text-yellow-800 border-yellow-200", label: "Pending" };
-      case "accepted": return { color: "bg-green-100 text-green-800 border-green-200", label: "Accepted" };
-      case "in-progress": return { color: "bg-blue-100 text-blue-800 border-blue-200", label: "In Progress" };
-      case "completed": return { color: "bg-gray-100 text-gray-800 border-gray-200", label: "Completed" };
+      case "pending": return { color: "bg-yellow-100 text-yellow-800 border-yellow-200", label: t("tabs.pending") };
+      case "accepted": return { color: "bg-green-100 text-green-800 border-green-200", label: t("tabs.accepted") };
+      case "in-progress": return { color: "bg-blue-100 text-blue-800 border-blue-200", label: t("tabs.inProgress") };
+      case "completed": return { color: "bg-gray-100 text-gray-800 border-gray-200", label: t("tabs.completed") };
       default: return { color: "bg-gray-100 text-gray-800 border-gray-200", label: status };
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "pending": return t("tabs.pending");
+      case "accepted": return t("tabs.accepted");
+      case "rejected": return t("tabs.rejected");
+      case "in-progress": return t("tabs.inProgress");
+      case "completed": return t("tabs.completed");
+      default: return status;
     }
   };
 
   if (loading || !route) {
     return (
       <MobileLayout showFAB={false}>
-        <Header title="Route Details" showBack />
+        <Header title={t("routes.routeDetails")} showBack />
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Loading route...</div>
+          <div className="text-gray-500">{t("common.loading")}</div>
         </div>
       </MobileLayout>
     );
@@ -167,7 +180,7 @@ export default function RouteDetailPage() {
 
   return (
     <MobileLayout showFAB={false}>
-      <Header title="Route Details" showBack />
+      <Header title={t("routes.routeDetails")} showBack />
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
         {/* Header Card */}
         <Card>
@@ -179,12 +192,12 @@ export default function RouteDetailPage() {
                 {(route.origin || route.destination) && (
                   <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
-                    {route.origin || "Origin"} → {route.destination || "Destination"}
+                    {route.origin || t("routes.origin")} → {route.destination || t("routes.destination")}
                   </p>
                 )}
               </div>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(route.status)}`}>
-                {route.status}
+                {getStatusLabel(route.status)}
               </span>
             </div>
 
@@ -192,32 +205,38 @@ export default function RouteDetailPage() {
               <div className="flex items-center gap-2 text-gray-600">
                 <User className="h-4 w-4" />
                 <div>
-                  <div className="text-xs text-gray-500">Driver</div>
+                  <div className="text-xs text-gray-500">{t("routes.driver")}</div>
                   <div className="font-medium">{route.assignedDriver.name}</div>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <Truck className="h-4 w-4" />
                 <div>
-                  <div className="text-xs text-gray-500">Truck</div>
+                  <div className="text-xs text-gray-500">{t("routes.truck")}</div>
                   <div className="font-medium">{route.assignedTruck?.truckNumber || 'N/A'}</div>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <Calendar className="h-4 w-4" />
                 <div>
-                  <div className="text-xs text-gray-500">Start Date</div>
+                  <div className="text-xs text-gray-500">{t("routes.startDate")}</div>
                   <div className="font-medium">{new Date(route.startDate).toLocaleDateString()}</div>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <MapPin className="h-4 w-4" />
                 <div>
-                  <div className="text-xs text-gray-500">Distance</div>
-                  <div className="font-medium">{route.totalDistance} km</div>
+                  <div className="text-xs text-gray-500">{t("routes.distance")}</div>
+                  <div className="font-medium">{route.totalDistance} {t("routes.km")}</div>
                 </div>
               </div>
             </div>
+            {route.notes && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
+                <span className="font-semibold block mb-1">{t("routes.notes")}:</span>
+                {route.notes}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -225,9 +244,9 @@ export default function RouteDetailPage() {
         {isDriver && (
           <Card>
             <CardContent className="pt-6">
-              <h2 className="text-lg font-semibold mb-4">Your Fee</h2>
+              <h2 className="text-lg font-semibold mb-4">{t("routes.yourFee")}</h2>
               <div className="bg-blue-50 p-6 rounded-lg text-center">
-                <div className="text-sm text-gray-600">You will earn</div>
+                <div className="text-sm text-gray-600">{t("routes.youWillEarn")}</div>
                 <div className="text-3xl font-bold text-blue-600 mt-1">€{route.driverCost.toFixed(2)}</div>
               </div>
             </CardContent>
@@ -238,20 +257,20 @@ export default function RouteDetailPage() {
         {!isDriver && (
           <Card>
             <CardContent className="pt-6">
-              <h2 className="text-lg font-semibold mb-4">Financial Summary</h2>
+              <h2 className="text-lg font-semibold mb-4">{t("routes.financialSummary")}</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600">Total Revenue</div>
+                  <div className="text-sm text-gray-600">{t("routes.totalRevenue")}</div>
                   <div className="text-2xl font-bold text-blue-600">€{route.totalRevenue.toFixed(2)}</div>
                 </div>
                 <div className="bg-red-50 p-4 rounded-lg">
-                  <div className="text-sm text-gray-600">Total Cost</div>
+                  <div className="text-sm text-gray-600">{t("routes.totalCost")}</div>
                   <div className="text-2xl font-bold text-red-600">€{route.totalCost.toFixed(2)}</div>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg col-span-2">
-                  <div className="text-sm text-gray-600">Net Profit</div>
+                  <div className="text-sm text-gray-600">{t("routes.netProfit")}</div>
                   <div className="text-3xl font-bold text-green-600">€{route.profit.toFixed(2)}</div>
-                  <div className="text-sm text-gray-500 mt-1">€{route.profitPerKm.toFixed(2)}/km</div>
+                  <div className="text-sm text-gray-500 mt-1">€{route.profitPerKm.toFixed(2)}/{t("routes.km")}</div>
                 </div>
               </div>
             </CardContent>
@@ -262,38 +281,38 @@ export default function RouteDetailPage() {
         {!isDriver && (
           <Card>
             <CardContent className="pt-6">
-              <h2 className="text-lg font-semibold mb-4">Cost Breakdown</h2>
+              <h2 className="text-lg font-semibold mb-4">{t("routes.costBreakdown")}</h2>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <Fuel className="h-4 w-4 text-gray-500" />
-                    <span>Fuel Cost</span>
+                    <span>{t("routes.fuelCost")}</span>
                   </div>
                   <span className="font-semibold">€{route.fuelCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-gray-500" />
-                    <span>Driver Cost</span>
+                    <span>{t("routes.driverCost")}</span>
                   </div>
                   <span className="font-semibold">€{route.driverCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <Truck className="h-4 w-4 text-gray-500" />
-                    <span>Truck Cost</span>
+                    <span>{t("routes.truckCost")}</span>
                   </div>
                   <span className="font-semibold">€{route.truckCost.toFixed(2)}</span>
                 </div>
                 {route.tolls > 0 && (
                   <div className="flex justify-between items-center">
-                    <span>Tolls</span>
+                    <span>{t("routes.tolls")}</span>
                     <span className="font-semibold">€{route.tolls.toFixed(2)}</span>
                   </div>
                 )}
                 {route.otherExpenses > 0 && (
                   <div className="flex justify-between items-center">
-                    <span>Other Expenses</span>
+                    <span>{t("routes.otherExpenses")}</span>
                     <span className="font-semibold">€{route.otherExpenses.toFixed(2)}</span>
                   </div>
                 )}
@@ -306,15 +325,15 @@ export default function RouteDetailPage() {
         <Card>
           <CardContent className="pt-6">
             <h2 className="text-lg font-semibold mb-4">
-              Loads ({route.loads.length})
+              {t("routes.loadsCount", { count: route.loads.length })}
               {isDriver && isRouteInProgress && (
                 <span className="text-sm font-normal text-gray-500 ml-2">
-                  — {route.loads.filter((l: any) => l.status === 'completed').length}/{route.loads.length} completed
+                  {t("routes.completedLoadsCount", { completed: route.loads.filter((l: any) => l.status === 'completed').length, total: route.loads.length })}
                 </span>
               )}
             </h2>
             {route.loads.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">No loads attached to this route</p>
+              <p className="text-gray-500 text-center py-4">{t("routes.noLoadsAttached")}</p>
             ) : (
               <div className="space-y-3">
                 {route.loads.map((load: any) => {
@@ -334,7 +353,7 @@ export default function RouteDetailPage() {
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <div className="font-medium">{load.loadNumber || 'Load'}</div>
+                            <div className="font-medium">{load.loadNumber || t("common.load")}</div>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${loadStatus.color}`}>
                               {loadStatus.label}
                             </span>
@@ -347,7 +366,7 @@ export default function RouteDetailPage() {
                           <div className="font-semibold text-green-600">
                             {isDriver ? `€${load.driverPrice || 0}` : `€${load.clientPrice}`}
                           </div>
-                          <div className="text-xs text-gray-500">{load.distance} km</div>
+                          <div className="text-xs text-gray-500">{load.distance} {t("routes.km")}</div>
                         </div>
                       </div>
 
@@ -367,7 +386,7 @@ export default function RouteDetailPage() {
                               ) : (
                                 <Play className="h-4 w-4 mr-2" />
                               )}
-                              Start This Load
+                              {t("routes.startThisLoad")}
                             </Button>
                           )}
 
@@ -380,7 +399,7 @@ export default function RouteDetailPage() {
                                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
                               >
                                 <Navigation className="h-4 w-4 mr-1" />
-                                Navigate
+                                {t("routes.navigate")}
                               </Button>
                               <Button
                                 onClick={() => handleCompleteLoad(loadId)}
@@ -393,7 +412,7 @@ export default function RouteDetailPage() {
                                 ) : (
                                   <Check className="h-4 w-4 mr-1" />
                                 )}
-                                Complete
+                                {t("routes.complete")}
                               </Button>
                             </div>
                           )}
@@ -402,7 +421,7 @@ export default function RouteDetailPage() {
                           {load.status === 'completed' && (
                             <div className="flex items-center gap-2 text-green-600 text-sm">
                               <CheckCircle className="h-4 w-4" />
-                              <span>Completed</span>
+                              <span>{t("routes.completed")}</span>
                             </div>
                           )}
                         </div>
@@ -414,16 +433,6 @@ export default function RouteDetailPage() {
             )}
           </CardContent>
         </Card>
-
-        {/* Notes */}
-        {route.notes && (
-          <Card>
-            <CardContent className="pt-6">
-              <h2 className="text-lg font-semibold mb-2">Notes</h2>
-              <p className="text-gray-600">{route.notes}</p>
-            </CardContent>
-          </Card>
-        )}
 
         {/* === DRIVER ACTION BUTTONS === */}
 
@@ -437,7 +446,7 @@ export default function RouteDetailPage() {
               className="flex-1 border-red-500 text-red-500 hover:bg-red-50"
             >
               <XCircle className="h-4 w-4 mr-2" />
-              Reject
+              {t("routes.reject")}
             </Button>
             <Button
               onClick={handleAccept}
@@ -445,7 +454,7 @@ export default function RouteDetailPage() {
               className="flex-1 bg-green-600 hover:bg-green-700"
             >
               <CheckCircle className="h-4 w-4 mr-2" />
-              Accept
+              {t("routes.accept")}
             </Button>
           </div>
         )}
@@ -454,9 +463,9 @@ export default function RouteDetailPage() {
         {canStartRoute && (
           <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 space-y-4">
             <div>
-              <h3 className="font-bold text-lg mb-2 text-black">Ready to Start?</h3>
+              <h3 className="font-bold text-lg mb-2 text-black">{t("routes.readyToStart")}</h3>
               <p className="text-sm text-gray-600">
-                Click the button below when you are ready to begin this route. You&apos;ll be able to start and complete each load individually.
+                {t("routes.readyToStartDesc")}
               </p>
             </div>
             <Button
@@ -465,7 +474,7 @@ export default function RouteDetailPage() {
               className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full flex items-center justify-center gap-2"
             >
               <Truck className="w-5 h-5" />
-              {actionLoading ? "Starting..." : "Start Route"}
+              {actionLoading ? t("routes.starting") : t("routes.startRoute")}
             </Button>
           </div>
         )}
@@ -478,9 +487,9 @@ export default function RouteDetailPage() {
                 <CheckCircle className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-lg text-green-900">All Loads Completed!</h3>
+                <h3 className="font-bold text-lg text-green-900">{t("routes.allLoadsCompleted")}</h3>
                 <p className="text-sm text-green-700">
-                  All loads have been delivered. You can now complete the route.
+                  {t("routes.allLoadsCompletedDesc")}
                 </p>
               </div>
             </div>
@@ -490,7 +499,7 @@ export default function RouteDetailPage() {
               className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full flex items-center justify-center gap-2"
             >
               <CheckCircle className="w-5 h-5" />
-              {actionLoading ? "Completing..." : "Complete Route"}
+              {actionLoading ? t("routes.completing") : t("routes.completeRoute")}
             </Button>
           </div>
         )}
@@ -503,9 +512,9 @@ export default function RouteDetailPage() {
                 <Navigation className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-lg text-white">Route In Progress</h3>
+                <h3 className="font-bold text-lg text-white">{t("routes.routeInProgress")}</h3>
                 <p className="text-sm text-blue-100">
-                  Start each load above, navigate to delivery, then mark as complete.
+                  {t("routes.routeInProgressDesc")}
                 </p>
               </div>
             </div>
@@ -517,10 +526,10 @@ export default function RouteDetailPage() {
           <div className="bg-green-50 rounded-xl p-6 shadow-md border border-green-200">
             <div className="flex items-center gap-3">
               <CheckCircle className="h-6 w-6 text-green-600" />
-              <h3 className="font-bold text-lg text-green-900">Route Completed</h3>
+              <h3 className="font-bold text-lg text-green-900">{t("routes.routeCompleted")}</h3>
             </div>
             <p className="text-sm text-green-700 mt-2">
-              This route has been marked as completed. All loads delivered successfully.
+              {t("routes.routeCompletedDesc")}
             </p>
           </div>
         )}
@@ -535,13 +544,13 @@ export default function RouteDetailPage() {
               className="flex-1 border-red-500 text-red-500 hover:bg-red-50"
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              {isDeleting ? "Deleting..." : "Delete Route"}
+              {isDeleting ? t("routes.deleting") : t("routes.deleteRoute")}
             </Button>
             <Button
               onClick={() => router.push(`/routes/${route.id}/edit`)}
               className="flex-1 bg-black hover:bg-gray-800"
             >
-              Edit Route
+              {t("routes.editRoute")}
             </Button>
           </div>
         )}

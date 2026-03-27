@@ -206,25 +206,25 @@ export function DriverDashboard() {
             {/* My Routes Section */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xl font-semibold text-gray-900">My Routes</h3>
+                <h3 className="text-xl font-semibold text-gray-900">{t("routes.myRoutes")}</h3>
                 <Link href="/routes" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
-                  View All <ArrowRight className="h-3 w-3" />
+                  {t("common.viewAll")} <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
               {driverRoutes.length === 0 ? (
                 <div className="bg-white rounded-xl p-8 text-center border border-gray-100">
                   <Truck className="h-10 w-10 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-500">No routes assigned yet</p>
+                  <p className="text-gray-500">{t("routes.noRoutesAssigned")}</p>
                 </div>
               ) : (
                 <div className="grid gap-4">
                   {driverRoutes.slice(0, 5).map((route) => {
                     const statusConfig = {
-                      pending: { color: "bg-yellow-100 text-yellow-800", label: "Pending" },
-                      accepted: { color: "bg-green-100 text-green-800", label: "Accepted" },
-                      "in-progress": { color: "bg-blue-100 text-blue-800", label: "In Progress" },
-                      completed: { color: "bg-gray-100 text-gray-800", label: "Completed" },
-                      rejected: { color: "bg-red-100 text-red-800", label: "Rejected" },
+                      pending: { color: "bg-yellow-100 text-yellow-800", label: t("tabs.pending") },
+                      accepted: { color: "bg-green-100 text-green-800", label: t("tabs.accepted") },
+                      "in-progress": { color: "bg-blue-100 text-blue-800", label: t("tabs.inProgress") },
+                      completed: { color: "bg-gray-100 text-gray-800", label: t("tabs.completed") },
+                      rejected: { color: "bg-red-100 text-red-800", label: t("tabs.rejected") },
                     }[route.status] || { color: "bg-gray-100 text-gray-800", label: route.status };
 
                     return (
@@ -251,11 +251,11 @@ export function DriverDashboard() {
                         </div>
                         <div className="text-sm text-gray-600 flex items-center gap-1 mb-1">
                           <MapPin className="h-3 w-3" />
-                          {route.origin || "Origin"} → {route.destination || "Destination"}
+                          {route.origin || t("routes.origin")} → {route.destination || t("routes.destination")}
                         </div>
                         <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <span>{route.totalDistance} km</span>
-                          <span>{route.loads.length} load(s)</span>
+                          <span>{route.totalDistance} {t("routes.km")}</span>
+                          <span>{t("routes.loadCount", { count: route.loads.length })}</span>
                           <span>{new Date(route.startDate).toLocaleDateString()}</span>
                         </div>
                       </div>
