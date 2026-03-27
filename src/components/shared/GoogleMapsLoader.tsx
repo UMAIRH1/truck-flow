@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 
 interface GoogleMapsLoaderProps {
   children: React.ReactNode;
@@ -8,6 +9,7 @@ interface GoogleMapsLoaderProps {
 
 export function GoogleMapsLoader({ children }: GoogleMapsLoaderProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const locale = useLocale();
 
   useEffect(() => {
     // Check if already loaded
@@ -38,7 +40,7 @@ export function GoogleMapsLoader({ children }: GoogleMapsLoaderProps) {
     }
 
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&loading=async`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&loading=async&language=${locale}`;
     script.async = true;
     script.defer = true;
 
