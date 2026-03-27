@@ -524,6 +524,7 @@
     "routeCompletedDesc": "This route has been marked as completed. All loads delivered successfully.",
     "deleteRoute": "Delete Route",
     "deleting": "Deleting...",
-    "editRoute": "Edit Route"
+    "editRoute": "Edit Route",
+    "readyToComplete": "Ready to Complete"
   }
 }

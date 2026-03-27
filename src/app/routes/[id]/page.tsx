@@ -18,7 +18,7 @@ export default function RouteDetailPage() {
   const router = useRouter();
   const params = useParams();
   const t = useTranslations();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { routes, acceptRoute, rejectRoute, startRoute, completeRoute, deleteRoute, fetchRoutes, loading } = useRoutes();
   const [route, setRoute] = useState<any>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -129,6 +129,7 @@ export default function RouteDetailPage() {
   };
 
   const getStatusColor = (status: string) => {
+    if (canCompleteRoute) return "bg-green-500 text-white animate-pulse-slow shadow-[0_0_15px_rgba(34,197,94,0.4)]";
     switch (status) {
       case "pending": return "bg-yellow-100 text-yellow-800";
       case "accepted": return "bg-green-100 text-green-800";
@@ -150,6 +151,7 @@ export default function RouteDetailPage() {
   };
 
   const getStatusLabel = (status: string) => {
+    if (canCompleteRoute) return t("routes.readyToComplete");
     switch (status) {
       case "pending": return t("tabs.pending");
       case "accepted": return t("tabs.accepted");
@@ -160,7 +162,7 @@ export default function RouteDetailPage() {
     }
   };
 
-  if (loading || !route) {
+  if (loading || authLoading || !route) {
     return (
       <MobileLayout showFAB={false}>
         <Header title={t("routes.routeDetails")} showBack />
@@ -172,6 +174,7 @@ export default function RouteDetailPage() {
   }
 
   const isDriver = user?.role === 'driver';
+  const isManager = !!user && user.role !== 'driver';
   const canAcceptReject = isDriver && route.status === 'pending';
   const canStartRoute = isDriver && route.status === 'accepted';
   const isRouteInProgress = route.status === 'in-progress';
@@ -479,28 +482,36 @@ export default function RouteDetailPage() {
           </div>
         )}
 
-        {/* In-Progress: Complete Route (when all loads done) */}
+        {/* In-Progress: Ready to Complete Route (when all loads done) */}
         {canCompleteRoute && (
-          <div className="bg-green-50 rounded-xl p-6 shadow-md border border-green-300 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-green-500 p-3 rounded-full">
-                <CheckCircle className="h-6 w-6 text-white" />
+          <div className="bg-green-100 rounded-xl p-6 shadow-lg border-2 border-green-500 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center gap-4">
+              <div className="bg-green-600 p-3 rounded-full shadow-md">
+                <CheckCircle className="h-8 w-8 text-white" />
               </div>
-              <div>
-                <h3 className="font-bold text-lg text-green-900">{t("routes.allLoadsCompleted")}</h3>
-                <p className="text-sm text-green-700">
+              <div className="flex-1">
+                <h3 className="font-extrabold text-xl text-green-900 leading-tight">
+                  {t("routes.readyToComplete")}
+                </h3>
+                <p className="text-sm text-green-800 mt-1 font-medium">
                   {t("routes.allLoadsCompletedDesc")}
                 </p>
               </div>
             </div>
-            <Button
-              onClick={handleCompleteRoute}
-              disabled={actionLoading}
-              className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full flex items-center justify-center gap-2"
-            >
-              <CheckCircle className="w-5 h-5" />
-              {actionLoading ? t("routes.completing") : t("routes.completeRoute")}
-            </Button>
+            <div className="pt-2">
+              <Button
+                onClick={handleCompleteRoute}
+                disabled={actionLoading}
+                className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded-2xl flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95"
+              >
+                {actionLoading ? (
+                  <Clock className="h-6 w-6 animate-spin" />
+                ) : (
+                  <CheckCircle className="h-6 w-6" />
+                )}
+                {actionLoading ? t("routes.completing") : t("routes.completeRoute")}
+              </Button>
+            </div>
           </div>
         )}
 
@@ -535,7 +546,7 @@ export default function RouteDetailPage() {
         )}
 
         {/* === MANAGER ACTION BUTTONS === */}
-        {user?.role === 'manager' && route.status === 'pending' && (
+        {isManager && route.status === 'pending' && (
           <div className="flex gap-4">
             <Button
               onClick={handleDelete}

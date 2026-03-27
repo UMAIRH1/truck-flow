@@ -13,10 +13,11 @@ export default function RoutesPage() {
   const router = useRouter();
   const t = useTranslations();
   const { routes, loading, deleteRoute } = useRoutes();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const isDriver = user?.role === 'driver';
+  const isManager = !!user && user.role !== 'driver';
 
   // Drivers only see their own routes
   const visibleRoutes = isDriver
@@ -32,7 +33,8 @@ export default function RoutesPage() {
     }
   }, [openMenuId]);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, isReady?: boolean) => {
+    if (isReady) return "bg-green-500 text-white animate-pulse-slow shadow-sm";
     switch (status) {
       case "pending": return "bg-yellow-100 text-yellow-800";
       case "accepted": return "bg-green-100 text-green-800";
@@ -43,7 +45,8 @@ export default function RoutesPage() {
     }
   };
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: string, isReady?: boolean) => {
+    if (isReady) return t("routes.readyToComplete");
     switch (status) {
       case "pending": return t("tabs.pending");
       case "accepted": return t("tabs.accepted");
@@ -90,7 +93,7 @@ export default function RoutesPage() {
       <div className="px-4 py-6 max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">{t("routes.allRoutes")}</h1>
-          {user?.role === "manager" && (
+          {isManager && (
             <Button
               onClick={() => router.push("/routes/create")}
               className="bg-black hover:bg-gray-800"
@@ -101,7 +104,7 @@ export default function RoutesPage() {
           )}
         </div>
 
-        {loading ? (
+        {authLoading || loading ? (
           <div className="text-center py-12">{t("common.loading")}</div>
         ) : visibleRoutes.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
@@ -126,10 +129,16 @@ export default function RoutesPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(route.status)}`}>
-                      {getStatusLabel(route.status)}
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(
+                      route.status, 
+                      isDriver && route.status === 'in-progress' && route.loads.length > 0 && route.loads.every((l: any) => l.status === 'completed')
+                    )}`}>
+                      {getStatusLabel(
+                        route.status,
+                        isDriver && route.status === 'in-progress' && route.loads.length > 0 && route.loads.every((l: any) => l.status === 'completed')
+                      )}
                     </span>
-                    {user?.role === "manager" && (
+                    {isManager && (
                       <div className="relative">
                         <button
                           onClick={(e) => toggleMenu(e, route.id)}

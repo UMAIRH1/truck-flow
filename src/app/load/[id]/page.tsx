@@ -27,7 +27,7 @@ export default function LoadStatusPage() {
   const [viewerFilename, setViewerFilename] = useState("");
 
   const load = getLoadById(params.id as string);
-  const isManager = user?.role === "manager";
+  const isManager = !!user && user.role !== "driver";
   const isDriver = user?.role === "driver";
 
   const openDocument = (url: string, filename: string) => {
