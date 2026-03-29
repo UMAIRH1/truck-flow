@@ -166,37 +166,30 @@ export function DriverDashboard() {
               <StatCard icon={Clock} label={t("dashboard.pendingPayments")} value={`€ ${stats.pendingEarnings.toLocaleString()}.00`} />
             </div>
 
-            {/* Load Status Cards */}
+            {/* Route Status Cards */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("dashboard.assignedLoads")}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("routes.myRoutes")}</h3>
               <div className="space-y-3">
-                <Link href="/my-loads?tab=pending" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <Link href="/routes" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
                     <span className="text-gray-700">{t("tabs.pending")}</span>
                   </div>
-                  <span className="font-semibold text-gray-900">{pendingLoads.length}</span>
+                  <span className="font-semibold text-gray-900">{pendingRoutes.length}</span>
                 </Link>
-                <Link href="/my-loads?tab=accepted" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                    <span className="text-gray-700">{t("tabs.accepted")}</span>
-                  </div>
-                  <span className="font-semibold text-gray-900">{acceptedLoads.length}</span>
-                </Link>
-                <Link href="/my-loads?tab=rejected" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                    <span className="text-gray-700">{t("tabs.rejected")}</span>
-                  </div>
-                  <span className="font-semibold text-gray-900">{rejectedLoads.length}</span>
-                </Link>
-                <Link href="/my-loads?tab=completed" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <Link href="/routes" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <span className="text-gray-700">{t("tabs.inProgress")}</span>
+                  </div>
+                  <span className="font-semibold text-gray-900">{activeRoutes.length}</span>
+                </Link>
+                <Link href="/routes" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
                     <span className="text-gray-700">{t("tabs.completed")}</span>
                   </div>
-                  <span className="font-semibold text-gray-900">{completedLoads.length}</span>
+                  <span className="font-semibold text-gray-900">{driverRoutes.filter(r => r.status === "completed").length}</span>
                 </Link>
               </div>
             </div>
@@ -262,33 +255,6 @@ export function DriverDashboard() {
                     );
                   })}
                 </div>
-              )}
-            </div>
-
-            {/* My Loads Section */}
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">{t("dashboard.myAssignedLoads")}</h3>
-              {driverLoads.length === 0 ? (
-                <div className="bg-white rounded-xl p-8 text-center">
-                  <p className="text-gray-500">{t("dashboard.noLoadsAssigned")}</p>
-                </div>
-              ) : (
-                <>
-                  <div className="grid gap-4">
-                    {driverLoads.slice(0, 5).map((load) => (
-                      <DriverLoadCard
-                        key={load.id}
-                        load={load}
-                        showStatusLabel={true}
-                        showActions={load.status === "pending" || load.status === "accepted"}
-                        onAccept={() => handleAccept(load.id)}
-                        onDecline={() => handleDecline(load.id)}
-                        onStart={() => handleStart(load.id)}
-                        onMapView={() => handleMapView(load.id)}
-                      />
-                    ))}
-                  </div>
-                </>
               )}
             </div>
 
