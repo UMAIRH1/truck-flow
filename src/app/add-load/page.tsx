@@ -23,6 +23,7 @@ export default function AddLoadPage() {
   const { addLoad } = useLoads();
   const t = useTranslations("addLoad");
   const tHeader = useTranslations("header");
+  const tCommon = useTranslations("common");
 
   const [drivers, setDrivers] = useState<any[]>([]);
   const [isLoadingDrivers, setIsLoadingDrivers] = useState(true);
@@ -315,13 +316,13 @@ export default function AddLoadPage() {
                 {distance !== null && (
                   <div className="mt-2 text-sm text-gray-600 flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
-                    <span>Distance: <strong>{distance} km</strong></span>
+                    <span>{t("distance")}: <strong>{distance} km</strong></span>
                   </div>
                 )}
                 {isCalculatingDistance && (
                   <div className="mt-2 text-sm text-gray-500 flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Calculating distance...</span>
+                    <span>{tCommon("loading")}</span>
                   </div>
                 )}
               </div>
@@ -427,7 +428,7 @@ export default function AddLoadPage() {
                     icon={BusFront}
                     id="expectedPayoutDate"
                     type="date"
-                    placeholder={t("expectedPayoutDate") || "Expected Payout Date"}
+                    placeholder={t("expectedPayoutDate")}
                     showPlaceholderForDate={true}
                     value={formData.expectedPayoutDate}
                     onChange={(e) => setFormData({ ...formData, expectedPayoutDate: e.target.value })}
@@ -478,14 +479,14 @@ export default function AddLoadPage() {
 
               {/* Cost Model Fields */}
               <div className="border-t pt-4 mt-2">
-                <h3 className="text-sm font-semibold mb-3 text-gray-700">Cost Model (Optional)</h3>
+                <h3 className="text-sm font-semibold mb-3 text-gray-700">{t("costModel")}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
                     <InputWithIcon
                       icon={Fuel}
                       id="fuelConsumption"
                       type="number"
-                      placeholder="Fuel L/100km"
+                      placeholder={t("fuelConsumption")}
                       value={formData.fuelConsumption}
                       onChange={(e) => setFormData({ ...formData, fuelConsumption: e.target.value })}
                     />
@@ -495,7 +496,7 @@ export default function AddLoadPage() {
                       icon={DollarSign}
                       id="fuelPricePerLiter"
                       type="number"
-                      placeholder="Fuel Price/L"
+                      placeholder={t("fuelPrice")}
                       value={formData.fuelPricePerLiter}
                       onChange={(e) => setFormData({ ...formData, fuelPricePerLiter: e.target.value })}
                     />
@@ -505,7 +506,7 @@ export default function AddLoadPage() {
                       icon={User}
                       id="driverDailyCost"
                       type="number"
-                      placeholder="Driver Daily Cost"
+                      placeholder={t("driverDailyCost")}
                       value={formData.driverDailyCost}
                       onChange={(e) => setFormData({ ...formData, driverDailyCost: e.target.value })}
                     />
@@ -515,7 +516,7 @@ export default function AddLoadPage() {
                       icon={Truck}
                       id="truckCostPerKm"
                       type="number"
-                      placeholder="Truck Cost/km"
+                      placeholder={t("truckCostPerKm")}
                       value={formData.truckCostPerKm}
                       onChange={(e) => setFormData({ ...formData, truckCostPerKm: e.target.value })}
                     />
@@ -557,7 +558,7 @@ export default function AddLoadPage() {
                       ) : (
                         <>
                           <Camera className="h-6 w-6 mb-1 text-[#0095FF]" />
-                          <span className="text-xs text-[#0095FF] text-center">Upload Photos (Optional)</span>
+                          <span className="text-xs text-[#0095FF] text-center">{t("uploadPhotos")}</span>
                         </>
                       )}
                     </div>
@@ -569,14 +570,13 @@ export default function AddLoadPage() {
               <div className="flex md:flex-row flex-col gap-4">
                 {costBreakdown && (
                   <div className="flex-1 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold mb-2 text-blue-900">Cost Breakdown</h4>
+                    <h4 className="text-sm font-semibold mb-2 text-blue-900">{t("costBreakdown")}</h4>
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>Fuel Cost:</div><div className="font-semibold">€{costBreakdown.fuelCost.toFixed(2)}</div>
-                      <div>Driver Cost:</div><div className="font-semibold">€{costBreakdown.driverCost.toFixed(2)}</div>
-                      <div>Truck Cost:</div><div className="font-semibold">€{costBreakdown.truckCost.toFixed(2)}</div>
-                      <div className="border-t pt-1">Total Cost:</div><div className="border-t pt-1 font-bold">€{costBreakdown.totalCost.toFixed(2)}</div>
-                      <div className="text-green-700">Profit:</div><div className="font-bold text-green-700">€{costBreakdown.profit.toFixed(2)}</div>
-                      <div className="text-gray-600">Profit/km:</div><div className="font-semibold text-gray-600">€{costBreakdown.profitPerKm.toFixed(2)}</div>
+                      <div>{t("fuel")}:</div><div className="font-semibold">€{costBreakdown.fuelCost.toFixed(2)}</div>
+                      <div>{t("driver")}:</div><div className="font-semibold">€{costBreakdown.driverCost.toFixed(2)}</div>
+                      <div>{t("truck")}:</div><div className="font-semibold">€{costBreakdown.truckCost.toFixed(2)}</div>
+                      <div className="border-t pt-1">{t("totalCost")}:</div><div className="border-t pt-1 font-bold">€{costBreakdown.totalCost.toFixed(2)}</div>
+                      <div className="text-green-700">{t("profit")}:</div><div className="font-bold text-green-700">€{costBreakdown.profit.toFixed(2)}</div>
                     </div>
                   </div>
                 )}
@@ -586,8 +586,8 @@ export default function AddLoadPage() {
                   className="bg-blue-500 text-white h-12 flex flex-col items-center justify-center py-1" 
                   size="lg"
                 >
-                  <span className="text-xs">Gross Profit: €{calculateProfit().grossProfit.toFixed(2)}</span>
-                  <span className="text-xs font-bold">Net Profit: €{calculateProfit().netProfit.toFixed(2)}</span>
+                  <span className="text-xs">{t("grossProfit")}: €{calculateProfit().grossProfit.toFixed(2)}</span>
+                  <span className="text-xs font-bold">{t("netProfit")}: €{calculateProfit().netProfit.toFixed(2)}</span>
                 </Button>
                 <Button type="submit" size="lg" disabled={isSubmitting} className="bg-black h-12 hover:bg-blue-600 text-white ">
                   {isSubmitting ? t("creatingLoad") : t("submitAndAdd")}

@@ -9,12 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Truck, User, Calendar, DollarSign, Fuel } from "lucide-react";
 import { GooglePlacesInput, GoogleMapsLoader } from "@/components/shared";
 import api from "@/lib/api";
 
 export default function CreateRoutePage() {
   const router = useRouter();
+  const t = useTranslations("routes");
+  const tHeader = useTranslations("header");
+  const tCommon = useTranslations("common");
   const { createRoute } = useRoutes();
   const { loads } = useLoads();
   
@@ -262,24 +266,24 @@ export default function CreateRoutePage() {
   return (
     <GoogleMapsLoader>
       <MobileLayout showFAB={false}>
-        <Header title="Create Route" showBack />
+        <Header title={t("createRoute")} showBack />
       <div className="px-4 py-6 max-w-4xl mx-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card>
             <CardContent className="pt-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Route Name *</label>
+                <label className="block text-sm font-medium mb-2">{t("routeName")} *</label>
                 <Input
                   value={formData.routeName}
                   onChange={(e) => setFormData({ ...formData, routeName: e.target.value })}
-                  placeholder="e.g., Athens to Thessaloniki Route"
+                  placeholder={t("routeNamePlaceholder")}
                   required
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Driver Current Location</label>
+                  <label className="block text-sm font-medium mb-2">{t("driverCurrentLocation")}</label>
                   <GooglePlacesInput
                     value={formData.driverStartingLocation}
                     onChange={(value) => setFormData({ ...formData, driverStartingLocation: value })}
@@ -288,15 +292,15 @@ export default function CreateRoutePage() {
                       console.log("Driver location selected");
                       setDriverLocationSelected(true);
                     }}
-                    placeholder="e.g., Faisalabad (optional)"
+                    placeholder={t("driverLocationPlaceholder")}
                   />
-                  <p className="text-xs text-gray-500 mt-1">Where is the driver currently located?</p>
+                  <p className="text-xs text-gray-500 mt-1">{t("driverLocationDesc")}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Route Origin *</label>
+                  <label className="block text-sm font-medium mb-2">{t("origin")} *</label>
                   <GooglePlacesInput
                     value={formData.origin}
                     onChange={(value) => setFormData({ ...formData, origin: value })}
@@ -305,12 +309,12 @@ export default function CreateRoutePage() {
                       console.log("Origin place selected");
                       setOriginSelected(true);
                     }}
-                    placeholder="e.g., Lahore"
+                    placeholder={t("originPlaceholder")}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Route Destination *</label>
+                  <label className="block text-sm font-medium mb-2">{t("destination")} *</label>
                   <GooglePlacesInput
                     value={formData.destination}
                     onChange={(value) => setFormData({ ...formData, destination: value })}
@@ -319,7 +323,7 @@ export default function CreateRoutePage() {
                       console.log("Destination place selected");
                       setDestinationSelected(true);
                     }}
-                    placeholder="e.g., Karachi"
+                    placeholder={t("destinationPlaceholder")}
                     required
                   />
                 </div>
@@ -329,19 +333,19 @@ export default function CreateRoutePage() {
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
                   {preRouteDistance !== null && preRouteDistance > 0 && (
                     <div className="text-sm text-blue-800 flex items-center justify-between">
-                      <span className="font-medium">Pre-Route Distance (Driver → Origin):</span>
+                      <span className="font-medium">{t("preRouteDistance")}:</span>
                       <span className="font-bold">{preRouteDistance} km</span>
                     </div>
                   )}
                   {routeDistance !== null && (
                     <div className="text-sm text-blue-800 flex items-center justify-between">
-                      <span className="font-medium">Route Distance (Origin → Destination):</span>
+                      <span className="font-medium">{t("routeDistance")}:</span>
                       <span className="font-bold">{routeDistance} km</span>
                     </div>
                   )}
                   {distance !== null && (
                     <div className="text-sm text-blue-900 flex items-center justify-between border-t border-blue-300 pt-2">
-                      <span className="font-semibold">Total Distance:</span>
+                      <span className="font-semibold">{t("totalDistance")}:</span>
                       <span className="font-bold text-lg">{distance} km</span>
                     </div>
                   )}
@@ -351,13 +355,13 @@ export default function CreateRoutePage() {
               {isCalculatingDistance && (
                 <div className="text-sm text-gray-500 flex items-center gap-2">
                   <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
-                  <span>Calculating distance...</span>
+                  <span>{t("calculatingDistance")}</span>
                 </div>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Tolls (€)</label>
+                  <label className="block text-sm font-medium mb-2">{t("tolls")} (€)</label>
                   <Input
                     type="number"
                     step="0.01"
@@ -367,7 +371,7 @@ export default function CreateRoutePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Other Expenses (€)</label>
+                  <label className="block text-sm font-medium mb-2">{t("otherExpenses")} (€)</label>
                   <Input
                     type="number"
                     step="0.01"
@@ -380,7 +384,7 @@ export default function CreateRoutePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Assign Driver *</label>
+                  <label className="block text-sm font-medium mb-2">{t("assignDriver")} *</label>
                   <select
                     value={formData.assignedDriverId}
                     onChange={(e) => setFormData({ ...formData, assignedDriverId: e.target.value })}
@@ -388,7 +392,7 @@ export default function CreateRoutePage() {
                     required
                     disabled={isLoadingDrivers}
                   >
-                    <option value="">Select Driver</option>
+                    <option value="">{t("selectDriver")}</option>
                     {drivers.map((driver) => (
                       <option key={driver._id} value={driver._id}>
                         {driver.name}
@@ -398,18 +402,18 @@ export default function CreateRoutePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Truck Number</label>
+                  <label className="block text-sm font-medium mb-2">{t("truckNumber")}</label>
                   <Input
                     value={formData.truckNumber}
                     onChange={(e) => setFormData({ ...formData, truckNumber: e.target.value })}
-                    placeholder="e.g., TRK-001"
+                    placeholder={t("truckNumberPlaceholder")}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Start Date *</label>
+                  <label className="block text-sm font-medium mb-2">{t("startDate")} *</label>
                   <Input
                     type="date"
                     value={formData.startDate}
@@ -419,7 +423,7 @@ export default function CreateRoutePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">End Date</label>
+                  <label className="block text-sm font-medium mb-2">{t("endDate")}</label>
                   <Input
                     type="date"
                     value={formData.endDate}
@@ -429,10 +433,10 @@ export default function CreateRoutePage() {
               </div>
 
               <div className="border-t pt-4">
-                <h3 className="text-sm font-semibold mb-3">Cost Model</h3>
+                <h3 className="text-sm font-semibold mb-3">{t("costModel")}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm mb-2">Fuel Consumption (L/100km)</label>
+                    <label className="block text-sm mb-2">{t("fuelConsumption")} (L/100km)</label>
                     <Input
                       type="number"
                       value={formData.fuelConsumption}
@@ -441,7 +445,7 @@ export default function CreateRoutePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm mb-2">Fuel Price (€/L)</label>
+                    <label className="block text-sm mb-2">{t("fuelPrice")} (€/L)</label>
                     <Input
                       type="number"
                       step="0.01"
@@ -451,7 +455,7 @@ export default function CreateRoutePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm mb-2">Driver Daily Cost (€)</label>
+                    <label className="block text-sm mb-2">{t("driverDailyCost")} (€)</label>
                     <Input
                       type="number"
                       value={formData.driverDailyCost}
@@ -460,7 +464,7 @@ export default function CreateRoutePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm mb-2">Truck Cost (€/km)</label>
+                    <label className="block text-sm mb-2">{t("truckCostPerKm")} (€/km)</label>
                     <Input
                       type="number"
                       step="0.01"
@@ -473,11 +477,11 @@ export default function CreateRoutePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Notes</label>
+                <label className="block text-sm font-medium mb-2">{t("notes")}</label>
                 <Textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder="Additional notes..."
+                  placeholder={t("notesPlaceholder")}
                   rows={3}
                 />
               </div>
@@ -487,7 +491,7 @@ export default function CreateRoutePage() {
           {availableLoads.length > 0 && (
             <Card>
               <CardContent className="pt-6">
-                <h3 className="text-sm font-semibold mb-3">Attach Loads (Optional)</h3>
+                <h3 className="text-sm font-semibold mb-3">{t("attachLoads")}</h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {availableLoads.map((load) => (
                     <label
@@ -519,37 +523,37 @@ export default function CreateRoutePage() {
           {economics && (
             <Card className="bg-blue-50 border-blue-200">
               <CardContent className="pt-6">
-                <h3 className="text-sm font-semibold mb-3 text-blue-900">Route Economics Summary</h3>
+                <h3 className="text-sm font-semibold mb-3 text-blue-900">{t("routeEconomics")}</h3>
                 <div className="grid grid-cols-2 gap-y-2 text-sm">
-                  <div className="text-gray-600">Total Distance:</div>
+                  <div className="text-gray-600">{t("totalDistance")}:</div>
                   <div className="font-medium text-right">{economics.distance.toFixed(2)} km</div>
                   
-                  <div className="text-gray-600">Trip Duration:</div>
-                  <div className="font-medium text-right">{economics.days} {economics.days === 1 ? 'day' : 'days'}</div>
+                  <div className="text-gray-600">{t("tripDuration")}:</div>
+                  <div className="font-medium text-right">{economics.days} {economics.days === 1 ? tCommon('load') : tCommon('loads')}</div>
 
-                  <div className="text-gray-600">Est. Fuel Cost:</div>
+                  <div className="text-gray-600">{t("fuelCost")}:</div>
                   <div className="font-medium text-right">€{economics.fuelCost.toFixed(2)}</div>
                   
-                  <div className="text-gray-600">Est. Driver Cost:</div>
+                  <div className="text-gray-600">{t("driverCost")}:</div>
                   <div className="font-medium text-right">€{economics.driverCost.toFixed(2)}</div>
                   
-                  <div className="text-gray-600">Est. Truck Cost:</div>
+                  <div className="text-gray-600">{t("truckCost")}:</div>
                   <div className="font-medium text-right">€{economics.truckCost.toFixed(2)}</div>
 
-                  <div className="text-gray-600">Tolls & Other:</div>
+                  <div className="text-gray-600">{t("otherExpenses")}:</div>
                   <div className="font-medium text-right">€{(economics.tolls + economics.other).toFixed(2)}</div>
                   
                   <div className="border-t border-blue-200 col-span-2 my-1"></div>
                   
-                  <div className="font-semibold text-blue-900">Total Est. Cost:</div>
+                  <div className="font-semibold text-blue-900">{t("totalCost")}:</div>
                   <div className="font-bold text-right text-blue-900">€{economics.totalCost.toFixed(2)}</div>
                   
-                  <div className="font-semibold text-green-700">Total Revenue:</div>
+                  <div className="font-semibold text-green-700">{t("totalRevenue")}:</div>
                   <div className="font-bold text-right text-green-700">€{economics.totalRevenue.toFixed(2)}</div>
                   
                   <div className="border-t-2 border-blue-300 col-span-2 my-1"></div>
                   
-                  <div className="text-lg font-bold text-blue-900">Projected Profit:</div>
+                  <div className="text-lg font-bold text-blue-900">{t("projectedProfit")}:</div>
                   <div className={`text-lg font-bold text-right ${economics.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     €{economics.profit.toFixed(2)}
                   </div>
@@ -571,14 +575,14 @@ export default function CreateRoutePage() {
               onClick={() => router.back()}
               className="flex-1"
             >
-              Cancel
+              {tCommon("cancel")}
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-black hover:bg-gray-800"
             >
-              {isSubmitting ? "Creating..." : "Create Route"}
+              {isSubmitting ? t("creatingRoute") : t("createRoute")}
             </Button>
           </div>
         </form>

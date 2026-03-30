@@ -85,7 +85,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
               onChange={onPickupChange}
               onCoordinatesChange={onPickupCoordinates}
               onMapClick={() => setShowPickupMap(!showPickupMap)}
-              placeholder={t("from")}
+              placeholder={t("pickupPlaceholder")}
               className="border-none shadow-none focus-visible:ring-0 p-0 h-10 text-base placeholder:text-gray-400"
               required
             />
@@ -99,7 +99,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
               onChange={onDropoffChange}
               onCoordinatesChange={onDropoffCoordinates}
               onMapClick={() => setShowDropoffMap(!showDropoffMap)}
-              placeholder={t("to")}
+              placeholder={t("dropoffPlaceholder")}
               className="border-none shadow-none focus-visible:ring-0 p-0 h-10 text-base placeholder:text-gray-400"
               required
             />
