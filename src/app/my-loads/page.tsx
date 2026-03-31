@@ -66,7 +66,7 @@ function MyLoadsContent() {
     <DriverLoadCard
       key={load.id}
       load={load}
-      showActions={activeTab === "pending" || activeTab === "accepted"}
+      showActions={activeTab === "pending" || activeTab === "accepted" || activeTab === "in-progress"}
       onAccept={() => handleAccept(load.id)}
       onDecline={() => handleDecline(load.id)}
       onStart={() => handleStart(load.id)}

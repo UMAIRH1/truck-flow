@@ -4,7 +4,7 @@ import { StatCard, DriverLoadCard } from "@/components/shared";
 import { useLoads } from "@/contexts/LoadContext";
 import { useRoutes } from "@/contexts/RouteContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { DollarSign, Clock, CreditCard, ArrowRight, Truck, MapPin } from "lucide-react";
+import { DollarSign, Clock, CreditCard, ArrowRight, Truck, MapPin, Package } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Driver } from "@/types";
@@ -254,6 +254,41 @@ export function DriverDashboard() {
                       </div>
                     );
                   })}
+                </div>
+              )}
+            </div>
+
+            {/* Solo Loads Section */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xl font-semibold text-gray-900">{t("driver.assignedSoloLoads")}</h3>
+                <Link href="/my-loads" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                  {t("common.viewAll")} <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+              {driverLoads.filter(l => l.status !== 'completed' && l.status !== 'rejected').length === 0 ? (
+                <div className="bg-white rounded-xl p-8 text-center border border-gray-100">
+                  <Package className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+                  <p className="text-gray-500">{t("driver.noSoloLoads")}</p>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {driverLoads
+                    .filter(l => l.status !== 'completed' && l.status !== 'rejected')
+                    .slice(0, 5)
+                    .map((load) => (
+                      <DriverLoadCard
+                        key={load.id}
+                        load={load}
+                        showActions={true}
+                        showStatusLabel={true}
+                        onAccept={() => handleAccept(load.id)}
+                        onDecline={() => handleDecline(load.id)}
+                        onStart={() => handleStart(load.id)}
+                        onMapView={() => handleMapView(load.id)}
+                        className="bg-white border-gray-100 shadow-sm"
+                      />
+                    ))}
                 </div>
               )}
             </div>

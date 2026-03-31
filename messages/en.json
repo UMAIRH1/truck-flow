@@ -215,7 +215,10 @@
     "mapView": "Map View",
     "decline": "Decline",
     "accept": "Accept",
-    "checkBackLater": "Check back later for new opportunities"
+    "checkBackLater": "Check back later for new opportunities",
+    "completeLoad": "Complete & Upload POD",
+    "noSoloLoads": "No independent loads assigned.",
+    "assignedSoloLoads": "Assigned Solo Loads"
   },
   "settings": {
     "account": "Account",

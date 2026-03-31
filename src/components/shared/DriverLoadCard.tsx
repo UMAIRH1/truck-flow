@@ -147,6 +147,14 @@ export function DriverLoadCard({ load, showActions = false, showStatusLabel = fa
               <Truck className="h-4 w-4" /> Start Journey
             </Button>
           )}
+          {load.status === "in-progress" && (
+            <Button 
+              onClick={() => router.push(`/load/${load.id}`)} 
+              className="w-full px-4 py-2 bg-green-600 text-white text-sm rounded-md font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+            >
+              <Check className="h-4 w-4" /> {tDriver("completeLoad")}
+            </Button>
+          )}
         </div>
       )}
     </div>
