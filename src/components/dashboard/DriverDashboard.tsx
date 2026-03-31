@@ -194,6 +194,34 @@ export function DriverDashboard() {
               </div>
             </div>
 
+            {/* Load Status Cards */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("dashboard.soloLoadStatus")}</h3>
+              <div className="space-y-3">
+                <Link href="/my-loads" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                    <span className="text-gray-700">{t("tabs.pending")}</span>
+                  </div>
+                  <span className="font-semibold text-gray-900">{pendingLoads.length}</span>
+                </Link>
+                <Link href="/my-loads" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <span className="text-gray-700">{t("tabs.accepted")} / {t("tabs.inProgress")}</span>
+                  </div>
+                  <span className="font-semibold text-gray-900">{acceptedLoads.length}</span>
+                </Link>
+                <Link href="/my-loads" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span className="text-gray-700">{t("tabs.completed")}</span>
+                  </div>
+                  <span className="font-semibold text-gray-900">{completedLoads.length}</span>
+                </Link>
+              </div>
+            </div>
+
           </div>
           <div className="lg:col-span-2 space-y-6">
             {/* My Routes Section */}

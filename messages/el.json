@@ -168,7 +168,8 @@
     "totalRevenue": "Συνολικά Έσοδα",
     "profitPerRoute": "Κέρδος ανά Διαδρομή",
     "profitPerTruck": "Κέρδος ανά Φορτηγό",
-    "profitPerDriver": "Κέρδος ανά Οδηγό"
+    "profitPerDriver": "Κέρδος ανά Οδηγό",
+    "soloLoadStatus": "Κατάσταση Ανατεθειμένων Φορτίων"
   },
   "tabs": {
     "accepted": "Αποδεκτά",
@@ -218,7 +219,7 @@
     "checkBackLater": "Ελέγξτε ξανά αργότερα για νέες ευκαιρίες",
     "completeLoad": "Ολοκλήρωση & Μεταφόρτωση POD",
     "noSoloLoads": "Δεν υπάρχουν ανατεθειμένα ανεξάρτητα φορτία.",
-    "assignedSoloLoads": "Ανατεθειμένα Μεμονωμένα Φορτία"
+    "assignedSoloLoads": "Ανατεθειμένα Φορτία"
   },
   "settings": {
     "account": "Λογαριασμός",

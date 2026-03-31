@@ -168,7 +168,8 @@
     "totalRevenue": "Total Revenue",
     "profitPerRoute": "Profit per Route",
     "profitPerTruck": "Profit per Truck",
-    "profitPerDriver": "Profit per Driver"
+    "profitPerDriver": "Profit per Driver",
+    "soloLoadStatus": "Assigned Load Status"
   },
   "tabs": {
     "accepted": "Accepted",
@@ -218,7 +219,7 @@
     "checkBackLater": "Check back later for new opportunities",
     "completeLoad": "Complete & Upload POD",
     "noSoloLoads": "No independent loads assigned.",
-    "assignedSoloLoads": "Assigned Solo Loads"
+    "assignedSoloLoads": "Assigned Loads"
   },
   "settings": {
     "account": "Account",
