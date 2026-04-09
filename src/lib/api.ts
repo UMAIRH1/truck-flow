@@ -163,6 +163,14 @@ class ApiClient {
     return this.request('/auth/logout', { method: 'POST' });
   }
 
+  // FCM token update
+  async updateFcmToken(token: string, action: 'add' | 'remove') {
+    return this.request('/auth/fcm-token', {
+      method: 'POST',
+      body: JSON.stringify({ token, action }),
+    });
+  }
+
   // User endpoints (Manager only)
   async createDriver(driverData: {
     name: string;

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useCallback, ReactNode, use
 import { Notification } from '@/types';
 import api from '@/lib/api';
 import socketService from '@/lib/socket';
+import { requestNotificationPermission } from '@/lib/firebase';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 
@@ -122,6 +123,13 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
       // Connect to WebSocket
       socketService.connect(token);
+
+      // Request Push Notification Permissions
+      requestNotificationPermission().then((firebaseToken) => {
+        if (firebaseToken) {
+          console.log('Firebase Push Notifications Active');
+        }
+      });
 
       // Listen for new notifications
       const handleNotification = (notification: any) => {
