@@ -230,6 +230,8 @@
     "securityDesc": "Tap here to know about security",
     "notifications": "Notifications",
     "notificationsDesc": "Tap here to change notification setting",
+    "enablePush": "Enable Push Notifications",
+    "enablePushDesc": "Receive real-time alerts on this device",
     "privacy": "Privacy",
     "privacyDesc": "Tap here to know privacy setting",
     "addPaymentMethods": "Add Payment Methods",

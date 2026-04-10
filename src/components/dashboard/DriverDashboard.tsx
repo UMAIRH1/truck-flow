@@ -11,6 +11,7 @@ import { Driver } from "@/types";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { useTranslations } from "next-intl";
+import { NotificationBanner } from "@/components/notifications/NotificationBanner";
 
 interface DriverDashboardStats {
   assignedLoads: number;
@@ -157,8 +158,12 @@ export function DriverDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header title={t("header.dashboard")} />
+      
+      <div className="px-6 pt-4 max-w-7xl mx-auto">
+        <NotificationBanner />
+      </div>
 
-      <div className="px-6 py-8 max-w-7xl mx-auto space-y-6">
+      <div className="px-6 py-6 max-w-7xl mx-auto space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 space-y-6">
             <div className="grid grid-cols-2 gap-6">

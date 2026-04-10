@@ -23,41 +23,49 @@ export const requestNotificationPermission = async () => {
   if (typeof window === 'undefined') return null;
 
   try {
+    toast.info("Checking notification support...");
     const supported = await isSupported();
     if (!supported) {
-      console.log('Push notifications are not supported in this browser.');
+      toast.error("Push notifications NOT supported in this browser.");
       return null;
     }
 
+    toast.info("Requesting permission...");
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
+      toast.success("Permission GRANTED");
+      
       if (!messaging) {
         messaging = getMessaging(app);
       }
       
       const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
       if (!vapidKey) {
-        console.error('Missing VAPID Key in environment variables');
+        toast.error("Error: NEXT_PUBLIC_FIREBASE_VAPID_KEY is missing in Amplify!");
         return null;
       }
 
-      // Get the FCM token (needs VAPID key)
-      const token = await getToken(messaging, { vapidKey });
+      toast.info("Generating token (this may take a few seconds)...");
+      
+      // Try to get token with explicit service worker registration if possible
+      const token = await getToken(messaging, { 
+        vapidKey: vapidKey 
+      });
       
       if (token) {
-        console.log('FCM Token generated successfully');
-        // Send token to backend to update User.fcmTokens
+        toast.success("Token generated! Saving to backend...");
         await api.updateFcmToken(token, 'add');
+        toast.success("Push notifications fully activated! ✅");
         return token;
       } else {
-        console.warn('No FCM token received from getToken()');
+        toast.error("Token generation failed (returned empty).");
       }
     } else {
-      console.warn('Notification permission was not granted:', permission);
+      toast.error(`Permission denied: ${permission}`);
     }
   } catch (error: any) {
     console.error('Error getting notification permission:', error);
-    // Don't toast error here to avoid annoying the user if they're on an unsupported browser
+    toast.error(`Fatal Error: ${error.message || 'Check browser console'}`);
   }
   return null;
 };

@@ -124,13 +124,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       // Connect to WebSocket
       socketService.connect(token);
 
-      // Request Push Notification Permissions
-      requestNotificationPermission().then((firebaseToken) => {
-        if (firebaseToken) {
-          console.log('Firebase Push Notifications Active');
-        }
-      });
-
       // Listen for new notifications
       const handleNotification = (notification: any) => {
         console.log('New notification received:', notification);

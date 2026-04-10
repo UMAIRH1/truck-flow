@@ -3,11 +3,13 @@
 import React, { useState } from "react";
 import { Header, MobileLayout } from "@/components/layout";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChevronRight, BusFront } from "lucide-react";
+import { ChevronRight, BusFront, Bell } from "lucide-react";
 import Link from "next/link";
 import Modal from "@/app/settings/_components/modal";
 import { useTranslations } from "next-intl";
 import { InstallPWA } from "@/components/shared/InstallPWA";
+import { requestNotificationPermission } from "@/lib/firebase";
+import { toast } from "sonner";
 
 interface SettingsItem {
   label: string;
@@ -23,6 +25,18 @@ export default function SettingsPage() {
   const t = useTranslations("settings");
   const tHeader = useTranslations("header");
 
+  const handleEnableNotifications = async () => {
+    try {
+      const token = await requestNotificationPermission();
+      if (token) {
+        toast.success("Push notifications enabled!");
+      }
+    } catch (error) {
+      console.error("Failed to enable notifications:", error);
+      toast.error("Failed to enable notifications");
+    }
+  };
+
   const accountItems: SettingsItem[] = [
     { label: t("editProfile"), description: t("editProfileDesc"), href: "/settings/profile" },
     {
@@ -31,6 +45,11 @@ export default function SettingsPage() {
       href: "/settings/security",
     },
     { label: t("notifications"), description: t("notificationsDesc"), href: "/notifications", badge: true },
+    {
+      label: t("enablePush"),
+      description: t("enablePushDesc"),
+      onClick: handleEnableNotifications,
+    },
     { label: t("privacy"), description: t("privacyDesc"), href: "/settings/privacy" },
   ];
 
@@ -56,7 +75,11 @@ export default function SettingsPage() {
     const content = (
       <div className="flex items-center gap-4 py-4 bg-white rounded-xl hover:bg-gray-50 transition-colors">
         <div className="p-2 bg-(--color-button-table) rounded-md">
-          <BusFront className="h-5 w-5 text-white" />
+          {item.label === t("enablePush") ? (
+            <Bell className="h-5 w-5 text-white" />
+          ) : (
+            <BusFront className="h-5 w-5 text-white" />
+          )}
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
@@ -134,7 +157,11 @@ export default function SettingsPage() {
                         <Link href={item.href} className="block">
                           <div className="flex items-center gap-4 py-2 bg-white rounded-xl hover:bg-gray-50">
                             <div className="p-2 bg-(--color-button-table) rounded-md">
-                              <BusFront className="h-5 w-5 text-white" />
+                              {item.label === t("enablePush") ? (
+                                <Bell className="h-5 w-5 text-white" />
+                              ) : (
+                                <BusFront className="h-5 w-5 text-white" />
+                              )}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
@@ -149,14 +176,18 @@ export default function SettingsPage() {
                         <button onClick={() => item.onClick && item.onClick()} className="w-full text-left cursor-pointer">
                           <div className="flex items-center gap-4 py-2 bg-white rounded-xl hover:bg-gray-50">
                             <div className="p-2 bg-(--color-button-table) rounded-md">
-                              <BusFront className="h-5 w-5 text-white" />
+                              {item.label === t("enablePush") ? (
+                                <Bell className="h-5 w-5 text-white" />
+                              ) : (
+                                <BusFront className="h-5 w-5 text-white" />
+                              )}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
                                 <span className="font-medium">{item.label}</span>
                                 {item.badge && <span className="w-2 h-2 bg-red-500 rounded-full" />}
                               </div>
-                              <p className="text-xs font-normal text-(--color-gray-light)">{item.description}</p>
+                              {item.description && <p className="text-xs font-normal text-(--color-gray-light)">{item.description}</p>}
                             </div>
                           </div>
                         </button>
@@ -175,7 +206,11 @@ export default function SettingsPage() {
                         <Link href={item.href} className="block">
                           <div className="flex items-center gap-4 py-2 bg-white rounded-xl hover:bg-gray-50">
                             <div className="p-2 bg-(--color-button-table) rounded-md">
-                              <BusFront className="h-5 w-5 text-white" />
+                              {item.label === t("enablePush") ? (
+                                <Bell className="h-5 w-5 text-white" />
+                              ) : (
+                                <BusFront className="h-5 w-5 text-white" />
+                              )}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
@@ -195,7 +230,11 @@ export default function SettingsPage() {
                         >
                           <div className="flex items-center gap-4 py-2 bg-white rounded-xl hover:bg-gray-50">
                             <div className="p-2 bg-(--color-button-table) rounded-md">
-                              <BusFront className="h-5 w-5 text-white" />
+                              {item.label === t("enablePush") ? (
+                                <Bell className="h-5 w-5 text-white" />
+                              ) : (
+                                <BusFront className="h-5 w-5 text-white" />
+                              )}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2">

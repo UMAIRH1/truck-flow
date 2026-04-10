@@ -8,6 +8,7 @@ import { DollarSign, Clock, CreditCard, Truck, ArrowRight, ChartColumn, Plus, Us
 import Link from "next/link";
 import api from "@/lib/api";
 import { useTranslations } from "next-intl";
+import { NotificationBanner } from "@/components/notifications/NotificationBanner";
 
 interface DashboardStats {
   totalLoads: number;
@@ -149,6 +150,11 @@ export function ManagerDashboard() {
   return (
     <div className="min-h-screen">
       <Header title={t("header.dashboard")} />
+      
+      <div className="max-w-7xl mx-auto px-4 lg:px-6 pt-4">
+        <NotificationBanner />
+      </div>
+
       <div className=" max-w-7xl mx-auto bg-(--color-yellow-light)">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 px-4 py-6 lg:px-6 rounded-t-2xl md:rounded-none bg-(--color-white)">
           <div className="space-y-4 lg:col-span-1">
