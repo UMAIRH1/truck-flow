@@ -26,14 +26,17 @@ export default function SettingsPage() {
   const tHeader = useTranslations("header");
 
   const handleEnableNotifications = async () => {
+    toast.info("Notification setting clicked...");
     try {
       const token = await requestNotificationPermission();
       if (token) {
-        toast.success("Push notifications enabled!");
+        toast.success("Push notifications activated! ✅");
+      } else {
+        toast.error("Failed to get token. Check permission settings.");
       }
     } catch (error) {
       console.error("Failed to enable notifications:", error);
-      toast.error("Failed to enable notifications");
+      toast.error("Error enabling notifications. Try again.");
     }
   };
 
