@@ -9,6 +9,7 @@ export interface User {
   avatar?: string;
   role: UserRole;
   country?: string;
+  preferredLanguage?: string;
   createdAt: Date;
 }
 
@@ -40,6 +41,7 @@ export interface Load {
   assignedDriver?: Driver;
   status: LoadStatus;
   notes?: string;
+  initialImages?: string[];
   podImages?: string[];
   invoices?: string[];
   documents?: string[];
@@ -86,6 +88,9 @@ export interface Route {
   tolls: number;
   otherExpenses: number;
   notes?: string;
+  podImage?: string;
+  invoices?: string[];
+  documents?: string[];
   loadIds: string[];
   loads?: Load[];
   totalRevenue?: number;

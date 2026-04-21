@@ -222,6 +222,7 @@ class ApiClient {
     fuelPricePerLiter?: number;
     driverDailyCost?: number;
     truckCostPerKm?: number;
+    initialImages?: string[];
   }) {
     return this.request('/loads/', {
       method: 'POST',
@@ -254,6 +255,7 @@ class ApiClient {
     tolls?: number;
     otherExpenses?: number;
     notes?: string;
+    initialImages?: string[];
   }>) {
     return this.request(`/loads/${id}`, {
       method: 'PATCH',
@@ -348,6 +350,7 @@ class ApiClient {
     country?: string;
     avatar?: string;
     password?: string;
+    preferredLanguage?: string;
   }) {
     return this.request('/users/profile', {
       method: 'PATCH',
@@ -475,6 +478,17 @@ class ApiClient {
   async startRoute(routeId: string) {
     return this.request(`/routes/${routeId}/start`, {
       method: 'PATCH',
+    });
+  }
+
+  async uploadRouteDocuments(routeId: string, data: {
+    invoices?: string[];
+    documents?: string[];
+    podImage?: string;
+  }) {
+    return this.request(`/routes/${routeId}/documents`, {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   }
 

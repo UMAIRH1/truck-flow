@@ -18,6 +18,7 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<void>;
   logout: () => void;
   switchRole: (role: UserRole) => void;
+  updateProfile: (data: any) => Promise<void>;
   clearError: () => void;
 }
 
@@ -51,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               email: response.user.email,
               phone: response.user.phone,
               role: response.user.role,
+              preferredLanguage: response.user.preferredLanguage,
               createdAt: new Date(response.user.createdAt),
             };
             setUser(userData);
@@ -87,6 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: response.user.email,
             phone: response.user.phone,
             role: response.user.role,
+            preferredLanguage: response.user.preferredLanguage,
             createdAt: new Date(response.user.createdAt),
           };
           setUser(userData);
@@ -166,6 +169,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.warn("Role switching not supported with API authentication");
   }, []);
 
+  const updateProfile = useCallback(async (data: any) => {
+    try {
+      const response = await api.updateProfile(data);
+      if (response.success && response.user) {
+        const updatedUser: User = {
+          ...user!,
+          name: response.user.name || user!.name,
+          email: response.user.email || user!.email,
+          phone: response.user.phone || user!.phone,
+          preferredLanguage: response.user.preferredLanguage || user!.preferredLanguage,
+          avatar: response.user.avatar || user!.avatar,
+          country: response.user.country || user!.country,
+        };
+        setUser(updatedUser);
+        localStorage.setItem("truckflow_user", JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error("Failed to update profile in context:", error);
+      throw error;
+    }
+  }, [user]);
+
   const handleSetSelectedRole = useCallback((role: UserRole) => {
     setSelectedRole(role);
     localStorage.setItem("truckflow_role", role);
@@ -186,6 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginWithGoogle,
         logout,
         switchRole,
+        updateProfile,
         clearError,
       }}
     >

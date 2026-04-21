@@ -9,10 +9,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useRouter, useParams } from "next/navigation";
 import { 
   Truck, MapPin, Calendar, DollarSign, CheckCircle, XCircle, 
-  Clock, Package, TrendingUp, Fuel, User, Trash2, Play, Navigation, Check
+  Clock, Package, TrendingUp, Fuel, User, Trash2, Play, Navigation, Check, Upload, FileText
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/api";
+import { DocumentViewer } from "@/components/shared/DocumentViewer";
 
 export default function RouteDetailPage() {
   const router = useRouter();
@@ -24,6 +25,9 @@ export default function RouteDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [loadActionLoading, setLoadActionLoading] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState("");
+  const [viewerFilename, setViewerFilename] = useState("");
 
   useEffect(() => {
     const foundRoute = routes.find(r => r.id === params.id);
@@ -148,6 +152,18 @@ export default function RouteDetailPage() {
       case "completed": return { color: "bg-gray-100 text-gray-800 border-gray-200", label: t("tabs.completed") };
       default: return { color: "bg-gray-100 text-gray-800 border-gray-200", label: status };
     }
+  };
+
+  const openDocument = (url: string, filename: string) => {
+    setViewerUrl(url);
+    setViewerFilename(filename);
+    setViewerOpen(true);
+  };
+
+  const closeViewer = () => {
+    setViewerOpen(false);
+    setViewerUrl("");
+    setViewerFilename("");
   };
 
   const getStatusLabel = (status: string) => {
@@ -324,6 +340,108 @@ export default function RouteDetailPage() {
           </Card>
         )}
 
+        {/* --- Document Display Section --- */}
+        {(route.podImage || (route.invoices && route.invoices.length > 0) || (route.documents && route.documents.length > 0)) && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold px-1">{t("loadStatus.documents")}</h2>
+            
+            {/* POD Image */}
+            {route.podImage && (
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    {t("loadStatus.pod")}
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <button
+                      onClick={() => openDocument(route.podImage, "pod-image.jpg")}
+                      className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-yellow-400 transition-colors group cursor-pointer"
+                    >
+                      <img src={route.podImage} alt="POD" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                        <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-semibold">View</span>
+                      </div>
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Invoices */}
+            {route.invoices && route.invoices.length > 0 && (
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-blue-600" />
+                    {t("loadStatus.invoices")}
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {route.invoices.map((file: string, index: number) => {
+                      const isImage = file.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => openDocument(file, `invoice-${index + 1}.jpg`)}
+                          className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-yellow-400 transition-colors group cursor-pointer"
+                        >
+                          {isImage ? (
+                            <img src={file} alt={`Invoice ${index + 1}`} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gray-50">
+                              <FileText className="h-10 w-10 text-gray-400 mb-1" />
+                              <span className="text-[10px] text-gray-500 text-center">Invoice {index + 1}</span>
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                            <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-semibold">View</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Other Documents */}
+            {route.documents && route.documents.length > 0 && (
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-gray-600" />
+                    {t("loadStatus.otherDocuments")}
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {route.documents.map((file: string, index: number) => {
+                      const isImage = file.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => openDocument(file, `document-${index + 1}.jpg`)}
+                          className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-yellow-400 transition-colors group cursor-pointer"
+                        >
+                          {isImage ? (
+                            <img src={file} alt={`Document ${index + 1}`} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gray-50">
+                              <FileText className="h-10 w-10 text-gray-400 mb-1" />
+                              <span className="text-[10px] text-gray-500 text-center">Doc {index + 1}</span>
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                            <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-semibold">View</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+
         {/* Loads - with driver actions when route is in-progress */}
         <Card>
           <CardContent className="pt-6">
@@ -498,18 +616,21 @@ export default function RouteDetailPage() {
                 </p>
               </div>
             </div>
-            <div className="pt-2">
+            <div className="pt-2 space-y-3">
               <Button
-                onClick={handleCompleteRoute}
-                disabled={actionLoading}
-                className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded-2xl flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95"
+                onClick={() => router.push(`/routes/${route.id}/upload-pod`)}
+                className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
               >
-                {actionLoading ? (
-                  <Clock className="h-6 w-6 animate-spin" />
-                ) : (
-                  <CheckCircle className="h-6 w-6" />
-                )}
-                {actionLoading ? t("routes.completing") : t("routes.completeRoute")}
+                <Upload className="w-5 h-5" />
+                {t("loadStatus.uploadPod")}
+              </Button>
+              <Button
+                onClick={() => router.push(`/routes/${route.id}/upload-documents`)}
+                variant="outline"
+                className="w-full h-12 border-2 border-green-600 text-green-700 font-semibold rounded-full flex items-center justify-center gap-2 transition-all active:scale-95"
+              >
+                <FileText className="w-5 h-5" />
+                {t("loadStatus.uploadInvoices")}
               </Button>
             </div>
           </div>
@@ -566,6 +687,15 @@ export default function RouteDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Document Viewer Modal */}
+      {viewerOpen && (
+        <DocumentViewer
+          url={viewerUrl}
+          filename={viewerFilename}
+          onClose={closeViewer}
+        />
+      )}
     </MobileLayout>
   );
 }

@@ -253,7 +253,7 @@ export default function AddLoadPage() {
         fuel: parseFloat(formData.fuel) || 0,
         tolls: parseFloat(formData.tolls) || 0,
         otherExpenses: parseFloat(formData.otherExpenses) || 0,
-        podImages: images,
+        initialImages: images,
         // Cost model fields
         fuelConsumption: parseFloat(formData.fuelConsumption) || 30,
         fuelPricePerLiter: parseFloat(formData.fuelPricePerLiter) || 0,

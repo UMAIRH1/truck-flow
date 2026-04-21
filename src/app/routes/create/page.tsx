@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Truck, User, Calendar, DollarSign, Fuel } from "lucide-react";
+import { Truck, User, Calendar, DollarSign, Fuel, X } from "lucide-react";
 import { GooglePlacesInput, GoogleMapsLoader } from "@/components/shared";
 import api from "@/lib/api";
 
@@ -33,6 +33,8 @@ export default function CreateRoutePage() {
   const [originSelected, setOriginSelected] = useState(false);
   const [destinationSelected, setDestinationSelected] = useState(false);
   const [driverLocationSelected, setDriverLocationSelected] = useState(false);
+  const [showPotentialProfit, setShowPotentialProfit] = useState(false);
+  const [estimatedRevenue, setEstimatedRevenue] = useState<string>("");
 
   const [originCoords, setOriginCoords] = useState<{lat: number, lng: number} | null>(null);
   const [destinationCoords, setDestinationCoords] = useState<{lat: number, lng: number} | null>(null);
@@ -190,7 +192,14 @@ export default function CreateRoutePage() {
     const totalCost = fuelCost + driverCost + truckCost + tolls + other;
 
     const selectedLoads = loads.filter(load => formData.selectedLoadIds.includes(load.id));
-    const totalRevenue = selectedLoads.reduce((sum, load) => sum + (load.clientPrice || 0), 0);
+    const hasLoads = selectedLoads.length > 0;
+    
+    // Use manual revenue if no loads are selected but profit calculation is toggled
+    const manualRevenue = parseFloat(estimatedRevenue) || 0;
+    const totalRevenue = hasLoads 
+      ? selectedLoads.reduce((sum, load) => sum + (load.clientPrice || 0), 0)
+      : manualRevenue;
+
     const profit = totalRevenue - totalCost;
 
     return {
@@ -203,7 +212,8 @@ export default function CreateRoutePage() {
       distance,
       days,
       tolls,
-      other
+      other,
+      hasLoads
     };
   };
 
@@ -548,15 +558,63 @@ export default function CreateRoutePage() {
                   <div className="font-semibold text-blue-900">{t("totalCost")}:</div>
                   <div className="font-bold text-right text-blue-900">€{economics.totalCost.toFixed(2)}</div>
                   
-                  <div className="font-semibold text-green-700">{t("totalRevenue")}:</div>
-                  <div className="font-bold text-right text-green-700">€{economics.totalRevenue.toFixed(2)}</div>
-                  
-                  <div className="border-t-2 border-blue-300 col-span-2 my-1"></div>
-                  
-                  <div className="text-lg font-bold text-blue-900">{t("projectedProfit")}:</div>
-                  <div className={`text-lg font-bold text-right ${economics.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    €{economics.profit.toFixed(2)}
-                  </div>
+                  {(economics.hasLoads || showPotentialProfit) ? (
+                    <>
+                      <div className="border-t border-blue-200 col-span-2 my-1"></div>
+                      
+                      <div className="font-semibold text-green-700">
+                        {economics.hasLoads ? t("totalRevenue") : "Estimated Revenue"}:
+                      </div>
+                      <div className="font-bold text-right text-green-700">
+                        €{economics.totalRevenue.toFixed(2)}
+                      </div>
+                      
+                      <div className="border-t-2 border-blue-300 col-span-2 my-1"></div>
+                      
+                      <div className="text-lg font-bold text-blue-900">{t("projectedProfit")}:</div>
+                      <div className={`text-lg font-bold text-right ${economics.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        €{economics.profit.toFixed(2)}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="col-span-2 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowPotentialProfit(true)}
+                        className="w-full text-xs h-8 border-dashed border-blue-400 text-blue-600 hover:bg-blue-100"
+                      >
+                        <DollarSign className="w-3 h-3 mr-1" />
+                        Calculate Potential Profit
+                      </Button>
+                    </div>
+                  )}
+
+                  {showPotentialProfit && !economics.hasLoads && (
+                    <div className="col-span-2 pt-2">
+                       <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Manual Revenue Estimate (€)</label>
+                       <div className="flex gap-2">
+                          <Input 
+                            type="number"
+                            value={estimatedRevenue}
+                            onChange={(e) => setEstimatedRevenue(e.target.value)}
+                            placeholder="Enter expected client price"
+                            className="text-xs h-8"
+                          />
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            onClick={() => {
+                              setShowPotentialProfit(false);
+                              setEstimatedRevenue("");
+                            }}
+                            className="h-8 px-2 text-gray-400 hover:text-red-500"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                       </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

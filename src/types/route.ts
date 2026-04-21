@@ -41,6 +41,9 @@ export interface Route {
   tolls: number;
   otherExpenses: number;
   notes?: string;
+  podImage?: string;
+  invoices?: string[];
+  documents?: string[];
   createdBy: {
     id: string;
     name: string;

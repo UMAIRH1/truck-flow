@@ -328,6 +328,27 @@ export default function LoadStatusPage() {
         )}
       </div>
 
+      {/* Reference Photos from Manager */}
+      {load.initialImages && load.initialImages.length > 0 && (
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="font-bold text-lg mb-4 text-black">Reference Photos</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {load.initialImages.map((image, index) => (
+              <button
+                key={index}
+                onClick={() => openDocument(image, `reference-${index + 1}.jpg`)}
+                className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-yellow-400 transition-colors group cursor-pointer"
+              >
+                <img src={image} alt={`Reference ${index + 1}`} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">
+                  <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-semibold">View</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Timeline */}
       {timeline.length > 0 && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">

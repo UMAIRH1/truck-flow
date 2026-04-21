@@ -19,6 +19,7 @@ interface RouteContextType {
   completeRoute: (id: string) => Promise<void>;
   addLoadsToRoute: (routeId: string, loadIds: string[]) => Promise<void>;
   removeLoadFromRoute: (routeId: string, loadId: string) => Promise<void>;
+  uploadDocuments: (routeId: string, data: { invoices?: string[]; documents?: string[]; podImage?: string }) => Promise<void>;
 }
 
 const RouteContext = createContext<RouteContextType | undefined>(undefined);
@@ -69,6 +70,9 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
       tolls: apiRoute.tolls || 0,
       otherExpenses: apiRoute.otherExpenses || 0,
       notes: apiRoute.notes,
+      podImage: apiRoute.podImage || "",
+      invoices: apiRoute.invoices || [],
+      documents: apiRoute.documents || [],
       createdBy: {
         id: apiRoute.createdBy?._id || apiRoute.createdBy,
         name: apiRoute.createdBy?.name || "",
@@ -191,6 +195,27 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const uploadDocuments = async (routeId: string, data: { invoices?: string[]; documents?: string[]; podImage?: string }) => {
+    try {
+      setLoading(true);
+      const response = await api.uploadRouteDocuments(routeId, data);
+      if (response.success && response.route) {
+        setRoutes((prev) =>
+          prev.map((route) =>
+            route.id === routeId ? transformRoute(response.route) : route
+          )
+        );
+      }
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || "Failed to upload documents");
+      console.error("Failed to upload documents:", err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const addLoadsToRoute = async (routeId: string, loadIds: string[]) => {
     try {
       const response = await api.addLoadsToRoute(routeId, loadIds);
@@ -244,6 +269,7 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
         completeRoute,
         addLoadsToRoute,
         removeLoadFromRoute,
+        uploadDocuments,
       }}
     >
       {children}

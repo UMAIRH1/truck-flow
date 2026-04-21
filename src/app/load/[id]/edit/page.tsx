@@ -11,7 +11,8 @@ import { InputWithIcon } from "@/app/add-load/_components/InputWithIcon";
 import { SelectWithIcon } from "@/app/add-load/_components/SelectWithIcon";
 import { LocationPicker } from "@/app/add-load/_components/LocationPicker";
 import { Textarea } from "@/components/ui/textarea";
-import { BusFront, User, UserRound } from "lucide-react";
+import { BusFront, Camera, Loader2, User, UserRound, X } from "lucide-react";
+import { uploadToCloudinary, validateImageFile } from "@/lib/cloudinary";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 
@@ -21,6 +22,7 @@ export default function EditLoadPage() {
   const { getLoadById, refreshLoads } = useLoads();
   const t = useTranslations("addLoad");
   const tHeader = useTranslations("header");
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const load = getLoadById(params.id as string);
   const [drivers, setDrivers] = useState<any[]>([]);
@@ -47,6 +49,8 @@ export default function EditLoadPage() {
     otherExpenses: "",
     notes: "",
   });
+  const [images, setImages] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Load existing data
   useEffect(() => {
@@ -70,8 +74,41 @@ export default function EditLoadPage() {
         otherExpenses: load.otherExpenses?.toString() || "",
         notes: load.notes || "",
       });
+      setImages(load.initialImages || []);
     }
   }, [load]);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    setError("");
+
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+          throw new Error(validation.error);
+        }
+        return uploadToCloudinary(file);
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      setImages((prev) => [...prev, ...uploadedUrls]);
+    } catch (err: any) {
+      setError(err.message || "Failed to upload image. Please try again.");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   // Fetch drivers
   useEffect(() => {
@@ -146,6 +183,7 @@ export default function EditLoadPage() {
         tolls: parseFloat(formData.tolls) || 0,
         otherExpenses: parseFloat(formData.otherExpenses) || 0,
         notes: formData.notes,
+        initialImages: images,
       };
 
       const response = await api.updateLoad(params.id as string, updateData);
@@ -315,13 +353,48 @@ export default function EditLoadPage() {
               />
             </div>
 
-            <Textarea
-              id="notes"
-              placeholder={t("notes")}
-              className="rounded-sm! border border-[#CECECE]!"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            />
+            <div className="grid grid-cols-12 gap-2 md:gap-4">
+              <div className="col-span-8">
+                <Textarea
+                  id="notes"
+                  placeholder={t("notes")}
+                  className="rounded-sm! border border-[#CECECE]!"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                />
+              </div>
+
+              <div className="col-span-4">
+                <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" multiple className="hidden" />
+                <div className="flex items-center gap-4 flex-wrap">
+                  {images.map((image, index) => (
+                    <div key={index} className="relative w-24 h-24">
+                      <img src={image} alt={`Upload ${index + 1}`} className="w-full h-full object-cover rounded-xl" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <div
+                    onClick={() => !isUploading && fileInputRef.current?.click()}
+                    className={`w-full h-20 bg-[#E5E9EE]  border border-[#CECECE]! rounded-sm flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:border-yellow-400 transition-colors ${isUploading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {isUploading ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      <>
+                        <Camera className="h-6 w-6 mb-1 text-[#0095FF]" />
+                        <span className="text-xs text-[#0095FF] text-center">{t("uploadPhotos")}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
