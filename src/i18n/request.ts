@@ -1,8 +1,9 @@
 import { getRequestConfig } from "next-intl/server";
+import { cookies } from "next/headers";
 
 export default getRequestConfig(async () => {
-  // Locale for static generation
-  const locale = "en";
+  const cookieStore = await cookies();
+  const locale = cookieStore.get("truck-flow-locale")?.value || "en";
 
   try {
     const messages = (await import(`../../messages/${locale}.json`)).default;
@@ -15,7 +16,7 @@ export default getRequestConfig(async () => {
     console.error(`Failed to load messages for locale ${locale}:`, error);
     return {
       locale,
-      messages: {},
+      messages: (await import(`../../messages/en.json`)).default,
       timeZone: "Europe/Athens",
     };
   }

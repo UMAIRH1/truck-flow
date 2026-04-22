@@ -152,59 +152,59 @@ export default function LoadStatusPage() {
       {/* Manager-specific Financial Details */}
       {isManager && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-          <h3 className="font-bold text-lg mb-4 text-black">Financial Details</h3>
+          <h3 className="font-bold text-lg mb-4 text-black">{t("financialDetails")}</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-green-50 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="h-4 w-4 text-green-600" />
-                <span className="text-xs text-gray-600">Client Price</span>
+                <span className="text-xs text-gray-600">{t("clientPrice")}</span>
               </div>
               <p className="text-xl font-bold text-green-600">€{load.clientPrice.toFixed(2)}</p>
             </div>
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="h-4 w-4 text-blue-600" />
-                <span className="text-xs text-gray-600">Driver Price</span>
+                <span className="text-xs text-gray-600">{t("driverPrice")}</span>
               </div>
               <p className="text-xl font-bold text-blue-600">€{(load.driverPrice || 0).toFixed(2)}</p>
             </div>
             <div className="bg-orange-50 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <AlertCircle className="h-4 w-4 text-orange-600" />
-                <span className="text-xs text-gray-600">Total Expenses</span>
+                <span className="text-xs text-gray-600">{t("totalExpenses")}</span>
               </div>
               <p className="text-xl font-bold text-orange-600">€{((load.fuel || 0) + (load.tolls || 0) + (load.otherExpenses || 0)).toFixed(2)}</p>
             </div>
             <div className={`${profit >= 0 ? 'bg-purple-50' : 'bg-red-50'} p-4 rounded-lg`}>
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className={`h-4 w-4 ${profit >= 0 ? 'text-purple-600' : 'text-red-600'}`} />
-                <span className="text-xs text-gray-600">Profit</span>
+                <span className="text-xs text-gray-600">{t("profit")}</span>
               </div>
               <p className={`text-xl font-bold ${profit >= 0 ? 'text-purple-600' : 'text-red-600'}`}>€{profit.toFixed(2)}</p>
             </div>
           </div>
 
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <h4 className="font-semibold text-sm mb-3 text-gray-700">Expense Breakdown</h4>
+            <h4 className="font-semibold text-sm mb-3 text-gray-700">{t("expenseBreakdown")}</h4>
             <div className="grid grid-cols-3 gap-3">
               <div className="flex items-center gap-2">
                 <Fuel className="h-4 w-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-gray-500">Fuel</p>
+                  <p className="text-xs text-gray-500">{t("fuel")}</p>
                   <p className="font-semibold text-sm">€{(load.fuel || 0).toFixed(2)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-gray-500">Tolls</p>
+                  <p className="text-xs text-gray-500">{t("tolls")}</p>
                   <p className="font-semibold text-sm">€{(load.tolls || 0).toFixed(2)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-gray-500" />
                 <div>
-                  <p className="text-xs text-gray-500">Other</p>
+                  <p className="text-xs text-gray-500">{t("other")}</p>
                   <p className="font-semibold text-sm">€{(load.otherExpenses || 0).toFixed(2)}</p>
                 </div>
               </div>
@@ -216,22 +216,22 @@ export default function LoadStatusPage() {
       {/* Driver-specific Payment Details */}
       {isDriver && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-          <h3 className="font-bold text-lg mb-4 text-black">Payment Details</h3>
+          <h3 className="font-bold text-lg mb-4 text-black">{t("paymentDetails")}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-green-50 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="h-4 w-4 text-green-600" />
-                <span className="text-xs text-gray-600">Your Payment</span>
+                <span className="text-xs text-gray-600">{t("yourPayment")}</span>
               </div>
               <p className="text-2xl font-bold text-green-600">€{(load.driverPrice || 0).toFixed(2)}</p>
             </div>
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="h-4 w-4 text-blue-600" />
-                <span className="text-xs text-gray-600">Payment Terms</span>
+                <span className="text-xs text-gray-600">{t("paymentTerms")}</span>
               </div>
               <p className="text-lg font-bold text-blue-600">{load.paymentTerms} Days</p>
-              <p className="text-xs text-gray-500 mt-1">Expected: {formatDate(load.expectedPayoutDate)}</p>
+              <p className="text-xs text-gray-500 mt-1">{t("expected")}: {formatDate(load.expectedPayoutDate)}</p>
             </div>
           </div>
         </div>
@@ -239,44 +239,42 @@ export default function LoadStatusPage() {
 
       {/* Load Details */}
       <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-        <h3 className="font-bold text-lg mb-4 text-black">Load Details</h3>
+        <h3 className="font-bold text-lg mb-4 text-black">{t("loadDetails")}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-start gap-3">
             <Package className="h-5 w-5 text-gray-500 mt-0.5" />
             <div>
-              <p className="text-xs text-gray-500">Shipping Type</p>
+              <p className="text-xs text-gray-500">{t("shippingType")}</p>
               <p className="font-semibold">{load.shippingType}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <Package className="h-5 w-5 text-gray-500 mt-0.5" />
             <div>
-              <p className="text-xs text-gray-500">Load Weight</p>
+              <p className="text-xs text-gray-500">{t("loadWeight")}</p>
               <p className="font-semibold">{load.loadWeight} KG</p>
             </div>
           </div>
-          {load.pallets && (
             <div className="flex items-start gap-3">
               <Package className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
-                <p className="text-xs text-gray-500">Pallets</p>
+                <p className="text-xs text-gray-500">{t("pallets")}</p>
                 <p className="font-semibold">{load.pallets}</p>
               </div>
             </div>
-          )}
           {isManager && (
             <>
               <div className="flex items-start gap-3">
                 <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
                 <div>
-                  <p className="text-xs text-gray-500">Payment Terms</p>
+                  <p className="text-xs text-gray-500">{t("paymentTerms")}</p>
                   <p className="font-semibold">{load.paymentTerms} Days</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
                 <div>
-                  <p className="text-xs text-gray-500">Expected Payout</p>
+                  <p className="text-xs text-gray-500">{t("expectedPayout")}</p>
                   <p className="font-semibold">{formatDate(load.expectedPayoutDate)}</p>
                 </div>
               </div>
@@ -285,7 +283,7 @@ export default function LoadStatusPage() {
         </div>
         {load.notes && (
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <p className="text-xs text-gray-500 mb-1">Notes</p>
+            <p className="text-xs text-gray-500 mb-1">{t("notes")}</p>
             <p className="text-sm text-gray-700">{load.notes}</p>
           </div>
         )}
@@ -304,7 +302,7 @@ export default function LoadStatusPage() {
               </div>
               <div>
                 <p className="font-semibold text-base">{load.assignedDriver.name}</p>
-                <p className="text-xs text-gray-500">Assigned Driver</p>
+                <p className="text-xs text-gray-500">{t("driver")}</p>
               </div>
             </div>
             {load.assignedDriver.phone && (
@@ -331,7 +329,7 @@ export default function LoadStatusPage() {
       {/* Reference Photos from Manager */}
       {load.initialImages && load.initialImages.length > 0 && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-          <h3 className="font-bold text-lg mb-4 text-black">Reference Photos</h3>
+          <h3 className="font-bold text-lg mb-4 text-black">{t("referencePhotos")}</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {load.initialImages.map((image, index) => (
               <button
@@ -352,7 +350,7 @@ export default function LoadStatusPage() {
       {/* Timeline */}
       {timeline.length > 0 && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-          <h3 className="font-bold text-lg mb-4 text-black">Timeline</h3>
+          <h3 className="font-bold text-lg mb-4 text-black">{t("timeline")}</h3>
           <div className="space-y-4">
             {timeline.map((item, index) => {
               // Check if timestamp exists and is valid
@@ -387,7 +385,7 @@ export default function LoadStatusPage() {
       {/* POD Images */}
       {load.podImages && load.podImages.length > 0 && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-          <h3 className="font-bold text-lg mb-4 text-black">Proof of Delivery</h3>
+          <h3 className="font-bold text-lg mb-4 text-black">{t("pod")}</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {load.podImages.map((image, index) => (
               <button
@@ -408,7 +406,7 @@ export default function LoadStatusPage() {
       {/* Invoices */}
       {load.invoices && load.invoices.length > 0 && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-          <h3 className="font-bold text-lg mb-4 text-black">Invoices</h3>
+          <h3 className="font-bold text-lg mb-4 text-black">{t("invoices")}</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {load.invoices.map((file, index) => {
               // Check if it's an image or document
@@ -457,7 +455,7 @@ export default function LoadStatusPage() {
       {/* Other Documents */}
       {load.documents && load.documents.length > 0 && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-          <h3 className="font-bold text-lg mb-4 text-black">Other Documents</h3>
+          <h3 className="font-bold text-lg mb-4 text-black">{t("otherDocuments")}</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {load.documents.map((file, index) => {
               // Check if it's an image or document
@@ -507,9 +505,9 @@ export default function LoadStatusPage() {
       {isDriver && load.status === "accepted" && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 space-y-4">
           <div>
-            <h3 className="font-bold text-lg mb-2 text-black">Ready to Start?</h3>
+            <h3 className="font-bold text-lg mb-2 text-black">{t("readyToStart")}</h3>
             <p className="text-sm text-gray-600">
-              Click the button below when you are ready to start the journey for this load.
+              {t("readyToStartDesc")}
             </p>
           </div>
           <Button
@@ -524,7 +522,7 @@ export default function LoadStatusPage() {
             className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full flex items-center justify-center gap-2"
           >
             <Truck className="w-5 h-5" />
-            Start Journey
+            {t("startJourney")}
           </Button>
         </div>
       )}
@@ -539,9 +537,9 @@ export default function LoadStatusPage() {
                 <MapPin className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-lg text-white">Navigation</h3>
+                <h3 className="font-bold text-lg text-white">{t("navigation")}</h3>
                 <p className="text-sm text-blue-100">
-                  Get turn-by-turn directions to your destination
+                  {t("navigationDesc")}
                 </p>
               </div>
             </div>
@@ -550,16 +548,16 @@ export default function LoadStatusPage() {
               className="w-full h-14 bg-white text-blue-600 hover:bg-blue-50 font-semibold rounded-full shadow-lg flex items-center justify-center gap-2 text-lg"
             >
               <MapPin className="w-6 h-6" />
-              Start Navigation
+              {t("startNavigation")}
             </Button>
           </div>
 
           {/* Upload Documents Section */}
           <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 space-y-4">
             <div>
-              <h3 className="font-bold text-lg mb-2 text-black">Complete Delivery</h3>
+              <h3 className="font-bold text-lg mb-2 text-black">{t("completeDelivery")}</h3>
               <p className="text-sm text-gray-600">
-                Upload proof of delivery to mark this load as completed.
+                {t("completeDeliveryDesc")}
               </p>
             </div>
             <div className="space-y-3">
@@ -568,7 +566,7 @@ export default function LoadStatusPage() {
                 className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full"
               >
                 <Upload className="w-5 h-5 mr-2" />
-                Upload Proof of Delivery
+                {t("uploadProofOfDelivery")}
               </Button>
               <Button
                 onClick={() => router.push(`/load/${load.id}/upload-documents`)}
@@ -576,7 +574,7 @@ export default function LoadStatusPage() {
                 className="w-full h-12"
               >
                 <Upload className="w-5 h-5 mr-2" />
-                Upload Invoice & Documents
+                {t("uploadInvoicesAndDocs")}
               </Button>
             </div>
           </div>
@@ -588,10 +586,10 @@ export default function LoadStatusPage() {
         <div className="bg-green-50 rounded-xl p-6 shadow-md border border-green-200">
           <div className="flex items-center gap-3 mb-2">
             <Check className="h-6 w-6 text-green-600" />
-            <h3 className="font-bold text-lg text-green-900">Load Completed</h3>
+            <h3 className="font-bold text-lg text-green-900">{t("loadCompleted")}</h3>
           </div>
           <p className="text-sm text-green-700">
-            This load has been marked as completed.
+            {t("loadCompletedDesc")}
           </p>
         </div>
       )}
@@ -599,9 +597,9 @@ export default function LoadStatusPage() {
       {/* Accept/Reject Buttons for Driver - Pending Loads */}
       {isDriver && load.status === "pending" && (
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
-          <h3 className="font-bold text-lg mb-4 text-black">Load Assignment</h3>
+          <h3 className="font-bold text-lg mb-4 text-black">{t("loadAssignment")}</h3>
           <p className="text-sm text-gray-600 mb-4">
-            This load has been assigned to you. Please accept or decline.
+            {t("loadAssignmentDesc")}
           </p>
           <div className="flex gap-4">
             <Button
@@ -617,7 +615,7 @@ export default function LoadStatusPage() {
               variant="outline"
               className="flex-1 h-12 border-red-500 text-red-500 hover:bg-red-50"
             >
-              Decline
+              {tCommon("cancel")}
             </Button>
             <Button
               onClick={async () => {
@@ -630,7 +628,7 @@ export default function LoadStatusPage() {
               }}
               className="flex-1 h-12 bg-green-500 hover:bg-green-600 text-white"
             >
-              Accept Load
+              {t("acceptLoad")}
             </Button>
           </div>
         </div>
@@ -640,9 +638,9 @@ export default function LoadStatusPage() {
       {isManager && load.status === "rejected" && (
         <div className="bg-red-50 rounded-xl p-6 shadow-md border border-red-200">
           <div className="mb-4">
-            <h3 className="font-bold text-lg text-red-900 mb-2">Load Rejected</h3>
+            <h3 className="font-bold text-lg text-red-900 mb-2">{t("loadRejected")}</h3>
             <p className="text-sm text-red-700">
-              This load was rejected by the driver. You can reassign it to another driver.
+              {t("loadRejectedDesc")}
             </p>
           </div>
           <Button
@@ -650,7 +648,7 @@ export default function LoadStatusPage() {
             className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-full"
           >
             <User className="w-5 h-5 mr-2" />
-            Reassign to Another Driver
+            {t("reassignToAnother")}
           </Button>
         </div>
       )}
@@ -662,7 +660,7 @@ export default function LoadStatusPage() {
             onClick={() => router.push(`/load/${load.id}/edit`)}
             className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-full"
           >
-            Edit Load Details
+            {t("editLoadDetails")}
           </Button>
         </div>
       )}
