@@ -20,7 +20,8 @@ export default function LoadHistoryPage() {
 
   const filteredLoads = loads.filter((load) => {
     const matchesStatus = load.status === activeTab;
-    const matchesDate = !dateFilter || new Date(load.loadingDate).toDateString() === dateFilter.toDateString();
+    const loadDate = load.loadingDate ? new Date(load.loadingDate) : null;
+    const matchesDate = !dateFilter || (loadDate && !isNaN(loadDate.getTime()) && loadDate.toDateString() === dateFilter.toDateString());
     return matchesStatus && matchesDate;
   });
 

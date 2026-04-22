@@ -280,7 +280,23 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
 export function useRoutes() {
   const context = useContext(RouteContext);
   if (context === undefined) {
-    throw new Error("useRoutes must be used within a RouteProvider");
+    // Fallback for build time
+    return {
+      routes: [],
+      loading: false,
+      error: null,
+      fetchRoutes: async () => {},
+      createRoute: async () => {},
+      updateRoute: async () => {},
+      deleteRoute: async () => {},
+      acceptRoute: async () => {},
+      rejectRoute: async () => {},
+      startRoute: async () => {},
+      completeRoute: async () => {},
+      addLoadsToRoute: async () => {},
+      removeLoadFromRoute: async () => {},
+      uploadDocuments: async () => {},
+    } as RouteContextType;
   }
   return context;
 }

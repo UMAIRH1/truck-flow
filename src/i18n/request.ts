@@ -1,13 +1,22 @@
 import { getRequestConfig } from "next-intl/server";
 
 export default getRequestConfig(async () => {
-  // For client-side i18n without routing, we'll get locale from cookie/localStorage
-  // Default to 'en' if not set
+  // Locale for static generation
   const locale = "en";
 
-  return {
-    locale,
-    messages: (await import(`../../messages/${locale}.json`)).default,
-    timeZone: "Europe/Athens", // Set default timezone for Greece
-  };
+  try {
+    const messages = (await import(`../../messages/${locale}.json`)).default;
+    return {
+      locale,
+      messages,
+      timeZone: "Europe/Athens",
+    };
+  } catch (error) {
+    console.error(`Failed to load messages for locale ${locale}:`, error);
+    return {
+      locale,
+      messages: {},
+      timeZone: "Europe/Athens",
+    };
+  }
 });

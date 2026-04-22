@@ -520,6 +520,7 @@
     "truck": "Truck",
     "truckNumber": "Truck Number",
     "truckNumberPlaceholder": "e.g., TRK-001",
+    "assignDriver": "Assign Driver",
     "startDate": "Start Date",
     "endDate": "End Date",
     "distance": "Distance",
