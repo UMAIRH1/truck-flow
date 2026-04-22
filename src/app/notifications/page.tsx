@@ -14,7 +14,7 @@ export default function NotificationsPage() {
   const handleNotificationClick = (notification: any) => {
     markAsRead(notification.id);
     if (notification.loadId) {
-      router.push(`/active-loads/${notification.loadId}`);
+      router.push(`/load/${notification.loadId}`);
     } else if (notification.routeId) {
       router.push(`/routes/${notification.routeId}`);
     }
