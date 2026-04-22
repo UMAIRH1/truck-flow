@@ -180,7 +180,7 @@ export default function RoutesPage() {
                     <MapPin className="h-4 w-4" />
                     <span>{route.totalDistance} {t("routes.km")}</span>
                   </div>
-                  {!isDriver && (
+                  {!isDriver && route.loads.length > 0 && route.profit >= 0 && (
                   <div className="flex items-center gap-2 text-gray-600">
                     <DollarSign className="h-4 w-4" />
                     <span className="font-semibold text-green-600">
@@ -188,7 +188,7 @@ export default function RoutesPage() {
                     </span>
                   </div>
                 )}
-                {isDriver && (
+                {isDriver && route.loads.length > 0 && route.profit >= 0 && (
                   <div className="flex items-center gap-2 text-gray-600">
                     <DollarSign className="h-4 w-4" />
                     <span className="font-semibold text-blue-600">

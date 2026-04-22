@@ -260,7 +260,7 @@ export default function RouteDetailPage() {
         </Card>
 
         {/* Driver-only: Your Fee */}
-        {isDriver && (
+        {isDriver && route.loads.length > 0 && route.profit >= 0 && (
           <Card>
             <CardContent className="pt-6">
               <h2 className="text-lg font-semibold mb-4">{t("routes.yourFee")}</h2>
@@ -273,7 +273,7 @@ export default function RouteDetailPage() {
         )}
 
         {/* Manager-only: Financial Summary */}
-        {!isDriver && (
+        {!isDriver && route.loads.length > 0 && route.profit >= 0 && (
           <Card>
             <CardContent className="pt-6">
               <h2 className="text-lg font-semibold mb-4">{t("routes.financialSummary")}</h2>
@@ -297,7 +297,7 @@ export default function RouteDetailPage() {
         )}
 
         {/* Manager-only: Cost Breakdown */}
-        {!isDriver && (
+        {!isDriver && route.loads.length > 0 && route.profit >= 0 && (
           <Card>
             <CardContent className="pt-6">
               <h2 className="text-lg font-semibold mb-4">{t("routes.costBreakdown")}</h2>
