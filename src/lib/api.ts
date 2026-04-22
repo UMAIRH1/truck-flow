@@ -288,6 +288,7 @@ class ApiClient {
   async calculateCosts(costData: {
     distance: number;
     clientPrice: number;
+    driverPrice?: number;
     fuelConsumption?: number;
     fuelPricePerLiter?: number;
     driverDailyCost?: number;

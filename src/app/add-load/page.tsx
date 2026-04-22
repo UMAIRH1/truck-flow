@@ -131,6 +131,7 @@ export default function AddLoadPage() {
         const response = await api.calculateCosts({
           distance,
           clientPrice: parseFloat(formData.clientPrice),
+          driverPrice: parseFloat(formData.driverPrice) || 0,
           fuelConsumption: parseFloat(formData.fuelConsumption) || 30,
           fuelPricePerLiter: parseFloat(formData.fuelPricePerLiter) || 0,
           driverDailyCost: parseFloat(formData.driverDailyCost) || 0,
