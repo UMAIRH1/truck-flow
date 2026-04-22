@@ -59,6 +59,7 @@ function transformLoadFromAPI(apiLoad: any): Load {
     } : undefined,
     status: apiLoad.status || "pending",
     notes: apiLoad.notes,
+    initialImages: apiLoad.initialImages || [],
     podImages: apiLoad.podImage ? [apiLoad.podImage] : apiLoad.podImages || [],
     invoices: apiLoad.invoices || [],
     documents: apiLoad.documents || [],
@@ -163,6 +164,7 @@ export function LoadProvider({ children }: { children: ReactNode }) {
           otherExpenses: loadData.otherExpenses || 0,
           notes: loadData.notes,
           driverId: loadData.assignedDriver?.id || undefined,
+          initialImages: loadData.initialImages,
         };
 
         const response = await api.createLoad(apiLoadData);
