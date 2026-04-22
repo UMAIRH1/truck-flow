@@ -286,11 +286,13 @@ export default function RouteDetailPage() {
                   <div className="text-sm text-gray-600">{t("routes.totalCost")}</div>
                   <div className="text-2xl font-bold text-red-600">€{route.totalCost.toFixed(2)}</div>
                 </div>
-                <div className="bg-green-50 p-4 rounded-lg col-span-2">
-                  <div className="text-sm text-gray-600">{t("routes.netProfit")}</div>
-                  <div className="text-3xl font-bold text-green-600">€{route.profit.toFixed(2)}</div>
-                  <div className="text-sm text-gray-500 mt-1">€{route.profitPerKm.toFixed(2)}/{t("routes.km")}</div>
-                </div>
+                {route.profit >= 0 && (
+                  <div className="bg-green-50 p-4 rounded-lg col-span-2">
+                    <div className="text-sm text-gray-600">{t("routes.netProfit")}</div>
+                    <div className="text-3xl font-bold text-green-600">€{route.profit.toFixed(2)}</div>
+                    <div className="text-sm text-gray-500 mt-1">€{route.profitPerKm.toFixed(2)}/{t("routes.km")}</div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
