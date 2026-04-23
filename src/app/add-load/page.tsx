@@ -150,7 +150,7 @@ export default function AddLoadPage() {
 
     const debounceTimer = setTimeout(calculateCosts, 500);
     return () => clearTimeout(debounceTimer);
-  }, [distance, formData.clientPrice, formData.fuelConsumption, formData.fuelPricePerLiter, 
+  }, [distance, formData.clientPrice, formData.driverPrice, formData.fuel, formData.fuelConsumption, formData.fuelPricePerLiter, 
       formData.driverDailyCost, formData.truckCostPerKm, formData.tolls, formData.otherExpenses]);
 
   // Load weight options
