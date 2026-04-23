@@ -194,7 +194,7 @@ export default function RouteDetailPage() {
   const canAcceptReject = isDriver && route.status === 'pending';
   const canStartRoute = isDriver && route.status === 'accepted';
   const isRouteInProgress = route.status === 'in-progress';
-  const allLoadsCompleted = route.loads.length > 0 && route.loads.every((l: any) => l.status === 'completed');
+  const allLoadsCompleted = route.loads.every((l: any) => l.status === 'completed');
   const canCompleteRoute = isDriver && isRouteInProgress && allLoadsCompleted;
 
   return (

@@ -131,11 +131,11 @@ export default function RoutesPage() {
                   <div className="flex items-center gap-2">
                     <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(
                       route.status, 
-                      isDriver && route.status === 'in-progress' && route.loads.length > 0 && route.loads.every((l: any) => l.status === 'completed')
+                      isDriver && route.status === 'in-progress' && route.loads.every((l: any) => l.status === 'completed')
                     )}`}>
                       {getStatusLabel(
                         route.status,
-                        isDriver && route.status === 'in-progress' && route.loads.length > 0 && route.loads.every((l: any) => l.status === 'completed')
+                        isDriver && route.status === 'in-progress' && route.loads.every((l: any) => l.status === 'completed')
                       )}
                     </span>
                     {isManager && (
