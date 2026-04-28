@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from "react";
 import { Load, Driver, LoadStatus, PaymentTerms } from "@/types";
 import api from "@/lib/api";
+import socketService from "@/lib/socket";
 import { useAuth } from "./AuthContext";
 
 interface LoadContextType {
@@ -140,6 +141,55 @@ export function LoadProvider({ children }: { children: ReactNode }) {
     refreshLoads();
     refreshDrivers();
   }, [refreshLoads, refreshDrivers]);
+
+  // WebSocket listener for real-time load updates
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const handleLoadUpdate = (data: any) => {
+      console.log('📦 Real-time load update:', data.action);
+      
+      switch (data.action) {
+        case 'new':
+          // A new load was assigned/broadcast to this driver
+          if (data.load) {
+            const newLoad = transformLoadFromAPI(data.load);
+            setLoads((prev) => {
+              // Avoid duplicates
+              if (prev.some((l) => l.id === newLoad.id)) return prev;
+              return [newLoad, ...prev];
+            });
+          }
+          break;
+          
+        case 'accepted_by_other':
+          // Another driver accepted this broadcast load — remove it
+          if (data.loadId) {
+            setLoads((prev) => prev.filter((l) => l.id !== data.loadId));
+          }
+          break;
+
+        case 'updated':
+          // A load was updated (status change, etc.)
+          if (data.load) {
+            const updatedLoad = transformLoadFromAPI(data.load);
+            setLoads((prev) =>
+              prev.map((l) => (l.id === updatedLoad.id ? updatedLoad : l))
+            );
+          }
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    socketService.on('load_update', handleLoadUpdate);
+
+    return () => {
+      socketService.off('load_update', handleLoadUpdate);
+    };
+  }, [isAuthenticated]);
 
   const addLoad = useCallback(
     async (loadData: Omit<Load, "id" | "createdAt" | "updatedAt">) => {

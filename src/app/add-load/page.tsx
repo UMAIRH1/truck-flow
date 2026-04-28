@@ -16,6 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { GoogleMapsLoader } from "@/components/shared";
 import { InputWithIcon } from "./_components/InputWithIcon";
 import { SelectWithIcon } from "./_components/SelectWithIcon";
+import { MultiDriverSelect } from "./_components/MultiDriverSelect";
 import { LocationPicker } from "./_components/LocationPicker";
 
 export default function AddLoadPage() {
@@ -36,7 +37,7 @@ export default function AddLoadPage() {
     pallets: "",
     clientName: "",
     clientPrice: "",
-    assignedDriverId: "",
+    assignedDriverIds: [] as string[],
     driverPrice: "",
     paymentTerms: 45 as PaymentTerms,
     expectedPayoutDate: "",
@@ -234,7 +235,10 @@ export default function AddLoadPage() {
       const expectedPayoutDate = new Date(loadingDate);
       expectedPayoutDate.setDate(expectedPayoutDate.getDate() + formData.paymentTerms);
 
-      await addLoad({
+      const apiModule = await import("@/lib/api");
+      const api = apiModule.default;
+
+      const apiLoadData: any = {
         pickupLocation: formData.pickupLocation,
         dropoffLocation: formData.dropoffLocation,
         pickupCoords: pickupCoords || undefined,
@@ -243,31 +247,28 @@ export default function AddLoadPage() {
         clientPrice: parseFloat(formData.clientPrice) || 0,
         driverPrice: parseFloat(formData.driverPrice) || 0,
         paymentTerms: formData.paymentTerms,
-        expectedPayoutDate,
         loadingDate,
         loadingTime: formData.loadingTime,
         shippingType: formData.shippingType,
         loadWeight: parseFloat(formData.loadWeight) || 0,
         pallets: parseFloat(formData.pallets) || undefined,
-        status: "pending",
-        notes: formData.notes,
         fuel: parseFloat(formData.fuel) || 0,
         tolls: parseFloat(formData.tolls) || 0,
         otherExpenses: parseFloat(formData.otherExpenses) || 0,
+        notes: formData.notes,
         initialImages: images,
-        // Cost model fields
         fuelConsumption: parseFloat(formData.fuelConsumption) || 30,
         fuelPricePerLiter: parseFloat(formData.fuelPricePerLiter) || 0,
         driverDailyCost: parseFloat(formData.driverDailyCost) || 0,
         truckCostPerKm: parseFloat(formData.truckCostPerKm) || 0,
-        assignedDriver: formData.assignedDriverId ? {
-          id: formData.assignedDriverId,
-          name: drivers.find(d => d._id === formData.assignedDriverId)?.name || "",
-          phone: "",
-          email: "",
-          isAvailable: true,
-        } : undefined,
-      });
+      };
+
+      // Multi-driver support: send driverIds array
+      if (formData.assignedDriverIds.length > 0) {
+        apiLoadData.driverIds = formData.assignedDriverIds;
+      }
+
+      const response = await api.createLoad(apiLoadData);
 
       router.push("/");
     } catch (err: any) {
@@ -395,12 +396,11 @@ export default function AddLoadPage() {
                   />
                 </div>
                 <div>
-                  <SelectWithIcon
-                    icon={BusFront}
-                    value={formData.assignedDriverId}
-                    onValueChange={(value) => setFormData({ ...formData, assignedDriverId: value })}
-                    placeholder={isLoadingDrivers ? t("loadingDrivers") || "Loading drivers..." : t("assignDriver")}
+                  <MultiDriverSelect
                     options={driverOptions}
+                    selectedValues={formData.assignedDriverIds}
+                    onSelectionChange={(values) => setFormData({ ...formData, assignedDriverIds: values })}
+                    placeholder={isLoadingDrivers ? t("loadingDrivers") || "Loading drivers..." : t("assignDriver")}
                     disabled={isLoadingDrivers}
                   />
                 </div>

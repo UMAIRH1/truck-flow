@@ -218,6 +218,7 @@ class ApiClient {
     otherExpenses?: number;
     notes?: string;
     driverId?: string;
+    driverIds?: string[];
     fuelConsumption?: number;
     fuelPricePerLiter?: number;
     driverDailyCost?: number;
