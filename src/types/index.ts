@@ -94,6 +94,10 @@ export interface Route {
   documents?: string[];
   loadIds: string[];
   loads?: Load[];
+  fuelCost?: number;
+  driverCost: number;
+  truckCost?: number;
+  totalCost?: number;
   totalRevenue?: number;
   profit?: number;
   profitPerKm?: number;

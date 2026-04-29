@@ -351,7 +351,14 @@ export function LoadProvider({ children }: { children: ReactNode }) {
 
   const getLoadsByDriver = useCallback(
     (driverId: string) => {
-      return loads.filter((load) => load.assignedDriver?.id === driverId);
+      return loads.filter((load) => 
+        load.assignedDriver?.id === driverId || 
+        load.assignedDriver?._id === driverId ||
+        (typeof load.assignedDriver === 'string' && load.assignedDriver === driverId) ||
+        load.broadcastTo?.some(d => 
+          d.id === driverId || d._id === driverId || (typeof d === 'string' && d === driverId)
+        )
+      );
     },
     [loads]
   );
@@ -359,7 +366,14 @@ export function LoadProvider({ children }: { children: ReactNode }) {
   const getPendingLoadsForDriver = useCallback(
     (driverId: string) => {
       return loads.filter(
-        (load) => load.assignedDriver?.id === driverId && load.status === "pending"
+        (load) => (
+          load.assignedDriver?.id === driverId || 
+          load.assignedDriver?._id === driverId ||
+          (typeof load.assignedDriver === 'string' && load.assignedDriver === driverId) ||
+          load.broadcastTo?.some(d => 
+            d.id === driverId || d._id === driverId || (typeof d === 'string' && d === driverId)
+          )
+        ) && load.status === "pending"
       );
     },
     [loads]

@@ -23,7 +23,7 @@ interface DriverDashboardStats {
 }
 
 export function DriverDashboard() {
-  const { loads, updateLoadStatus, assignDriver, refreshLoads, isLoading, error } = useLoads();
+  const { loads, updateLoadStatus, assignDriver, refreshLoads, getLoadsByDriver, isLoading, error } = useLoads();
   const { routes } = useRoutes();
   const { user } = useAuth();
   const router = useRouter();
@@ -43,18 +43,20 @@ export function DriverDashboard() {
       } catch (error: any) {
         console.error("Failed to fetch dashboard stats:", error);
         // Fallback to calculated stats from loads
-        const driverLoads = loads.filter((load) => load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id);
-        const completedLoads = driverLoads.filter((l) => l.status === "completed");
-        const acceptedLoads = driverLoads.filter((l) => l.status === "accepted" || l.status === "in-progress");
+        if (user?.id) {
+          const driverLoads = getLoadsByDriver(user.id);
+          const completedLoads = driverLoads.filter((l) => l.status === "completed");
+          const acceptedLoads = driverLoads.filter((l) => l.status === "accepted" || l.status === "in-progress");
 
-        setDashboardStats({
-          assignedLoads: driverLoads.filter((l) => l.status === "pending").length,
-          acceptedLoads: acceptedLoads.length,
-          completedLoads: completedLoads.length,
-          declinedLoads: 0,
-          totalEarnings: completedLoads.reduce((sum, load) => sum + (load.driverPrice || 0), 0),
-          pendingEarnings: acceptedLoads.reduce((sum, load) => sum + (load.driverPrice || 0), 0),
-        });
+          setDashboardStats({
+            assignedLoads: driverLoads.filter((l) => l.status === "pending").length,
+            acceptedLoads: acceptedLoads.length,
+            completedLoads: completedLoads.length,
+            declinedLoads: 0,
+            totalEarnings: completedLoads.reduce((sum, load) => sum + (load.driverPrice || 0), 0),
+            pendingEarnings: acceptedLoads.reduce((sum, load) => sum + (load.driverPrice || 0), 0),
+          });
+        }
       } finally {
         setIsLoadingStats(false);
       }
@@ -63,7 +65,7 @@ export function DriverDashboard() {
     if (!isLoading && loads.length >= 0) {
       fetchDashboardStats();
     }
-  }, [loads, isLoading, user]);
+  }, [loads, isLoading, user, getLoadsByDriver]);
 
   if (isLoading || isLoadingStats) {
     return (
@@ -95,7 +97,7 @@ export function DriverDashboard() {
     );
   }
 
-  const driverLoads = loads.filter((load) => (load.assignedDriver?.name === user?.name || load.assignedDriver?.id === user?.id) && !load.routeId);
+  const driverLoads = user?.id ? getLoadsByDriver(user.id).filter(l => !l.routeId) : [];
   const pendingLoads = driverLoads.filter((l) => l.status === "pending");
   const completedLoads = driverLoads.filter((l) => l.status === "completed");
   const acceptedLoads = driverLoads.filter((l) => l.status === "accepted" || l.status === "in-progress");

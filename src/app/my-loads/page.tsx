@@ -26,8 +26,18 @@ function MyLoadsContent() {
 
   // Filter loads for this driver - only show loads assigned to them and NOT attached to an active route
   const driverLoads = loads.filter((load) => {
-    const isAssigned = load.assignedDriver?.id === user?.id || load.assignedDriver?.name === user?.name;
-    const isBroadcasted = load.broadcastTo?.some(d => d.id === user?.id);
+    const isAssigned = 
+      load.assignedDriver?.id === user?.id || 
+      load.assignedDriver?._id === user?.id ||
+      load.assignedDriver?.name === user?.name ||
+      (typeof load.assignedDriver === 'string' && load.assignedDriver === user?.id);
+      
+    const isBroadcasted = load.broadcastTo?.some(d => 
+      d.id === user?.id || 
+      d._id === user?.id || 
+      (typeof d === 'string' && d === user?.id)
+    );
+    
     return (isAssigned || isBroadcasted) && !load.routeId;
   });
 
