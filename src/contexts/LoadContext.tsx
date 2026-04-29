@@ -145,7 +145,16 @@ export function LoadProvider({ children }: { children: ReactNode }) {
 
   // WebSocket listener for real-time load updates
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      socketService.disconnect();
+      return;
+    }
+
+    // Connect to socket with current token
+    const token = localStorage.getItem("truckflow_token");
+    if (token) {
+      socketService.connect(token);
+    }
 
     const handleLoadUpdate = (data: any) => {
       console.log('📦 Real-time load update:', data.action);
@@ -189,6 +198,8 @@ export function LoadProvider({ children }: { children: ReactNode }) {
 
     return () => {
       socketService.off('load_update', handleLoadUpdate);
+      // We don't disconnect here because other contexts might use the socket, 
+      // but logout handles it via !isAuthenticated
     };
   }, [isAuthenticated]);
 
