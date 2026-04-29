@@ -118,18 +118,6 @@ export function DriverDashboard() {
 
   const handleAccept = async (loadId: string) => {
     try {
-      const load = loads.find((l) => l.id === loadId);
-      if (load && !load.assignedDriver && user) {
-        const driver: Driver = {
-          id: user.id,
-          name: user.name,
-          phone: user.phone,
-          email: user.email,
-          avatar: user.avatar,
-          isAvailable: true,
-        };
-        await assignDriver(loadId, driver);
-      }
       await updateLoadStatus(loadId, "accepted");
     } catch (error) {
       console.error("Failed to accept load:", error);
