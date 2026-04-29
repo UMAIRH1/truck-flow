@@ -11,8 +11,10 @@ import { InputWithIcon } from "@/app/add-load/_components/InputWithIcon";
 import { SelectWithIcon } from "@/app/add-load/_components/SelectWithIcon";
 import { LocationPicker } from "@/app/add-load/_components/LocationPicker";
 import { Textarea } from "@/components/ui/textarea";
-import { BusFront, Camera, Loader2, User, UserRound, X } from "lucide-react";
+import { BusFront, Camera, Loader2, User, UserRound, X, DollarSign, Fuel, AlertCircle, Scale, Truck, CreditCard, UserCheck, Package, MapPin, Circle, Calendar, Clock } from "lucide-react";
 import { uploadToCloudinary, validateImageFile } from "@/lib/cloudinary";
+import { GoogleMapsLoader } from "@/components/shared";
+import { MultiDriverSelect } from "@/app/add-load/_components/MultiDriverSelect";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 
@@ -38,7 +40,7 @@ export default function EditLoadPage() {
     pallets: "",
     clientName: "",
     clientPrice: "",
-    assignedDriverId: "",
+    assignedDriverIds: [] as string[],
     driverPrice: "",
     paymentTerms: 45 as PaymentTerms,
     expectedPayoutDate: "",
@@ -48,13 +50,36 @@ export default function EditLoadPage() {
     tolls: "",
     otherExpenses: "",
     notes: "",
+    // Cost model fields
+    fuelConsumption: "30",
+    fuelPricePerLiter: "",
+    driverDailyCost: "",
+    truckCostPerKm: "",
   });
   const [images, setImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [distance, setDistance] = useState<number | null>(null);
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [isCalculatingDistance, setIsCalculatingDistance] = useState(false);
+  const [costBreakdown, setCostBreakdown] = useState<any>(null);
 
   // Load existing data
   useEffect(() => {
     if (load) {
+      // Handle drivers: could be assigned or broadcast
+      let initialDriverIds: string[] = [];
+      if (load.assignedDriver) {
+        const driverId = typeof load.assignedDriver === 'string' 
+          ? load.assignedDriver 
+          : (load.assignedDriver.id || (load.assignedDriver as any)._id);
+        if (driverId) initialDriverIds.push(driverId);
+      }
+      if (load.broadcastTo && load.broadcastTo.length > 0) {
+        const broadcastIds = load.broadcastTo.map((d: any) => d.id || d._id || d);
+        initialDriverIds = [...new Set([...initialDriverIds, ...broadcastIds])];
+      }
+
       setFormData({
         pickupLocation: load.pickupLocation || "",
         dropoffLocation: load.dropoffLocation || "",
@@ -63,7 +88,7 @@ export default function EditLoadPage() {
         pallets: load.pallets?.toString() || "",
         clientName: load.clientName || "",
         clientPrice: load.clientPrice?.toString() || "",
-        assignedDriverId: load.assignedDriver?.id || "",
+        assignedDriverIds: initialDriverIds,
         driverPrice: load.driverPrice?.toString() || "",
         paymentTerms: load.paymentTerms || 45,
         expectedPayoutDate: load.expectedPayoutDate ? new Date(load.expectedPayoutDate).toISOString().split('T')[0] : "",
@@ -73,10 +98,98 @@ export default function EditLoadPage() {
         tolls: load.tolls?.toString() || "",
         otherExpenses: load.otherExpenses?.toString() || "",
         notes: load.notes || "",
+        // Cost model fields
+        fuelConsumption: load.fuelConsumption?.toString() || "30",
+        fuelPricePerLiter: load.fuelPricePerLiter?.toString() || "",
+        driverDailyCost: load.driverDailyCost?.toString() || "",
+        truckCostPerKm: load.truckCostPerKm?.toString() || "",
       });
       setImages(load.initialImages || []);
+      
+      // Set initial coordinates if available
+      if (load.pickupCoords) setPickupCoords(load.pickupCoords);
+      if (load.dropoffCoords) setDropoffCoords(load.dropoffCoords);
     }
   }, [load]);
+
+  // Calculate distance when locations change
+  useEffect(() => {
+    const calculateDistance = async () => {
+      if (!formData.pickupLocation || !formData.dropoffLocation) {
+        setDistance(null);
+        return;
+      }
+
+      setIsCalculatingDistance(true);
+      try {
+        const startLoc = pickupCoords ? `${pickupCoords.lat},${pickupCoords.lng}` : formData.pickupLocation;
+        const endLoc = dropoffCoords ? `${dropoffCoords.lat},${dropoffCoords.lng}` : formData.dropoffLocation;
+
+        const response = await api.calculateDistance(startLoc, endLoc);
+        if (response.success && response.distance) {
+          setDistance(response.distance);
+        }
+      } catch (error: any) {
+        console.error("Failed to calculate distance:", error);
+        setDistance(null);
+      } finally {
+        setIsCalculatingDistance(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(calculateDistance, 1200);
+    return () => clearTimeout(debounceTimer);
+  }, [formData.pickupLocation, formData.dropoffLocation, pickupCoords, dropoffCoords]);
+
+  // Calculate costs when relevant fields change
+  useEffect(() => {
+    const calculateCosts = async () => {
+      if (!distance || !formData.clientPrice) {
+        setCostBreakdown(null);
+        return;
+      }
+
+      try {
+        const response = await api.calculateCosts({
+          distance,
+          clientPrice: parseFloat(formData.clientPrice),
+          driverPrice: parseFloat(formData.driverPrice) || 0,
+          fuelConsumption: parseFloat(formData.fuelConsumption) || 30,
+          fuelPricePerLiter: parseFloat(formData.fuelPricePerLiter) || 0,
+          driverDailyCost: parseFloat(formData.driverDailyCost) || 0,
+          truckCostPerKm: parseFloat(formData.truckCostPerKm) || 0,
+          tolls: parseFloat(formData.tolls) || 0,
+          otherExpenses: parseFloat(formData.otherExpenses) || 0,
+        });
+        if (response.success && response.costs) {
+          setCostBreakdown(response.costs);
+        }
+      } catch (error) {
+        console.error("Failed to calculate costs:", error);
+        setCostBreakdown(null);
+      }
+    };
+
+    const debounceTimer = setTimeout(calculateCosts, 500);
+    return () => clearTimeout(debounceTimer);
+  }, [distance, formData.clientPrice, formData.driverPrice, formData.fuel, formData.fuelConsumption, formData.fuelPricePerLiter, 
+      formData.driverDailyCost, formData.truckCostPerKm, formData.tolls, formData.otherExpenses]);
+
+  const calculateProfit = () => {
+    const income = parseFloat(formData.clientPrice) || 0;
+    const driverCost = parseFloat(formData.driverPrice) || 0;
+    const fuel = parseFloat(formData.fuel) || 0;
+    const tolls = parseFloat(formData.tolls) || 0;
+    const other = parseFloat(formData.otherExpenses) || 0;
+    
+    // Gross Profit = Client Price - Driver Price
+    const grossProfit = income - driverCost;
+    
+    // Net Profit = Gross Profit - All Expenses
+    const netProfit = grossProfit - fuel - tolls - other;
+    
+    return { grossProfit, netProfit };
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -167,16 +280,19 @@ export default function EditLoadPage() {
     setIsSubmitting(true);
 
     try {
+      const loadingDate = new Date(formData.loadingDate);
       const updateData: any = {
         pickupLocation: formData.pickupLocation,
         dropoffLocation: formData.dropoffLocation,
+        pickupCoords: pickupCoords || undefined,
+        dropoffCoords: dropoffCoords || undefined,
         clientName: formData.clientName,
         clientPrice: parseFloat(formData.clientPrice) || 0,
         driverPrice: parseFloat(formData.driverPrice) || 0,
         shippingType: formData.shippingType,
         loadWeight: parseFloat(formData.loadWeight) || 0,
         pallets: parseFloat(formData.pallets) || undefined,
-        loadingDate: formData.loadingDate,
+        loadingDate,
         loadingTime: formData.loadingTime,
         paymentTerms: formData.paymentTerms,
         fuel: parseFloat(formData.fuel) || 0,
@@ -184,7 +300,20 @@ export default function EditLoadPage() {
         otherExpenses: parseFloat(formData.otherExpenses) || 0,
         notes: formData.notes,
         initialImages: images,
+        // Cost model fields
+        fuelConsumption: parseFloat(formData.fuelConsumption) || 30,
+        fuelPricePerLiter: parseFloat(formData.fuelPricePerLiter) || 0,
+        driverDailyCost: parseFloat(formData.driverDailyCost) || 0,
+        truckCostPerKm: parseFloat(formData.truckCostPerKm) || 0,
       };
+
+      // Multi-driver support
+      if (formData.assignedDriverIds.length > 0) {
+        updateData.driverIds = formData.assignedDriverIds;
+      } else {
+        updateData.assignedDriver = null;
+        updateData.driverIds = [];
+      }
 
       const response = await api.updateLoad(params.id as string, updateData);
       
@@ -216,36 +345,76 @@ export default function EditLoadPage() {
         <Card className="border-none shadow-none py-0">
           <CardContent className="space-y-4 px-0">
             <div className="lg:col-span-2">
-              <LocationPicker
-                pickupValue={formData.pickupLocation}
-                dropoffValue={formData.dropoffLocation}
-                onPickupChange={(value: string) => setFormData({ ...formData, pickupLocation: value })}
-                onDropoffChange={(value: string) => setFormData({ ...formData, dropoffLocation: value })}
-                t={t}
-              />
+              <GoogleMapsLoader>
+                <LocationPicker
+                  pickupValue={formData.pickupLocation}
+                  dropoffValue={formData.dropoffLocation}
+                  onPickupChange={(value: string) => setFormData({ ...formData, pickupLocation: value })}
+                  onDropoffChange={(value: string) => setFormData({ ...formData, dropoffLocation: value })}
+                  onPickupCoordinates={(lat, lng) => setPickupCoords({ lat, lng })}
+                  onDropoffCoordinates={(lat, lng) => setDropoffCoords({ lat, lng })}
+                  pickupCoords={pickupCoords}
+                  dropoffCoords={dropoffCoords}
+                  t={t}
+                />
+              </GoogleMapsLoader>
+              {distance !== null && (
+                <div className="mt-2 text-sm text-gray-600 flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>{t("distance")}: <strong>{distance} km</strong></span>
+                </div>
+              )}
+              {isCalculatingDistance && (
+                <div className="mt-2 text-sm text-gray-500 flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Loading...</span>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <SelectWithIcon
-                icon={BusFront}
-                value={formData.shippingType}
-                onValueChange={(value) => setFormData({ ...formData, shippingType: value as ShippingType })}
-                options={shippingTypeOptions}
-              />
-              <SelectWithIcon
-                icon={BusFront}
-                value={formData.loadWeight}
-                onValueChange={(value) => setFormData({ ...formData, loadWeight: value })}
-                placeholder={t("loadWeight")}
-                options={loadWeightOptions}
-              />
-              <SelectWithIcon
-                icon={BusFront}
-                value={formData.pallets}
-                onValueChange={(value) => setFormData({ ...formData, pallets: value })}
-                placeholder={t("pallets")}
-                options={palletOptions}
-              />
+              <div>
+                <SelectWithIcon
+                  icon={BusFront}
+                  value={formData.shippingType}
+                  onValueChange={(value) => setFormData({ ...formData, shippingType: value as ShippingType })}
+                  options={shippingTypeOptions}
+                />
+              </div>
+              <div>
+                <InputWithIcon
+                  icon={Scale}
+                  id="loadWeight"
+                  type="number"
+                  placeholder={t("loadWeight")}
+                  value={formData.loadWeight}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0;
+                    if (value <= 24000) {
+                      setFormData({ ...formData, loadWeight: e.target.value });
+                    }
+                  }}
+                  min="0"
+                  max="24000"
+                />
+              </div>
+              <div>
+                <InputWithIcon
+                  icon={Package}
+                  id="pallets"
+                  type="number"
+                  placeholder={t("pallets")}
+                  value={formData.pallets}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0;
+                    if (value <= 33) {
+                      setFormData({ ...formData, pallets: e.target.value });
+                    }
+                  }}
+                  min="0"
+                  max="33"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -267,15 +436,16 @@ export default function EditLoadPage() {
                 onChange={(e) => setFormData({ ...formData, clientPrice: e.target.value })}
                 required
               />
-              <SelectWithIcon
-                icon={BusFront}
-                value={formData.assignedDriverId}
-                onValueChange={(value) => setFormData({ ...formData, assignedDriverId: value })}
-                placeholder={isLoadingDrivers ? t("loadingDrivers") || "Loading drivers..." : t("assignDriver")}
-                options={driverOptions}
-                disabled={isLoadingDrivers}
-              />
-            </div>
+                <div>
+                  <MultiDriverSelect
+                    options={driverOptions}
+                    selectedValues={formData.assignedDriverIds}
+                    onSelectionChange={(values) => setFormData({ ...formData, assignedDriverIds: values })}
+                    placeholder={isLoadingDrivers ? t("loadingDrivers") || "Loading drivers..." : t("assignDriver")}
+                    disabled={isLoadingDrivers}
+                  />
+                </div>
+              </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <InputWithIcon
@@ -353,6 +523,53 @@ export default function EditLoadPage() {
               />
             </div>
 
+            {/* Cost Model Fields */}
+            <div className="border-t pt-4 mt-2">
+              <h3 className="text-sm font-semibold mb-3 text-gray-700">{t("costModel")}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <InputWithIcon
+                    icon={Fuel}
+                    id="fuelConsumption"
+                    type="number"
+                    placeholder={t("fuelConsumption")}
+                    value={formData.fuelConsumption}
+                    onChange={(e) => setFormData({ ...formData, fuelConsumption: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <InputWithIcon
+                    icon={DollarSign}
+                    id="fuelPricePerLiter"
+                    type="number"
+                    placeholder={t("fuelPrice")}
+                    value={formData.fuelPricePerLiter}
+                    onChange={(e) => setFormData({ ...formData, fuelPricePerLiter: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <InputWithIcon
+                    icon={User}
+                    id="driverDailyCost"
+                    type="number"
+                    placeholder={t("driverDailyCost")}
+                    value={formData.driverDailyCost}
+                    onChange={(e) => setFormData({ ...formData, driverDailyCost: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <InputWithIcon
+                    icon={Truck}
+                    id="truckCostPerKm"
+                    type="number"
+                    placeholder={t("truckCostPerKm")}
+                    value={formData.truckCostPerKm}
+                    onChange={(e) => setFormData({ ...formData, truckCostPerKm: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-12 gap-2 md:gap-4">
               <div className="col-span-8">
                 <Textarea
@@ -396,24 +613,50 @@ export default function EditLoadPage() {
               </div>
             </div>
 
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
-            <div className="flex gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1 h-12"
-                onClick={() => router.back()}
+            <div className="flex md:flex-row flex-col gap-4 pt-4 border-t">
+              {costBreakdown && (
+                <div className="flex-1 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="text-sm font-semibold mb-2 text-blue-900">{t("costBreakdown")}</h4>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>{t("fuel")}:</div><div className="font-semibold">€{costBreakdown.fuelCost.toFixed(2)}</div>
+                    <div>{t("driver")}:</div><div className="font-semibold">€{costBreakdown.driverCost.toFixed(2)}</div>
+                    <div>{t("truck")}:</div><div className="font-semibold">€{costBreakdown.truckCost.toFixed(2)}</div>
+                    <div className="border-t pt-1">{t("totalCost")}:</div><div className="border-t pt-1 font-bold">€{costBreakdown.totalCost.toFixed(2)}</div>
+                    <div className="text-green-700">{t("profit")}:</div><div className="font-bold text-green-700">€{costBreakdown.profit.toFixed(2)}</div>
+                  </div>
+                </div>
+              )}
+              
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="bg-blue-500 text-white h-12 flex flex-col items-center justify-center py-1" 
+                size="lg"
+                onClick={() => {}}
               >
-                Cancel
+                <span className="text-xs">{t("grossProfit")}: €{calculateProfit().grossProfit.toFixed(2)}</span>
+                <span className="text-xs font-bold">{t("netProfit")}: €{calculateProfit().netProfit.toFixed(2)}</span>
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex-1 h-12 bg-blue-500 hover:bg-blue-600 text-white"
-              >
-                {isSubmitting ? "Updating..." : "Update Load"}
-              </Button>
+
+              <div className="flex gap-2 flex-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 h-12"
+                  onClick={() => router.back()}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 h-12 bg-black hover:bg-blue-600 text-white"
+                >
+                  {isSubmitting ? "Updating..." : "Update Load"}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

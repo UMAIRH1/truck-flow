@@ -39,6 +39,7 @@ export interface Load {
   loadWeight: number;
   pallets?: number;
   assignedDriver?: Driver;
+  broadcastTo?: Driver[];
   status: LoadStatus;
   notes?: string;
   initialImages?: string[];
@@ -112,6 +113,7 @@ export interface LoadTimelineItem {
 // Driver Types
 export interface Driver {
   id: string;
+  _id?: string;
   name: string;
   phone: string;
   email: string;
