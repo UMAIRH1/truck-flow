@@ -39,6 +39,12 @@ export function LoadCard({ load, showStatus = true, showDriver = true, onClick, 
           <span className="font-bold text-(--color-stat-gray) text-base">{load.clientName}</span>
         </div>
         <div className="flex items-center gap-2 text-xs text-(--color-dark-gray)">
+          {load.broadcastTo && load.broadcastTo.length > 0 && !load.assignedDriver && (
+            <div className="bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+              <Truck className="h-3 w-3" />
+              <span>Broadcasting</span>
+            </div>
+          )}
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
             <span>

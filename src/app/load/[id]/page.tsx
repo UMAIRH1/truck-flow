@@ -318,6 +318,31 @@ export default function LoadStatusPage() {
               </div>
             )}
           </div>
+        ) : load.broadcastTo && load.broadcastTo.length > 0 ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-blue-600 font-semibold mb-2">
+              <Truck className="h-5 w-5" />
+              <span>Broadcasting to {load.broadcastTo.length} Drivers</span>
+            </div>
+            <div className="grid grid-cols-1 gap-3">
+              {load.broadcastTo.map((driver) => (
+                <div key={driver.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <User className="h-5 w-5 text-gray-500" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm text-gray-900">{driver.name}</p>
+                    <p className="text-[10px] text-gray-500">Awaiting Acceptance</p>
+                  </div>
+                  {driver.phone && (
+                    <a href={`tel:${driver.phone}`} className="p-2 text-blue-600 hover:bg-blue-50 rounded-full">
+                      <Phone className="h-4 w-4" />
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         ) : (
           <div className="text-center py-4 text-gray-500">
             <User className="h-12 w-12 mx-auto mb-2 text-gray-300" />

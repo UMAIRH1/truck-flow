@@ -68,6 +68,7 @@ function transformLoadFromAPI(apiLoad: any): Load {
     updatedAt: apiLoad.updatedAt ? new Date(apiLoad.updatedAt) : new Date(),
     completedAt: apiLoad.completedAt ? new Date(apiLoad.completedAt) : undefined,
     timeline: apiLoad.timeline || [],
+    broadcastTo: apiLoad.broadcastTo ? apiLoad.broadcastTo.map(transformDriverFromAPI) : [],
   };
 }
 
