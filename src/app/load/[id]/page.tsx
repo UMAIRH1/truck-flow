@@ -318,7 +318,7 @@ export default function LoadStatusPage() {
               </div>
             )}
           </div>
-        ) : load.broadcastTo && load.broadcastTo.length > 0 ? (
+        ) : isManager && load.broadcastTo && load.broadcastTo.length > 0 ? (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-blue-600 font-semibold mb-2">
               <Truck className="h-5 w-5" />
