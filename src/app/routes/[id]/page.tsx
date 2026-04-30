@@ -28,11 +28,93 @@ export default function RouteDetailPage() {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerUrl, setViewerUrl] = useState("");
   const [viewerFilename, setViewerFilename] = useState("");
+  const [apiFetched, setApiFetched] = useState(false);
+  const [apiFetching, setApiFetching] = useState(false);
 
+  // First check context
   useEffect(() => {
     const foundRoute = routes.find(r => r.id === params.id);
-    setRoute(foundRoute);
+    if (foundRoute) {
+      setRoute(foundRoute);
+    }
   }, [routes, params.id]);
+
+  // If not found in context and context done loading, fetch from API
+  useEffect(() => {
+    if (!route && !loading && !apiFetched && !apiFetching) {
+      setApiFetching(true);
+      api.getRoute(params.id as string)
+        .then((response) => {
+          if (response.success && response.route) {
+            const apiRoute = response.route;
+            setRoute({
+              id: apiRoute._id,
+              routeName: apiRoute.routeName,
+              routeNumber: apiRoute.routeNumber,
+              origin: apiRoute.origin,
+              destination: apiRoute.destination,
+              assignedDriver: {
+                id: apiRoute.assignedDriver?._id || apiRoute.assignedDriver,
+                name: apiRoute.assignedDriver?.name || "",
+                email: apiRoute.assignedDriver?.email || "",
+                phone: apiRoute.assignedDriver?.phone || "",
+              },
+              assignedTruck: apiRoute.assignedTruck,
+              startDate: new Date(apiRoute.startDate),
+              endDate: apiRoute.endDate ? new Date(apiRoute.endDate) : undefined,
+              status: apiRoute.status,
+              loads: apiRoute.loads || [],
+              totalDistance: apiRoute.totalDistance || 0,
+              fuelCost: apiRoute.fuelCost || 0,
+              driverCost: apiRoute.driverCost || 0,
+              truckCost: apiRoute.truckCost || 0,
+              totalCost: apiRoute.totalCost || 0,
+              totalRevenue: apiRoute.totalRevenue || 0,
+              profit: apiRoute.profit || 0,
+              profitPerKm: apiRoute.profitPerKm || 0,
+              tolls: apiRoute.tolls || 0,
+              otherExpenses: apiRoute.otherExpenses || 0,
+              notes: apiRoute.notes,
+              podImage: apiRoute.podImage || "",
+              invoices: apiRoute.invoices || [],
+              documents: apiRoute.documents || [],
+              createdAt: new Date(apiRoute.createdAt),
+              updatedAt: new Date(apiRoute.updatedAt),
+              completedAt: apiRoute.completedAt ? new Date(apiRoute.completedAt) : undefined,
+            });
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to fetch route:", err);
+        })
+        .finally(() => {
+          setApiFetched(true);
+          setApiFetching(false);
+        });
+    }
+  }, [route, loading, apiFetched, apiFetching, params.id]);
+
+  if (loading || authLoading || apiFetching) {
+    return (
+      <MobileLayout showFAB={false}>
+        <Header title={t("routes.routeDetails")} showBack />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-500">{t("common.loading")}</div>
+        </div>
+      </MobileLayout>
+    );
+  }
+
+  if (!route) {
+    return (
+      <MobileLayout showFAB={false}>
+        <Header title={t("routes.routeDetails")} showBack />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-500">{t("routes.routeNotFound") || "Route not found"}</div>
+        </div>
+      </MobileLayout>
+    );
+  }
 
   const handleAccept = async () => {
     if (!route) return;
@@ -178,16 +260,7 @@ export default function RouteDetailPage() {
     }
   };
 
-  if (loading || authLoading || !route) {
-    return (
-      <MobileLayout showFAB={false}>
-        <Header title={t("routes.routeDetails")} showBack />
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">{t("common.loading")}</div>
-        </div>
-      </MobileLayout>
-    );
-  }
+
 
   const isDriver = user?.role === 'driver';
   const isManager = !!user && user.role !== 'driver';

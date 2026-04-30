@@ -12,12 +12,13 @@ import { useTranslations } from "next-intl";
 import { StatusBadge } from "@/components/shared";
 import { DocumentViewer } from "@/components/shared/DocumentViewer";
 import api from "@/lib/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Load } from "@/types";
 
 export default function LoadStatusPage() {
   const params = useParams();
   const router = useRouter();
-  const { getLoadById, refreshLoads } = useLoads();
+  const { getLoadById, refreshLoads, isLoading: contextLoading } = useLoads();
   const { user } = useAuth();
   const t = useTranslations("loadStatus");
   const tCommon = useTranslations("common");
@@ -25,8 +26,83 @@ export default function LoadStatusPage() {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerUrl, setViewerUrl] = useState("");
   const [viewerFilename, setViewerFilename] = useState("");
+  const [fetchedLoad, setFetchedLoad] = useState<Load | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
 
-  const load = getLoadById(params.id as string);
+  // First try context, then fallback to API
+  const contextLoad = getLoadById(params.id as string);
+  const load = contextLoad || fetchedLoad;
+
+  // If load not in context and context is done loading, fetch from API
+  useEffect(() => {
+    if (!contextLoad && !contextLoading && !fetchedLoad && !isFetching && !fetchError) {
+      setIsFetching(true);
+      api.getLoad(params.id as string)
+        .then((response) => {
+          if (response.success && response.load) {
+            // Transform API response to match frontend Load type
+            const apiLoad = response.load;
+            const transformed: Load = {
+              id: apiLoad._id,
+              loadNumber: apiLoad.loadNumber,
+              routeId: apiLoad.routeId,
+              pickupLocation: apiLoad.pickupLocation || "",
+              dropoffLocation: apiLoad.dropoffLocation || "",
+              pickupCoords: apiLoad.pickupCoords,
+              dropoffCoords: apiLoad.dropoffCoords,
+              clientName: apiLoad.clientName || "Unknown Client",
+              clientPrice: apiLoad.clientPrice || 0,
+              driverPrice: apiLoad.driverPrice || 0,
+              fuel: apiLoad.fuel || 0,
+              tolls: apiLoad.tolls || 0,
+              otherExpenses: apiLoad.otherExpenses || 0,
+              paymentTerms: apiLoad.paymentTerms || 30,
+              expectedPayoutDate: apiLoad.expectedPayoutDate ? new Date(apiLoad.expectedPayoutDate) : new Date(),
+              loadingDate: apiLoad.loadingDate ? new Date(apiLoad.loadingDate) : new Date(),
+              loadingTime: apiLoad.loadingTime || "00:00",
+              shippingType: apiLoad.shippingType || "FTL",
+              loadWeight: apiLoad.loadWeight || 0,
+              pallets: apiLoad.pallets,
+              assignedDriver: apiLoad.assignedDriver ? {
+                id: apiLoad.assignedDriver._id || apiLoad.assignedDriver.id || apiLoad.assignedDriver,
+                name: apiLoad.assignedDriver.name || "Unknown Driver",
+                phone: apiLoad.assignedDriver.phone || "",
+                email: apiLoad.assignedDriver.email || "",
+                isAvailable: true,
+              } : undefined,
+              status: apiLoad.status || "pending",
+              notes: apiLoad.notes,
+              initialImages: apiLoad.initialImages || [],
+              podImages: apiLoad.podImage ? [apiLoad.podImage] : apiLoad.podImages || [],
+              invoices: apiLoad.invoices || [],
+              documents: apiLoad.documents || [],
+              createdAt: apiLoad.createdAt ? new Date(apiLoad.createdAt) : new Date(),
+              updatedAt: apiLoad.updatedAt ? new Date(apiLoad.updatedAt) : new Date(),
+              completedAt: apiLoad.completedAt ? new Date(apiLoad.completedAt) : undefined,
+              timeline: apiLoad.timeline || [],
+              broadcastTo: apiLoad.broadcastTo ? apiLoad.broadcastTo.map((d: any) => ({
+                id: d._id || d.id || d,
+                name: d.name || "",
+                phone: d.phone || "",
+                email: d.email || "",
+                isAvailable: true,
+              })) : [],
+            };
+            setFetchedLoad(transformed);
+          } else {
+            setFetchError(true);
+          }
+        })
+        .catch(() => {
+          setFetchError(true);
+        })
+        .finally(() => {
+          setIsFetching(false);
+        });
+    }
+  }, [contextLoad, contextLoading, fetchedLoad, isFetching, fetchError, params.id]);
+
   const isManager = !!user && user.role !== "driver";
   const isDriver = user?.role === "driver";
 
@@ -42,19 +118,23 @@ export default function LoadStatusPage() {
     setViewerFilename("");
   };
 
-  // Debug info
-  console.log("Load Detail Debug:", {
-    loadId: params.id,
-    loadStatus: load?.status,
-    userRole: user?.role,
-    isDriver,
-    isManager,
-    hasPodImages: load?.podImages?.length || 0,
-    hasInvoices: load?.invoices?.length || 0,
-    hasDocuments: load?.documents?.length || 0,
-    invoices: load?.invoices,
-    documents: load?.documents,
-  });
+  // Show loading while context or API fetch is in progress
+  if (contextLoading || isFetching) {
+    return (
+      <>
+        <div className="block md:hidden">
+          <MobileLayout showFAB={false}>
+            <Header title={t("title")} showBack />
+            <div className="px-4 py-8 text-center text-gray-500">{tCommon("loading")}</div>
+          </MobileLayout>
+        </div>
+        <div className="hidden md:block">
+          <Header title={t("title")} showBack />
+          <div className="px-4 py-8 text-center text-gray-500">{tCommon("loading")}</div>
+        </div>
+      </>
+    );
+  }
 
   if (!load) {
     return (

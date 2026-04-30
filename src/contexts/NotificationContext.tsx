@@ -143,9 +143,39 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
       socketService.on('notification', handleNotification);
 
+      // Listen for notification removals (e.g., when another driver accepts a broadcast load)
+      const handleNotificationsRemoved = (data: any) => {
+        console.log('Notifications removed:', data);
+        
+        if (data.loadId) {
+          // Remove all notifications for this load from local state
+          setNotifications((prev) => {
+            const remaining = prev.filter((n) => n.loadId !== data.loadId);
+            setUnreadCount(remaining.filter((n) => !n.read).length);
+            return remaining;
+          });
+          // Also update raw notifications
+          setRawNotifications((prev) => prev.filter((n) => {
+            const nLoadId = n.loadId?._id || n.loadId;
+            return nLoadId?.toString() !== data.loadId;
+          }));
+        } else if (data.notificationIds && data.notificationIds.length > 0) {
+          // Remove specific notification IDs
+          setNotifications((prev) => {
+            const remaining = prev.filter((n) => !data.notificationIds.includes(n.id));
+            setUnreadCount(remaining.filter((n) => !n.read).length);
+            return remaining;
+          });
+          setRawNotifications((prev) => prev.filter((n) => !data.notificationIds.includes(n._id)));
+        }
+      };
+
+      socketService.on('notifications_removed', handleNotificationsRemoved);
+
       // Cleanup
       return () => {
         socketService.off('notification', handleNotification);
+        socketService.off('notifications_removed', handleNotificationsRemoved);
       };
     } else {
       setIsLoading(false);
