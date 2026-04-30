@@ -31,7 +31,7 @@ export default function UploadPODPage() {
     );
   }
 
-  if (load.status !== "accepted") {
+  if (load.status !== "accepted" && load.status !== "in-progress") {
     return (
       <MobileLayout showFAB={false}>
         <Header title={t("title")} showBack />
