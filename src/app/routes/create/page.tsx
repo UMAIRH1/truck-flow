@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Truck, User, Calendar, DollarSign, Fuel, X } from "lucide-react";
 import { GooglePlacesInput, GoogleMapsLoader } from "@/components/shared";
+import { MultiDriverSelect } from "../../add-load/_components/MultiDriverSelect";
 import api from "@/lib/api";
 
 export default function CreateRoutePage() {
@@ -44,8 +45,8 @@ export default function CreateRoutePage() {
     routeName: "",
     origin: "",
     destination: "",
-    driverStartingLocation: "", // New field for driver's current position
-    assignedDriverId: "",
+    driverStartingLocation: "",
+    assignedDriverIds: [] as string[], // Changed: supports multi-driver
     truckNumber: "",
     truckType: "",
     truckCapacity: "",
@@ -238,7 +239,7 @@ export default function CreateRoutePage() {
         totalDistance: distance || 0,
         preRouteDistance: preRouteDistance || 0,
         routeDistance: routeDistance || 0,
-        assignedDriverId: formData.assignedDriverId,
+        driverIds: formData.assignedDriverIds, // Send as array
         assignedTruck: {
           truckNumber: formData.truckNumber,
           truckType: formData.truckType,
@@ -395,20 +396,15 @@ export default function CreateRoutePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">{t("assignDriver")} *</label>
-                  <select
-                    value={formData.assignedDriverId}
-                    onChange={(e) => setFormData({ ...formData, assignedDriverId: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md"
-                    required
+                  <MultiDriverSelect
+                    options={drivers.map((d) => ({ value: d._id, label: d.name }))}
+                    selectedValues={formData.assignedDriverIds}
+                    onSelectionChange={(values) =>
+                      setFormData({ ...formData, assignedDriverIds: values })
+                    }
+                    placeholder={isLoadingDrivers ? "Loading drivers..." : t("selectDriver")}
                     disabled={isLoadingDrivers}
-                  >
-                    <option value="">{t("selectDriver")}</option>
-                    {drivers.map((driver) => (
-                      <option key={driver._id} value={driver._id}>
-                        {driver.name}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div>

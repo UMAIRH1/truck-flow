@@ -47,6 +47,12 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
         email: apiRoute.assignedDriver?.email || "",
         phone: apiRoute.assignedDriver?.phone || "",
       },
+      broadcastTo: (apiRoute.broadcastTo || []).map((d: any) => ({
+        id: d._id || d,
+        name: d.name || "",
+        email: d.email || "",
+        phone: d.phone || "",
+      })),
       assignedTruck: apiRoute.assignedTruck,
       startDate: new Date(apiRoute.startDate),
       endDate: apiRoute.endDate ? new Date(apiRoute.endDate) : undefined,
@@ -146,6 +152,11 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
         );
       }
     } catch (err: any) {
+      // 409 = already accepted by another driver
+      if (err.status === 409 || (err.message && err.message.includes('already been accepted'))) {
+        setRoutes((prev) => prev.filter((r) => r.id !== id));
+        throw new Error('This route has already been accepted by another driver');
+      }
       throw new Error(err.message || "Failed to accept route");
     }
   };
@@ -247,11 +258,40 @@ export function RouteProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Only fetch routes when user is authenticated and auth check is complete
     if (!authLoading && isAuthenticated) {
       fetchRoutes();
     }
   }, [authLoading, isAuthenticated]);
+
+  // WebSocket: real-time route_update events for drivers
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let socket: any = null;
+    try {
+      const { io } = require('socket.io-client');
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+      socket = io(API_URL, { withCredentials: true });
+
+      socket.on('route_update', (data: any) => {
+        if (data.action === 'new' && data.route) {
+          setRoutes((prev) => {
+            const exists = prev.some((r) => r.id === data.route._id);
+            if (exists) return prev;
+            return [transformRoute(data.route), ...prev];
+          });
+        } else if (data.action === 'updated' && data.route) {
+          setRoutes((prev) =>
+            prev.map((r) => r.id === data.route._id ? transformRoute(data.route) : r)
+          );
+        } else if (data.action === 'accepted_by_other' && data.routeId) {
+          setRoutes((prev) => prev.filter((r) => r.id !== data.routeId));
+        }
+      });
+    } catch (e) {
+      // socket.io not available
+    }
+    return () => { if (socket) socket.disconnect(); };
+  }, [isAuthenticated]);
 
   return (
     <RouteContext.Provider

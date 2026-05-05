@@ -14,6 +14,12 @@ export interface Route {
     email: string;
     phone: string;
   };
+  broadcastTo?: Array<{
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+  }>;
   assignedTruck?: {
     truckNumber?: string;
     truckType?: string;

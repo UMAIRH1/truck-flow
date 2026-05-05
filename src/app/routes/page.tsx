@@ -19,9 +19,13 @@ export default function RoutesPage() {
   const isDriver = user?.role === 'driver';
   const isManager = !!user && user.role !== 'driver';
 
-  // Drivers only see their own routes
+  // Drivers see routes they are assigned to OR broadcast to
   const visibleRoutes = isDriver
-    ? routes.filter(r => r.assignedDriver?.id === user?.id || r.assignedDriver?.name === user?.name)
+    ? routes.filter(r =>
+        r.assignedDriver?.id === user?.id ||
+        r.assignedDriver?.name === user?.name ||
+        (r as any).broadcastTo?.some((d: any) => d.id === user?.id)
+      )
     : routes;
 
   // Close menu when clicking outside
